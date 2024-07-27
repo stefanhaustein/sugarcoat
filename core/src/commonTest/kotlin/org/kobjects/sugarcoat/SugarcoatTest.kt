@@ -4,7 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class MythonTest {
+class SugarcoatTest {
 
     val SQR = """
 def main(x):
