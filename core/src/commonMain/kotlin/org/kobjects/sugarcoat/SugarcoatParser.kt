@@ -2,10 +2,10 @@ package org.kobjects.sugarcoat
 
 import org.kobjects.parsek.tokenizer.Scanner
 
-class SugarcoatParser private constructor(val scanner: Scanner<TokenType>) {
+class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
     val functions = mutableMapOf<String, Lambda>()
 
-    private fun parseExpression(): Evaluable = ExpressionParser.parseExpression(scanner)
+    private fun parseExpression(depth: Int): Evaluable = ExpressionParser.parseExpression(scanner, ParsingContext(depth, this))
 
     private fun currentIndent(): Int {
         if (scanner.current.type == TokenType.EOF) {
@@ -73,7 +73,7 @@ class SugarcoatParser private constructor(val scanner: Scanner<TokenType>) {
     }
 
     fun parseStatement(depth: Int): Evaluable {
-        var result = parseExpression()
+        var result = parseExpression(depth)
         if (scanner.tryConsume("=")) {
             throw RuntimeException("TBD")
         }
@@ -98,7 +98,7 @@ class SugarcoatParser private constructor(val scanner: Scanner<TokenType>) {
             while (currentIndent() == depth && scanner.lookAhead(1).type == TokenType.PROPERTY) {
                 scanner.consume(TokenType.NEWLINE)
                 val property = scanner.consume(TokenType.PROPERTY).text.substring(1)
-                val expr = if (scanner.current.text != ":") parseExpression() else null
+                val expr = if (scanner.current.text != ":") parseExpression(depth) else null
                 scanner.consume(":") { "Colon expected" }
                 val body = parseLambdaArgumentsAndBody(depth)
                 if (expr == null) {
@@ -132,7 +132,7 @@ class SugarcoatParser private constructor(val scanner: Scanner<TokenType>) {
     fun parseExtraArguments(depth: Int, symbol: Symbol): Symbol {
         val arguments = symbol.children.toMutableList()
         do {
-            arguments.add(Parameter("", parseExpression()))
+            arguments.add(Parameter("", parseExpression(depth)))
         } while (scanner.tryConsume(","))
         return Symbol(symbol.receiver, symbol.name, arguments.toList())
     }

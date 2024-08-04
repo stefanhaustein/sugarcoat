@@ -4,8 +4,8 @@ import org.kobjects.parsek.expressionparser.ConfigurableExpressionParser
 import org.kobjects.parsek.tokenizer.Scanner
 
 
-object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Unit, Evaluable>(
-    { scanner, _ -> ExpressionParser.parsePrimary(scanner) },
+object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, ParsingContext, Evaluable>(
+    { scanner, context -> ExpressionParser.parsePrimary(scanner, context) },
     prefix(9, "+", "-") { _, _, name, operand -> Symbol(operand, name, 9) },
     infix(8, "**") { _, _, _, left, right -> Symbol(left, "**", 8, right) },
     infix(7, "*", "/", "%", "//") { _, _, name, left, right -> Symbol(left, name, 7, right) },
@@ -16,7 +16,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Unit,
     infix(2, "||") { _, _, _, left, right -> Symbol(left, "||", 2, right) },
     prefix(1, "!") { _, _, _, operand -> Symbol(operand, "!", 1) }
 ) {
-    private fun parsePrimary(tokenizer: Scanner<TokenType>): Evaluable =
+    private fun parsePrimary(tokenizer: Scanner<TokenType>, context: ParsingContext): Evaluable =
         when (tokenizer.current.type) {
             TokenType.NUMBER ->
                 Literal(tokenizer.consume().text.toDouble())
@@ -29,14 +29,14 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Unit,
             }
             TokenType.IDENTIFIER -> {
                 var name = tokenizer.consume().text
-                val children = if (tokenizer.tryConsume("(")) parseParameterList(tokenizer, ")") else emptyList()
+                val children = if (tokenizer.tryConsume("(")) parseParameterList(tokenizer, context,")") else emptyList()
                 Symbol(null, name, children)
             }
             TokenType.SYMBOL -> {
                 if (!tokenizer.tryConsume("(")) {
                     throw tokenizer.exception("Unrecognized primary expression.")
                 }
-                val expr = parseExpression(tokenizer, Unit)
+                val expr = parseExpression(tokenizer, context)
                 tokenizer.consume(")")
                 expr
             }
@@ -44,9 +44,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Unit,
                 throw tokenizer.exception("Unrecognized primary expression.")
     }
 
-    fun parseExpression(tokenizer: Scanner<TokenType>) = parseExpression(tokenizer, Unit)
-
-    fun parseParameterList(tokenizer: Scanner<TokenType>, endToken: String): List<Parameter> {
+    fun parseParameterList(tokenizer: Scanner<TokenType>, context: ParsingContext, endToken: String): List<Parameter> {
         val builder = ParameterListBuilder()
         if (tokenizer.current.text != endToken) {
             do {
@@ -55,7 +53,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Unit,
                     tokenizer.consume("=")
                     name
                 } else ""
-                val value = parseExpression(tokenizer, Unit)
+                val value = parseExpression(tokenizer, context)
                 builder.add(parameterName, value)
             } while (tokenizer.tryConsume(","))
         }
@@ -63,6 +61,11 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Unit,
         return builder.build()
     }
 
-    fun eval(expression: String) = parseExpression(
-        Scanner(SugarcoatLexer(expression), TokenType.EOF)).eval(ProgramContext(Program(emptyMap())))
+    fun eval(expression: String): Any {
+        val scanner = Scanner(SugarcoatLexer(expression), TokenType.EOF)
+        val parsed = parseExpression(
+            scanner, ParsingContext(0, SugarcoatParser(scanner))
+        )
+        return parsed.eval(ProgramContext(Program(emptyMap())))
+    }
 }
