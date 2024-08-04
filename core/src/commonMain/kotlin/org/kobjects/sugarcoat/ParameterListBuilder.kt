@@ -11,6 +11,8 @@ class ParameterListBuilder {
     fun add(parameter: Parameter) {
         if (parameter.name.isEmpty()) {
             require(list.isEmpty() || list.last().name.isEmpty()) { "Can't add unnamed parameters after named parameters."}
+        } else {
+            require(list.isEmpty() || list.last().name.equals(parameter.name) || !list.any { it.name == parameter.name } )
         }
         list.add(parameter)
     }

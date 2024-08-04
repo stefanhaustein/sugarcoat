@@ -38,10 +38,10 @@ class SugarcoatParser private constructor(val scanner: Scanner<TokenType>) {
         scanner.consume("def")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'def'." }.text
         scanner.consume("(") { "Opening brace expected after function name '$name'." }
-        val parameters = mutableListOf<String>()
+        val parameters = mutableListOf<DeclaredParameter>()
         if (!scanner.tryConsume(")")) {
             do {
-                parameters.add(scanner.consume(TokenType.IDENTIFIER) { "Parameter name expected." }.text)
+                parameters.add(DeclaredParameter(scanner.consume(TokenType.IDENTIFIER) { "Parameter name expected." }.text))
             } while (scanner.tryConsume(","))
             scanner.consume(")") { "Closing brace or comma (')' or ',') expected after parameter" }
         }
@@ -94,21 +94,21 @@ class SugarcoatParser private constructor(val scanner: Scanner<TokenType>) {
             val symbol = result as Symbol
             val arguments = symbol.children.toMutableList()
             arguments.add(Parameter("", parseLambdaArgumentsAndBody(depth)))
+            result = Symbol(symbol.name, symbol.method, arguments.toList())
 
             while (currentIndent() == depth && scanner.lookAhead(1).type == TokenType.PROPERTY) {
+                val innerArguments = ParameterListBuilder()
+                innerArguments.add(result)
                 scanner.consume(TokenType.NEWLINE)
                 val property = scanner.consume(TokenType.PROPERTY).text.substring(1)
-                val expr = if (scanner.current.text != ":") parseExpression() else null
+                if (scanner.current.text != ":") {
+                    innerArguments.add(parseExpression())
+                }
                 scanner.consume(":") { "Colon expected" }
                 val body = parseLambdaArgumentsAndBody(depth)
-                if (expr == null) {
-                    arguments.add(Parameter(property, body))
-                } else {
-                    arguments.add(Parameter(property, Symbol("pair", false, expr, body)))
-                }
+                innerArguments.add(body)
+                result = Symbol(property, true, innerArguments.build())
             }
-
-            result = Symbol(symbol.name, symbol.method, arguments.toList())
         }
 
         return result
@@ -116,16 +116,16 @@ class SugarcoatParser private constructor(val scanner: Scanner<TokenType>) {
 
     fun parseLambdaArgumentsAndBody(depth: Int): Evaluable {
 
-        val parmeterNames = mutableListOf<String>()
+        val parmeters = mutableListOf<DeclaredParameter>()
         if (scanner.current.type == TokenType.IDENTIFIER) {
             do {
-                parmeterNames.add(scanner.consume(TokenType.IDENTIFIER).text)
+                parmeters.add(DeclaredParameter(scanner.consume(TokenType.IDENTIFIER).text))
             } while (scanner.tryConsume(","))
         }
 
 
         val parsedBody = parseBody(depth)
-        return if (parmeterNames.isEmpty()) parsedBody else Lambda(parmeterNames.toList(), parsedBody)
+        return if (parmeters.isEmpty()) parsedBody else Lambda(parmeters.toList(), parsedBody)
 
     }
 

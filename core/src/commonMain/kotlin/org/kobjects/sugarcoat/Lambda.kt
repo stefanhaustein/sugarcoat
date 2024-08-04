@@ -4,13 +4,13 @@ import org.kobjects.sugarcoat.Evaluable
 import org.kobjects.sugarcoat.RuntimeContext
 
 data class Lambda(
-    val parameters: List<String>,
+    val parameters: List<DeclaredParameter>,
     val body: Evaluable
 ) : Evaluable {
     fun eval(children: List<Parameter>, callerContext: RuntimeContext): Any {
         val localContext = LocalContext(callerContext)
         for (i in parameters.indices) {
-            localContext.symbols[parameters[i]] = children[i].value.eval(callerContext)
+            localContext.symbols[parameters[i].name] = children[i].value.eval(callerContext)
         }
         return body.eval(localContext)
     }

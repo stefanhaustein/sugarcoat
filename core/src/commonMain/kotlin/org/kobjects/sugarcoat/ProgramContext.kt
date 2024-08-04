@@ -1,7 +1,5 @@
 package org.kobjects.sugarcoat
 
-import kotlin.math.pow
-
 class ProgramContext(
     val program: Program,
     val printFn: (String) -> Unit = ::print
@@ -9,17 +7,8 @@ class ProgramContext(
 
     override fun evalSymbol(name: String, children: List<Parameter>, parameterContext: RuntimeContext): Any =
         program.functions[name]?.eval(children, parameterContext) ?: when (name) {
-            "+" -> children.fold(0.0) { acc, current -> acc + current.value.evalDouble(parameterContext) }
-            "*" -> children.fold(1.0) { acc, current -> acc * current.value.evalDouble(parameterContext) }
-            "/" -> parameterContext.numeric2(children) { a, b -> a / b }
-            "%" -> parameterContext.numeric2(children) { a, b -> a % b }
-            "-" -> if (children.size == 1) -children.first().value.evalDouble(parameterContext)
-            else children.subList(1, children.size).fold(children.first().value.evalDouble(parameterContext)) { acc, current -> acc - current.value.evalDouble(parameterContext) }
-            "**" -> parameterContext.numeric2(children) { a, b -> a.pow(b) }
-            "==" -> children.first().value.eval(parameterContext) == children[1].value.eval(parameterContext)
-            "=!" -> children.first().value.eval(parameterContext) != children[1].value.eval(parameterContext)
             "for" -> evalFor(children, parameterContext)
-            "if" -> evalIf(children, parameterContext)
+            "if" -> if (children[0].value.evalBoolean(parameterContext)) IfContext(children[1].value.eval(parameterContext)) else IfContext(null)
             "print" -> printFn(children.joinToString { it.value.eval(parameterContext).toString() })
             "range" -> when (children.size) {
                 1 -> LongRange(0, children[0].value.evalLong(parameterContext) - 1)
@@ -42,16 +31,6 @@ class ProgramContext(
             else -> throw IllegalStateException("Unrecognized symbol: $name")
         }
 
-    fun evalIf(children: List<Parameter>, parameterContext: RuntimeContext): Any {
-        var i = 0
-        while (i < children.size - 1) {
-            if (children[i].value.evalBoolean(parameterContext)) {
-                return children[i + 1].value.eval(parameterContext)
-            }
-            i += 2
-        }
-        return if (i < children.size) children.last().value.eval(parameterContext) else Unit
-    }
 
     fun evalFor(children: List<Parameter>, parameterContext: RuntimeContext) {
         val range = children[0].value.eval(parameterContext) as Collection<Any>

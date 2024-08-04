@@ -9,7 +9,16 @@ class Symbol(
 ) : Evaluable {
     constructor(name: String, precedence: Int, vararg children: Evaluable) : this(name, true, children.map { Parameter("", it) }, precedence)
     constructor(name: String, method: Boolean, vararg children: Evaluable) : this(name, method, children.map { Parameter("", it) })
-    override fun eval(context: RuntimeContext): Any = context.evalSymbol(name, children, context)
+    override fun eval(context: RuntimeContext): Any = if (method) {
+        val base = children[0].value.eval(context)
+        val baseContext = when (base)  {
+            is RuntimeContext -> base
+            is Boolean -> BooleanContext(base)
+            is Double -> DoubleContext(base)
+            else -> throw UnsupportedOperationException("Value $base can't be used as context for method invocations.")
+        }
+        baseContext.evalMethod(name, children, context)
+    } else context.evalSymbol(name, children, context)
 
     override fun toString(): String = buildString { stringify(this, 0) }
 

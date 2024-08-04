@@ -2,7 +2,11 @@ package org.kobjects.sugarcoat
 
 
 interface RuntimeContext {
-    fun evalSymbol(name: String, children: List<Parameter>, parameterContext: RuntimeContext): Any
+    fun evalSymbol(name: String, children: List<Parameter>, parameterContext: RuntimeContext): Any =
+        throw UnsupportedOperationException()
+
+    fun evalMethod(name: String, children: List<Parameter>, parameterContext: RuntimeContext): Any =
+        throw UnsupportedOperationException()
 
     fun numeric1(children: List<Parameter>, f: (Double) -> Any): Any {
         require(children.size == 1)
