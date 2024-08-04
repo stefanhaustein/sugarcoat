@@ -69,7 +69,7 @@ class SugarcoatParser private constructor(val scanner: Scanner<TokenType>) {
             }
             scanner.consume(TokenType.NEWLINE)
         }
-        return if (result.size == 1) result.first().value else Symbol("seq", false, result)
+        return if (result.size == 1) result.first().value else Symbol(null, "seq", result)
     }
 
     fun parseStatement(depth: Int): Evaluable {
@@ -94,11 +94,10 @@ class SugarcoatParser private constructor(val scanner: Scanner<TokenType>) {
             val symbol = result as Symbol
             val arguments = symbol.children.toMutableList()
             arguments.add(Parameter("", parseLambdaArgumentsAndBody(depth)))
-            result = Symbol(symbol.name, symbol.method, arguments.toList())
+            result = Symbol(symbol.receiver, symbol.name, arguments.toList())
 
             while (currentIndent() == depth && scanner.lookAhead(1).type == TokenType.PROPERTY) {
                 val innerArguments = ParameterListBuilder()
-                innerArguments.add(result)
                 scanner.consume(TokenType.NEWLINE)
                 val property = scanner.consume(TokenType.PROPERTY).text.substring(1)
                 if (scanner.current.text != ":") {
@@ -107,7 +106,7 @@ class SugarcoatParser private constructor(val scanner: Scanner<TokenType>) {
                 scanner.consume(":") { "Colon expected" }
                 val body = parseLambdaArgumentsAndBody(depth)
                 innerArguments.add(body)
-                result = Symbol(property, true, innerArguments.build())
+                result = Symbol(result, property, innerArguments.build())
             }
         }
 
@@ -134,7 +133,7 @@ class SugarcoatParser private constructor(val scanner: Scanner<TokenType>) {
         do {
             arguments.add(Parameter("", parseExpression()))
         } while (scanner.tryConsume(","))
-        return Symbol(symbol.name, symbol.method, arguments.toList())
+        return Symbol(symbol.receiver, symbol.name, arguments.toList())
     }
 
 

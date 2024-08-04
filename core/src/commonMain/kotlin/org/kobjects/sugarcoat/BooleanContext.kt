@@ -2,7 +2,7 @@ package org.kobjects.sugarcoat
 
 class BooleanContext(val value: Boolean) : RuntimeContext {
 
-    override fun evalMethod(
+    override fun evalSymbol(
         name: String,
         children: List<Parameter>,
         parameterContext: RuntimeContext

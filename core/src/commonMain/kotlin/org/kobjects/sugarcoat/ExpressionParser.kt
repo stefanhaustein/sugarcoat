@@ -6,15 +6,15 @@ import org.kobjects.parsek.tokenizer.Scanner
 
 object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Unit, Evaluable>(
     { scanner, _ -> ExpressionParser.parsePrimary(scanner) },
-    prefix(9, "+", "-") { _, _, name, operand -> Symbol(name, 9, operand) },
-    infix(8, "**") { _, _, _, left, right -> Symbol("**", 8, left, right) },
-    infix(7, "*", "/", "%", "//") { _, _, name, left, right -> Symbol(name, 7, left, right) },
-    infix(6, "+", "-") { _, _, name, left, right -> Symbol(name, 6, left, right) },
-    infix(5, "<", "<=", ">", ">=") { _, _, name, left, right -> Symbol(name, 5, left, right) },
-    infix(4, "==", "!=") { _, _, name, left, right -> Symbol(name, 4, left, right) },
-    infix(3, "&&") { _, _, _, left, right -> Symbol("&&", 3, left, right) },
-    infix(2, "||") { _, _, _, left, right -> Symbol("||", 2, left, right) },
-    prefix(1, "!") { _, _, _, operand -> Symbol("!", 1, operand) }
+    prefix(9, "+", "-") { _, _, name, operand -> Symbol(operand, name, 9) },
+    infix(8, "**") { _, _, _, left, right -> Symbol(left, "**", 8, right) },
+    infix(7, "*", "/", "%", "//") { _, _, name, left, right -> Symbol(left, name, 7, right) },
+    infix(6, "+", "-") { _, _, name, left, right -> Symbol(left, name, 6, right) },
+    infix(5, "<", "<=", ">", ">=") { _, _, name, left, right -> Symbol(left, name, 5, right) },
+    infix(4, "==", "!=") { _, _, name, left, right -> Symbol(left, name, 4, right) },
+    infix(3, "&&") { _, _, _, left, right -> Symbol(left, "&&", 3, right) },
+    infix(2, "||") { _, _, _, left, right -> Symbol(left, "||", 2, right) },
+    prefix(1, "!") { _, _, _, operand -> Symbol(operand, "!", 1) }
 ) {
     private fun parsePrimary(tokenizer: Scanner<TokenType>): Evaluable =
         when (tokenizer.current.type) {
@@ -30,7 +30,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Unit,
             TokenType.IDENTIFIER -> {
                 var name = tokenizer.consume().text
                 val children = if (tokenizer.tryConsume("(")) parseParameterList(tokenizer, ")") else emptyList()
-                Symbol(name, false, children)
+                Symbol(null, name, children)
             }
             TokenType.SYMBOL -> {
                 if (!tokenizer.tryConsume("(")) {
