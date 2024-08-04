@@ -15,13 +15,13 @@ def main(x):
 def main():
    for range(1, 20): x
      if x % 3 == 0: 
-       print("Fizz")
+       print "Fizz"
        if x % 5 == 0:
-         print("Buzz")
+         print "Buzz"
      .elif x % 5 == 0:
-       print("Buzz")
+       print "Buzz"
      .else:
-       print(x)
+       print x
      print("\n")    
 """
 
@@ -38,7 +38,7 @@ def main():
         val program = SugarcoatParser.parseProgram(FIZZBUZZ)
         val result = StringBuilder()
 
-        program.run() {
+        program.run {
             result.append(it)
         }
 

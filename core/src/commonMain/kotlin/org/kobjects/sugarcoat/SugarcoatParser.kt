@@ -94,20 +94,21 @@ class SugarcoatParser private constructor(val scanner: Scanner<TokenType>) {
             val symbol = result as Symbol
             val arguments = symbol.children.toMutableList()
             arguments.add(Parameter("", parseLambdaArgumentsAndBody(depth)))
-            result = Symbol(symbol.receiver, symbol.name, arguments.toList())
 
             while (currentIndent() == depth && scanner.lookAhead(1).type == TokenType.PROPERTY) {
-                val innerArguments = ParameterListBuilder()
                 scanner.consume(TokenType.NEWLINE)
                 val property = scanner.consume(TokenType.PROPERTY).text.substring(1)
-                if (scanner.current.text != ":") {
-                    innerArguments.add(parseExpression())
-                }
+                val expr = if (scanner.current.text != ":") parseExpression() else null
                 scanner.consume(":") { "Colon expected" }
                 val body = parseLambdaArgumentsAndBody(depth)
-                innerArguments.add(body)
-                result = Symbol(result, property, innerArguments.build())
+                if (expr == null) {
+                    arguments.add(Parameter(property, body))
+                } else {
+                    arguments.add(Parameter(property, Symbol("pair", false, expr, body)))
+                }
             }
+
+            result = Symbol(symbol.receiver, symbol.name, arguments.toList())
         }
 
         return result
