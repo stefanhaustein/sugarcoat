@@ -8,9 +8,9 @@ class Program(
 
     override fun toString() =
         buildString {
-            for ((name, def) in functions) {
-                append("def $name")
-                append(def)
+            for ((name, fn) in functions) {
+                append("fn $name")
+                append(fn)
                 append("\n")
             }
         }

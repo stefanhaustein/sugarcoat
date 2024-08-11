@@ -29,7 +29,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             }
             TokenType.IDENTIFIER -> {
                 var name = tokenizer.consume().text
-                val children = if (tokenizer.tryConsume("(")) parseParameterList(tokenizer, context,")") else emptyList()
+                val children = parseParameterList(tokenizer, context)
                 Symbol(null, name, children)
             }
             TokenType.SYMBOL -> {
@@ -44,22 +44,60 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
                 throw tokenizer.exception("Unrecognized primary expression.")
     }
 
-    fun parseParameterList(tokenizer: Scanner<TokenType>, context: ParsingContext, endToken: String): List<Parameter> {
+    fun parseParameterList(scanner: Scanner<TokenType>, context: ParsingContext): List<Parameter> {
         val builder = ParameterListBuilder()
-        if (tokenizer.current.text != endToken) {
-            do {
-                val parameterName = if (tokenizer.current.type == TokenType.IDENTIFIER && tokenizer.lookAhead(1).text == "=") {
-                    val name = tokenizer.consume(TokenType.IDENTIFIER).text
-                    tokenizer.consume("=")
-                    name
-                } else ""
-                val value = parseExpression(tokenizer, context)
-                builder.add(parameterName, value)
-            } while (tokenizer.tryConsume(","))
+        if (scanner.tryConsume("(")) {
+            if (scanner.current.text != ")") {
+                do {
+                    val parameterName =
+                        if (scanner.current.type == TokenType.IDENTIFIER && scanner.lookAhead(1).text == "=") {
+                            val name = scanner.consume(TokenType.IDENTIFIER).text
+                            scanner.consume("=")
+                            name
+                        } else ""
+                    val value = parseExpression(scanner, context)
+                    builder.add(parameterName, value)
+                } while (scanner.tryConsume(","))
+            }
+            scanner.consume(")")
         }
-        tokenizer.consume(endToken)
+
+        if (scanner.tryConsume(":")) {
+            builder.add(parseLambdaArgumentsAndBody(scanner, context))
+        }
+
+        while (scanner.current.type == TokenType.NEWLINE && context.parser.currentIndent() == context.depth && scanner.lookAhead(1).text == "--") {
+            scanner.consume(TokenType.NEWLINE)
+            scanner.consume("--")
+            val property = scanner.consume(TokenType.IDENTIFIER).text
+            val expr = if (scanner.current.text == "(") context.parser.parseExpression(context.depth) else null
+            scanner.consume(":") { "Colon expected" }
+            val body = parseLambdaArgumentsAndBody(scanner, context)
+            if (expr == null) {
+                builder.add(property, body)
+            } else {
+                builder.add(property, Symbol("pair", false, expr, body))
+            }
+        }
+
         return builder.build()
     }
+
+
+
+    fun parseLambdaArgumentsAndBody(scanner: Scanner<TokenType>, context: ParsingContext): Evaluable {
+
+        val parmeters = mutableListOf<DeclaredParameter>()
+        if (scanner.current.type == TokenType.IDENTIFIER) {
+            do {
+                parmeters.add(DeclaredParameter(scanner.consume(TokenType.IDENTIFIER).text))
+            } while (scanner.tryConsume(","))
+        }
+
+        val parsedBody = context.parser.parseBody(context.depth)
+        return if (parmeters.isEmpty()) parsedBody else Lambda(parmeters.toList(), parsedBody)
+    }
+
 
     fun eval(expression: String): Any {
         val scanner = Scanner(SugarcoatLexer(expression), TokenType.EOF)

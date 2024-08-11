@@ -7,21 +7,25 @@ import kotlin.test.assertTrue
 class SugarcoatTest {
 
     val SQR = """
-def main(x):
+fn main(x):
     x * x
 """
 
     val FIZZBUZZ = """
-def main():
-   for range(1, 20): x
-     if x % 3 == 0: 
-       print "Fizz"
-       if x % 5 == 0:
-         print "Buzz"
-     .elif x % 5 == 0:
-       print "Buzz"
-     .else:
-       print x
+fn main():
+   for (range(1, 20)): x
+     if (x % 3 == 0): 
+       print("Fizz")
+       
+       if (x % 5 == 0):
+         print("Buzz")
+     
+     --elif (x % 5 == 0):
+       print("Buzz")
+     
+     --else:
+       print(x)
+     
      print("\n")    
 """
 
@@ -29,7 +33,7 @@ def main():
     fun sqrTest() {
         val program = SugarcoatParser.parseProgram(SQR)
 
-        assertEquals("def main(x):\n  x * x\n", program.toString())
+        assertEquals("fn main(x):\n  x * x\n", program.toString())
         assertEquals(4.0, program.run(2.0))
     }
 

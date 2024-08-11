@@ -5,9 +5,9 @@ import org.kobjects.parsek.tokenizer.Scanner
 class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
     val functions = mutableMapOf<String, Lambda>()
 
-    private fun parseExpression(depth: Int): Evaluable = ExpressionParser.parseExpression(scanner, ParsingContext(depth, this))
+    internal fun parseExpression(depth: Int): Evaluable = ExpressionParser.parseExpression(scanner, ParsingContext(depth, this))
 
-    private fun currentIndent(): Int {
+    internal fun currentIndent(): Int {
         if (scanner.current.type == TokenType.EOF) {
             return 0
         }
@@ -23,7 +23,7 @@ class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
                 scanner.consume()
             } else {
                 when (scanner.current.text) {
-                    "def" -> parserDef()
+                    "fn" -> parseFn()
                     else -> throw scanner.exception("Unexpected token.")
                 }
             }
@@ -34,8 +34,8 @@ class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
         return Program(functions.toMap())
     }
 
-    fun parserDef() {
-        scanner.consume("def")
+    fun parseFn() {
+        scanner.consume("fn")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'def'." }.text
         scanner.consume("(") { "Opening brace expected after function name '$name'." }
         val parameters = mutableListOf<DeclaredParameter>()
@@ -53,18 +53,21 @@ class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
 
     fun parseBody(parentDepth: Int): Evaluable {
         val depth = currentIndent()
+        println("ParseBody; parentDepth: $parentDepth; depth: $depth")
         if (depth <= parentDepth) {
             return Symbol("seq", false)
         }
         scanner.consume(TokenType.NEWLINE)
         val result = mutableListOf<Parameter>()
         while(true) {
+            println("parsebody loop parsing at depth $depth")
             if (scanner.current.type != TokenType.NEWLINE) {
                 val statement = parseStatement(depth)
-                println("parsed: $statement")
+                println("parsed @$depth: $statement")
                 result.add(Parameter("", statement))
             }
             if (currentIndent() != depth) {
+                println("leaving b/c currentDepth = ${currentIndent()} != $depth")
                 break
             }
             scanner.consume(TokenType.NEWLINE)
@@ -78,63 +81,7 @@ class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
             throw RuntimeException("TBD")
         }
 
-        if (scanner.tryConsume(",")) {
-            require (result is Symbol) { "Call expected for ','" }
-            val symbol = result as Symbol
-            require (symbol.children.size == 1) { "Missing argument before ','" }
-            result = parseExtraArguments(depth, symbol)
-        } else if (scanner.current.type != TokenType.NEWLINE
-            && scanner.current.text != ":"
-            && result is Symbol && result.children.isEmpty()) {
-            result = parseExtraArguments(depth, result as Symbol)
-        }
-
-        if (scanner.tryConsume(":")) {
-            require (result is Symbol) { "Symbol expected for ':'" }
-            val symbol = result as Symbol
-            val arguments = symbol.children.toMutableList()
-            arguments.add(Parameter("", parseLambdaArgumentsAndBody(depth)))
-
-            while (currentIndent() == depth && scanner.lookAhead(1).type == TokenType.PROPERTY) {
-                scanner.consume(TokenType.NEWLINE)
-                val property = scanner.consume(TokenType.PROPERTY).text.substring(1)
-                val expr = if (scanner.current.text != ":") parseExpression(depth) else null
-                scanner.consume(":") { "Colon expected" }
-                val body = parseLambdaArgumentsAndBody(depth)
-                if (expr == null) {
-                    arguments.add(Parameter(property, body))
-                } else {
-                    arguments.add(Parameter(property, Symbol("pair", false, expr, body)))
-                }
-            }
-
-            result = Symbol(symbol.receiver, symbol.name, arguments.toList())
-        }
-
         return result
-    }
-
-    fun parseLambdaArgumentsAndBody(depth: Int): Evaluable {
-
-        val parmeters = mutableListOf<DeclaredParameter>()
-        if (scanner.current.type == TokenType.IDENTIFIER) {
-            do {
-                parmeters.add(DeclaredParameter(scanner.consume(TokenType.IDENTIFIER).text))
-            } while (scanner.tryConsume(","))
-        }
-
-
-        val parsedBody = parseBody(depth)
-        return if (parmeters.isEmpty()) parsedBody else Lambda(parmeters.toList(), parsedBody)
-
-    }
-
-    fun parseExtraArguments(depth: Int, symbol: Symbol): Symbol {
-        val arguments = symbol.children.toMutableList()
-        do {
-            arguments.add(Parameter("", parseExpression(depth)))
-        } while (scanner.tryConsume(","))
-        return Symbol(symbol.receiver, symbol.name, arguments.toList())
     }
 
 

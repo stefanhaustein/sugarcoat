@@ -8,7 +8,7 @@ import kotlin.text.Regex
 class SugarcoatLexer(input: String) : Lexer<TokenType>(
     input,
     RegularExpressions.HORIZONTAL_WHITESPACE to { null },
-    RegularExpressions.NEWLINE to { TokenType.NEWLINE },
+    Regex("""(\n[ \t]*)+""") to { TokenType.NEWLINE },
     Regex("""\.[\p{Alpha}_$][\p{Alpha}\d_$]*""".trimMargin()) to { TokenType.PROPERTY },
     RegularExpressions.NUMBER to { TokenType.NUMBER },
     RegularExpressions.DOUBLE_QUOTED_STRING to { TokenType.STRING },
