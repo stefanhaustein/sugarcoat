@@ -34,7 +34,7 @@ fn main():
         val program = SugarcoatParser.parseProgram(SQR)
 
         assertEquals("fn main(x):\n  x * x\n", program.toString())
-        assertEquals(4.0, program.run(2.0))
+        assertEquals(DoubleContext(4.0), program.run(2.0))
     }
 
     @Test
@@ -46,6 +46,6 @@ fn main():
             result.append(it)
         }
 
-        assertTrue(result.startsWith("1.0\n2.0\nFizz"), "Unexpected result $result")
+        assertTrue(result.startsWith("1\n2\nFizz"), "Unexpected result $result")
     }
 }

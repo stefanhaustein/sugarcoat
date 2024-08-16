@@ -1,19 +1,11 @@
 package org.kobjects.sugarcoat
 
 interface Evaluable {
-    fun eval(context: RuntimeContext): Any
+    fun eval(context: RuntimeContext): RuntimeContext
 
-    fun evalDouble(context: RuntimeContext): Double = (eval(context) as Number).toDouble()
-    fun evalBoolean(context: RuntimeContext): Boolean = eval(context) as Boolean
-    fun evalLong(context: RuntimeContext): Long =
-        when (val value = eval(context)) {
-            is Long -> value
-            is Number -> {
-                require(value.toLong().toDouble() == value.toDouble()) { "Integer expected; got $value" }
-                value.toLong()
-            }
-            else -> throw IllegalStateException("Integer expected; got $value")
-        }
+    fun evalDouble(context: RuntimeContext) = (eval(context) as DoubleContext).value
+    fun evalBoolean(context: RuntimeContext) = (eval(context) as BooleanContext).value
+    fun evalLong(context: RuntimeContext) = (eval(context) as LongContext).value
 
     fun stringify(stringBuilder: StringBuilder, parentPrecedence: Int) {
         stringBuilder.append(this)

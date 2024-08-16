@@ -8,15 +8,21 @@ class DoubleContext(val value: Double) : RuntimeContext {
         name: String,
         children: List<Parameter>,
         parameterContext: RuntimeContext
-    ): Any = when (name) {
-        "+" -> children.fold(value) { acc, current -> acc + current.value.evalDouble(parameterContext) }
-        "*" -> children.fold(value) { acc, current -> acc * current.value.evalDouble(parameterContext) }
-        "/" -> children.fold(value) { acc, current -> acc / current.value.evalDouble(parameterContext) }
-        "%" -> children.fold(value) { acc, current -> acc % current.value.evalDouble(parameterContext) }
-        "-" -> if (children.isEmpty()) -value else children.fold(value) { acc, current -> acc - current.value.evalDouble(parameterContext) }
-        "**" -> value.pow(children.first().value.evalDouble(parameterContext))
-        "==" -> value == children.first().value.evalDouble(parameterContext)
-        "!=" -> value != children.first().value.evalDouble(parameterContext)
+    ): RuntimeContext = when (name) {
+        "+" -> DoubleContext(children.fold(value) { acc, current -> acc + current.value.evalDouble(parameterContext) })
+        "*" -> DoubleContext(children.fold(value) { acc, current -> acc * current.value.evalDouble(parameterContext) })
+        "/" -> DoubleContext(children.fold(value) { acc, current -> acc / current.value.evalDouble(parameterContext) })
+        "%" -> DoubleContext(children.fold(value) { acc, current -> acc % current.value.evalDouble(parameterContext) })
+        "-" -> DoubleContext(if (children.isEmpty()) -value else children.fold(value) { acc, current -> acc - current.value.evalDouble(parameterContext) })
+        "**" -> DoubleContext(value.pow(children.first().value.evalDouble(parameterContext)))
+        "==" -> BooleanContext(value == children.first().value.evalDouble(parameterContext))
+        "!=" -> BooleanContext(value != children.first().value.evalDouble(parameterContext))
         else -> throw UnsupportedOperationException("Method $name unsupported for boolean values.")
     }
+
+    override fun toString() = value.toString()
+
+    override fun equals(other: Any?) = other is DoubleContext && other.value == value
+
+    override fun hashCode() = value.hashCode()
 }

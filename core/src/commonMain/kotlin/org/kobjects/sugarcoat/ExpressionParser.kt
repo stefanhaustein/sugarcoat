@@ -18,8 +18,10 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
 ) {
     private fun parsePrimary(tokenizer: Scanner<TokenType>, context: ParsingContext): Evaluable =
         when (tokenizer.current.type) {
-            TokenType.NUMBER ->
-                Literal(tokenizer.consume().text.toDouble())
+            TokenType.NUMBER -> {
+                val text = tokenizer.consume().text
+                Literal(if (text.contains(".") || text.contains("e") || text.contains("E")) text.toDouble() else text.toLong())
+            }
             TokenType.STRING -> {
                 val text = tokenizer.consume().text
                 Literal(
