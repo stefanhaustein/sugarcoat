@@ -1,4 +1,4 @@
-package org.kobjects.sugarcoat
+package org.kobjects.sugarcoat.parser
 
 enum class TokenType {
     NEWLINE, // Included for Mython

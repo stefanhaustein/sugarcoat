@@ -1,6 +1,6 @@
-package org.kobjects.sugarcoat
+package org.kobjects.sugarcoat.ast
 
-import org.kobjects.sugarcoat.function.LambdaDeclaration
+import org.kobjects.sugarcoat.runtime.ProgramContext
 
 class Program(
     val functions: Map<String, LambdaDeclaration>
@@ -17,7 +17,7 @@ class Program(
 
     fun run(vararg parameters: Any, printFn: (String) -> Unit = { print(it) }): Any {
 
-        return functions["main"]?.eval(parameters.map { ParameterReference("", Literal(it)) }, ProgramContext(this, printFn)) ?: throw IllegalStateException("main function not found.")
+        return functions["main"]?.eval(parameters.map { ParameterReference("", LiteralNode(it)) }, ProgramContext(this, printFn)) ?: throw IllegalStateException("main function not found.")
 
     }
 }

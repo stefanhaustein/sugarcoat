@@ -1,4 +1,4 @@
-package org.kobjects.sugarcoat
+package org.kobjects.sugarcoat.parser
 
 import org.kobjects.parsek.tokenizer.RegularExpressions
 import org.kobjects.parsek.tokenizer.Lexer

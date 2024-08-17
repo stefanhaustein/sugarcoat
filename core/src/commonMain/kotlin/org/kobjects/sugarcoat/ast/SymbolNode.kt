@@ -1,14 +1,16 @@
-package org.kobjects.sugarcoat
+package org.kobjects.sugarcoat.ast
+
+import org.kobjects.sugarcoat.runtime.RuntimeContext
 
 
-class SymbolReference(
-    val receiver: Evaluable?,
+class SymbolNode(
+    val receiver: Node?,
     val name: String,
     val children: List<ParameterReference>,
     val precedence: Int = 0
-) : Evaluable {
-    constructor(receiver: Evaluable?, name: String, precedence: Int, vararg children: Evaluable) : this(receiver, name, children.map { ParameterReference("", it) }, precedence)
-    constructor(name: String, vararg children: Evaluable) : this(null, name, children.map { ParameterReference("", it) })
+) : Node {
+    constructor(receiver: Node?, name: String, precedence: Int, vararg children: Node) : this(receiver, name, children.map { ParameterReference("", it) }, precedence)
+    constructor(name: String, vararg children: Node) : this(null, name, children.map { ParameterReference("", it) })
     override fun eval(context: RuntimeContext): RuntimeContext = if (receiver == null) context.evalSymbol(name, children, context)
         else {
             val baseContext = receiver.eval(context)

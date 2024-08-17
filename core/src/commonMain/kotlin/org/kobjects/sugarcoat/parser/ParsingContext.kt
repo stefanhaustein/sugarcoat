@@ -1,4 +1,4 @@
-package org.kobjects.sugarcoat
+package org.kobjects.sugarcoat.parser
 
 data class ParsingContext(
     val depth: Int,

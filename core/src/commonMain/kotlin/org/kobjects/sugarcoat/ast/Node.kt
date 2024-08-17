@@ -1,10 +1,11 @@
-package org.kobjects.sugarcoat
+package org.kobjects.sugarcoat.ast
 
+import org.kobjects.sugarcoat.runtime.RuntimeContext
 import org.kobjects.sugarcoat.datatype.BooleanContext
 import org.kobjects.sugarcoat.datatype.DoubleContext
 import org.kobjects.sugarcoat.datatype.LongContext
 
-interface Evaluable {
+interface Node {
     fun eval(context: RuntimeContext): RuntimeContext
 
     fun evalDouble(context: RuntimeContext) = (eval(context) as DoubleContext).value

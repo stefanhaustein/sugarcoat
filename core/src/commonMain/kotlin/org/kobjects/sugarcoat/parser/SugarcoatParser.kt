@@ -1,13 +1,17 @@
-package org.kobjects.sugarcoat
+package org.kobjects.sugarcoat.parser
 
 import org.kobjects.parsek.tokenizer.Scanner
-import org.kobjects.sugarcoat.function.LambdaDeclaration
-import org.kobjects.sugarcoat.function.ParameterDeclaration
+import org.kobjects.sugarcoat.ast.LambdaDeclaration
+import org.kobjects.sugarcoat.ast.ParameterDeclaration
+import org.kobjects.sugarcoat.ast.Node
+import org.kobjects.sugarcoat.ast.ParameterReference
+import org.kobjects.sugarcoat.ast.Program
+import org.kobjects.sugarcoat.ast.SymbolNode
 
 class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
     val functions = mutableMapOf<String, LambdaDeclaration>()
 
-    internal fun parseExpression(depth: Int): Evaluable = ExpressionParser.parseExpression(scanner, ParsingContext(depth, this))
+    internal fun parseExpression(depth: Int): Node = ExpressionParser.parseExpression(scanner, ParsingContext(depth, this))
 
     internal fun currentIndent(): Int {
         if (scanner.current.type == TokenType.EOF) {
@@ -53,11 +57,11 @@ class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
         functions[name] = fn
     }
 
-    fun parseBody(parentDepth: Int): Evaluable {
+    fun parseBody(parentDepth: Int): Node {
         val depth = currentIndent()
         println("ParseBody; parentDepth: $parentDepth; depth: $depth")
         if (depth <= parentDepth) {
-            return SymbolReference("seq")
+            return SymbolNode("seq")
         }
         scanner.consume(TokenType.NEWLINE)
         val result = mutableListOf<ParameterReference>()
@@ -74,10 +78,10 @@ class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
             }
             scanner.consume(TokenType.NEWLINE)
         }
-        return if (result.size == 1) result.first().value else SymbolReference(null, "seq", result)
+        return if (result.size == 1) result.first().value else SymbolNode(null, "seq", result)
     }
 
-    fun parseStatement(depth: Int): Evaluable {
+    fun parseStatement(depth: Int): Node {
         var result = parseExpression(depth)
         if (scanner.tryConsume("=")) {
             throw RuntimeException("TBD")

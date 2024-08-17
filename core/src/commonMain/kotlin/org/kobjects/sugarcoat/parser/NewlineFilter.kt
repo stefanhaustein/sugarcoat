@@ -1,4 +1,4 @@
-package org.kobjects.sugarcoat
+package org.kobjects.sugarcoat.parser
 
 import org.kobjects.parsek.tokenizer.Filter
 import org.kobjects.parsek.tokenizer.Token

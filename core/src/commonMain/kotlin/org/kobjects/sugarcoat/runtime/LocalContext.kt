@@ -1,7 +1,7 @@
-package org.kobjects.sugarcoat.function
+package org.kobjects.sugarcoat.runtime
 
-import org.kobjects.sugarcoat.ParameterReference
-import org.kobjects.sugarcoat.RuntimeContext
+import org.kobjects.sugarcoat.ast.LambdaDeclaration
+import org.kobjects.sugarcoat.ast.ParameterReference
 
 class LocalContext(
     val parentContext: RuntimeContext

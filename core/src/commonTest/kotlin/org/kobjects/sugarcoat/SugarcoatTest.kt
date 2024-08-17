@@ -1,6 +1,7 @@
 package org.kobjects.sugarcoat
 
 import org.kobjects.sugarcoat.datatype.DoubleContext
+import org.kobjects.sugarcoat.parser.SugarcoatParser
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

@@ -1,9 +1,13 @@
-package org.kobjects.sugarcoat
+package org.kobjects.sugarcoat.runtime
 
+import org.kobjects.sugarcoat.ast.LiteralNode
+import org.kobjects.sugarcoat.ast.ParameterReference
+import org.kobjects.sugarcoat.ast.Program
+import org.kobjects.sugarcoat.ast.SymbolNode
 import org.kobjects.sugarcoat.datatype.RangeContext
 import org.kobjects.sugarcoat.datatype.VoidContext
-import org.kobjects.sugarcoat.function.LambdaDeclaration
-import org.kobjects.sugarcoat.function.LocalContext
+import org.kobjects.sugarcoat.ast.LambdaDeclaration
+import org.kobjects.sugarcoat.ast.LambdaNode
 
 class ProgramContext(
     val program: Program,
@@ -30,7 +34,7 @@ class ProgramContext(
             "seq" -> children.fold<ParameterReference, RuntimeContext>(VoidContext) { _, current -> current.value.eval(parameterContext) }
             "=" -> {
                 require(children.size == 2) { "Two parameters expected for assignment"}
-                val target = (children.first() as Literal).value as String
+                val target = (children.first() as LiteralNode).value as String
                 (parameterContext as LocalContext).symbols[target] = children.last().value.eval(parameterContext)
                 VoidContext
             }
@@ -51,7 +55,7 @@ class ProgramContext(
             val value = child.value
             when (child.name) {
                 "elif" -> {
-                    require (value is SymbolReference && value.name == "pair")
+                    require (value is SymbolNode && value.name == "pair")
                     if (value.children[0].value.evalBoolean(parameterContext)) {
                         return value.children[1].value.eval(parameterContext)
                     }
@@ -68,7 +72,7 @@ class ProgramContext(
     fun evalFor(children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext {
         val range = (children[0].value.eval(parameterContext) as RangeContext).value
         for (value in range) {
-            (children[1].value as LambdaDeclaration).eval(listOf(ParameterReference("", Literal(value))), parameterContext)
+            (children[1].value as LambdaNode).lambda.eval(listOf(ParameterReference("", LiteralNode(value))), parameterContext)
         }
         return VoidContext
     }

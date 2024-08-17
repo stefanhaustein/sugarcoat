@@ -1,32 +1,40 @@
-package org.kobjects.sugarcoat
+package org.kobjects.sugarcoat.parser
 
 import org.kobjects.parsek.expressionparser.ConfigurableExpressionParser
 import org.kobjects.parsek.tokenizer.Scanner
-import org.kobjects.sugarcoat.function.LambdaDeclaration
-import org.kobjects.sugarcoat.function.ParameterDeclaration
+import org.kobjects.sugarcoat.runtime.ProgramContext
+import org.kobjects.sugarcoat.ast.LambdaDeclaration
+import org.kobjects.sugarcoat.ast.LambdaNode
+import org.kobjects.sugarcoat.ast.ParameterDeclaration
+import org.kobjects.sugarcoat.ast.Node
+import org.kobjects.sugarcoat.ast.LiteralNode
+import org.kobjects.sugarcoat.ast.ParameterListBuilder
+import org.kobjects.sugarcoat.ast.ParameterReference
+import org.kobjects.sugarcoat.ast.Program
+import org.kobjects.sugarcoat.ast.SymbolNode
 
 
-object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, ParsingContext, Evaluable>(
+object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, ParsingContext, Node>(
     { scanner, context -> ExpressionParser.parsePrimary(scanner, context) },
-    prefix(9, "+", "-") { _, _, name, operand -> SymbolReference(operand, name, 9) },
-    infix(8, "**") { _, _, _, left, right -> SymbolReference(left, "**", 8, right) },
-    infix(7, "*", "/", "%", "//") { _, _, name, left, right -> SymbolReference(left, name, 7, right) },
-    infix(6, "+", "-") { _, _, name, left, right -> SymbolReference(left, name, 6, right) },
-    infix(5, "<", "<=", ">", ">=") { _, _, name, left, right -> SymbolReference(left, name, 5, right) },
-    infix(4, "==", "!=") { _, _, name, left, right -> SymbolReference(left, name, 4, right) },
-    infix(3, "&&") { _, _, _, left, right -> SymbolReference(left, "&&", 3, right) },
-    infix(2, "||") { _, _, _, left, right -> SymbolReference(left, "||", 2, right) },
-    prefix(1, "!") { _, _, _, operand -> SymbolReference(operand, "!", 1) }
+    prefix(9, "+", "-") { _, _, name, operand -> SymbolNode(operand, name, 9) },
+    infix(8, "**") { _, _, _, left, right -> SymbolNode(left, "**", 8, right) },
+    infix(7, "*", "/", "%", "//") { _, _, name, left, right -> SymbolNode(left, name, 7, right) },
+    infix(6, "+", "-") { _, _, name, left, right -> SymbolNode(left, name, 6, right) },
+    infix(5, "<", "<=", ">", ">=") { _, _, name, left, right -> SymbolNode(left, name, 5, right) },
+    infix(4, "==", "!=") { _, _, name, left, right -> SymbolNode(left, name, 4, right) },
+    infix(3, "&&") { _, _, _, left, right -> SymbolNode(left, "&&", 3, right) },
+    infix(2, "||") { _, _, _, left, right -> SymbolNode(left, "||", 2, right) },
+    prefix(1, "!") { _, _, _, operand -> SymbolNode(operand, "!", 1) }
 ) {
-    private fun parsePrimary(tokenizer: Scanner<TokenType>, context: ParsingContext): Evaluable =
+    private fun parsePrimary(tokenizer: Scanner<TokenType>, context: ParsingContext): Node =
         when (tokenizer.current.type) {
             TokenType.NUMBER -> {
                 val text = tokenizer.consume().text
-                Literal(if (text.contains(".") || text.contains("e") || text.contains("E")) text.toDouble() else text.toLong())
+                LiteralNode(if (text.contains(".") || text.contains("e") || text.contains("E")) text.toDouble() else text.toLong())
             }
             TokenType.STRING -> {
                 val text = tokenizer.consume().text
-                Literal(
+                LiteralNode(
                     text.substring(1, text.length - 1)
                         .replace("\\n", "\n")
                 )
@@ -34,7 +42,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             TokenType.IDENTIFIER -> {
                 var name = tokenizer.consume().text
                 val children = parseParameterList(tokenizer, context)
-                SymbolReference(null, name, children)
+                SymbolNode(null, name, children)
             }
             TokenType.SYMBOL -> {
                 if (!tokenizer.tryConsume("(")) {
@@ -80,7 +88,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             if (expr == null) {
                 builder.add(property, body)
             } else {
-                builder.add(property, SymbolReference("pair", expr, body))
+                builder.add(property, SymbolNode("pair", expr, body))
             }
         }
 
@@ -89,7 +97,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
 
 
 
-    fun parseLambdaArgumentsAndBody(scanner: Scanner<TokenType>, context: ParsingContext): Evaluable {
+    fun parseLambdaArgumentsAndBody(scanner: Scanner<TokenType>, context: ParsingContext): Node {
 
         val parmeters = mutableListOf<ParameterDeclaration>()
         if (scanner.current.type == TokenType.IDENTIFIER) {
@@ -99,7 +107,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
         }
 
         val parsedBody = context.parser.parseBody(context.depth)
-        return if (parmeters.isEmpty()) parsedBody else LambdaDeclaration(parmeters.toList(), parsedBody)
+        return if (parmeters.isEmpty()) parsedBody else LambdaNode(LambdaDeclaration(parmeters.toList(), parsedBody))
     }
 
 

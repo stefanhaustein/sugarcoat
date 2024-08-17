@@ -1,7 +1,7 @@
 package org.kobjects.sugarcoat.datatype
 
-import org.kobjects.sugarcoat.ParameterReference
-import org.kobjects.sugarcoat.RuntimeContext
+import org.kobjects.sugarcoat.ast.ParameterReference
+import org.kobjects.sugarcoat.runtime.RuntimeContext
 import kotlin.math.pow
 
 class DoubleContext(val value: Double) : RuntimeContext {
