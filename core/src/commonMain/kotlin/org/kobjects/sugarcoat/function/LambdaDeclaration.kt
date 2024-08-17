@@ -1,13 +1,14 @@
-package org.kobjects.sugarcoat
+package org.kobjects.sugarcoat.function
 
 import org.kobjects.sugarcoat.Evaluable
+import org.kobjects.sugarcoat.ParameterReference
 import org.kobjects.sugarcoat.RuntimeContext
 
-data class Lambda(
-    val parameters: List<DeclaredParameter>,
+data class LambdaDeclaration(
+    val parameters: List<ParameterDeclaration>,
     val body: Evaluable
 ) : RuntimeContext, Evaluable {
-    fun eval(children: List<Parameter>, callerContext: RuntimeContext): RuntimeContext {
+    fun eval(children: List<ParameterReference>, callerContext: RuntimeContext): RuntimeContext {
         val localContext = LocalContext(callerContext)
         for (i in parameters.indices) {
             localContext.symbols[parameters[i].name] = children[i].value.eval(callerContext)
@@ -22,7 +23,7 @@ data class Lambda(
 
     override fun evalSymbol(
         name: String,
-        children: List<Parameter>,
+        children: List<ParameterReference>,
         parameterContext: RuntimeContext
     ): RuntimeContext {
         throw UnsupportedOperationException("$name not supported for lambda")

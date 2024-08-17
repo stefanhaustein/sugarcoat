@@ -1,11 +1,16 @@
 package org.kobjects.sugarcoat
 
+import org.kobjects.sugarcoat.datatype.RangeContext
+import org.kobjects.sugarcoat.datatype.VoidContext
+import org.kobjects.sugarcoat.function.LambdaDeclaration
+import org.kobjects.sugarcoat.function.LocalContext
+
 class ProgramContext(
     val program: Program,
     val printFn: (String) -> Unit = ::print
 ) : RuntimeContext {
 
-    override fun evalSymbol(name: String, children: List<Parameter>, parameterContext: RuntimeContext): RuntimeContext =
+    override fun evalSymbol(name: String, children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext =
         program.functions[name]?.eval(children, parameterContext) ?: when (name) {
             "for" -> evalFor(children, parameterContext)
             "if" -> evalIf(children, parameterContext)
@@ -22,7 +27,7 @@ class ProgramContext(
                 else -> throw IllegalArgumentException("2 or 3 parameter expected for range, but got ${children.size}")
             }
 
-            "seq" -> children.fold<Parameter, RuntimeContext>(VoidContext) { _, current -> current.value.eval(parameterContext) }
+            "seq" -> children.fold<ParameterReference, RuntimeContext>(VoidContext) { _, current -> current.value.eval(parameterContext) }
             "=" -> {
                 require(children.size == 2) { "Two parameters expected for assignment"}
                 val target = (children.first() as Literal).value as String
@@ -37,7 +42,7 @@ class ProgramContext(
             else -> throw IllegalStateException("Unrecognized symbol: $name")
         }
 
-    fun evalIf(children: List<Parameter>, parameterContext: RuntimeContext): RuntimeContext {
+    fun evalIf(children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext {
         if (children[0].value.evalBoolean(parameterContext)) {
             return children[1].value.eval(parameterContext)
         }
@@ -46,7 +51,7 @@ class ProgramContext(
             val value = child.value
             when (child.name) {
                 "elif" -> {
-                    require (value is Symbol && value.name == "pair")
+                    require (value is SymbolReference && value.name == "pair")
                     if (value.children[0].value.evalBoolean(parameterContext)) {
                         return value.children[1].value.eval(parameterContext)
                     }
@@ -60,10 +65,10 @@ class ProgramContext(
         return VoidContext
     }
 
-    fun evalFor(children: List<Parameter>, parameterContext: RuntimeContext): RuntimeContext {
+    fun evalFor(children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext {
         val range = (children[0].value.eval(parameterContext) as RangeContext).value
         for (value in range) {
-            (children[1].value as Lambda).eval(listOf(Parameter("", Literal(value))), parameterContext)
+            (children[1].value as LambdaDeclaration).eval(listOf(ParameterReference("", Literal(value))), parameterContext)
         }
         return VoidContext
     }

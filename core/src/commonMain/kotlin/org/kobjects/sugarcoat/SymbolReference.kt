@@ -1,14 +1,14 @@
 package org.kobjects.sugarcoat
 
 
-class Symbol(
+class SymbolReference(
     val receiver: Evaluable?,
     val name: String,
-    val children: List<Parameter>,
+    val children: List<ParameterReference>,
     val precedence: Int = 0
 ) : Evaluable {
-    constructor(receiver: Evaluable?, name: String, precedence: Int, vararg children: Evaluable) : this(receiver, name, children.map { Parameter("", it) }, precedence)
-    constructor(name: String, method: Boolean, vararg children: Evaluable) : this(null, name, children.map { Parameter("", it) })
+    constructor(receiver: Evaluable?, name: String, precedence: Int, vararg children: Evaluable) : this(receiver, name, children.map { ParameterReference("", it) }, precedence)
+    constructor(name: String, vararg children: Evaluable) : this(null, name, children.map { ParameterReference("", it) })
     override fun eval(context: RuntimeContext): RuntimeContext = if (receiver == null) context.evalSymbol(name, children, context)
         else {
             val baseContext = receiver.eval(context)

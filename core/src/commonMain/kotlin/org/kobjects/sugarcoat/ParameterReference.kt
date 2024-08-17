@@ -1,6 +1,6 @@
 package org.kobjects.sugarcoat
 
-data class Parameter(
+data class ParameterReference(
     val name: String,
     val value: Evaluable
 ) {

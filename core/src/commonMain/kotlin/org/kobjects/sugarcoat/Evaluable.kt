@@ -1,5 +1,9 @@
 package org.kobjects.sugarcoat
 
+import org.kobjects.sugarcoat.datatype.BooleanContext
+import org.kobjects.sugarcoat.datatype.DoubleContext
+import org.kobjects.sugarcoat.datatype.LongContext
+
 interface Evaluable {
     fun eval(context: RuntimeContext): RuntimeContext
 

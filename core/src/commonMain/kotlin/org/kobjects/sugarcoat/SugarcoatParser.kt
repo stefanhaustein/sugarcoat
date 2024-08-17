@@ -1,9 +1,11 @@
 package org.kobjects.sugarcoat
 
 import org.kobjects.parsek.tokenizer.Scanner
+import org.kobjects.sugarcoat.function.LambdaDeclaration
+import org.kobjects.sugarcoat.function.ParameterDeclaration
 
 class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
-    val functions = mutableMapOf<String, Lambda>()
+    val functions = mutableMapOf<String, LambdaDeclaration>()
 
     internal fun parseExpression(depth: Int): Evaluable = ExpressionParser.parseExpression(scanner, ParsingContext(depth, this))
 
@@ -38,16 +40,16 @@ class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
         scanner.consume("fn")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'def'." }.text
         scanner.consume("(") { "Opening brace expected after function name '$name'." }
-        val parameters = mutableListOf<DeclaredParameter>()
+        val parameters = mutableListOf<ParameterDeclaration>()
         if (!scanner.tryConsume(")")) {
             do {
-                parameters.add(DeclaredParameter(scanner.consume(TokenType.IDENTIFIER) { "Parameter name expected." }.text))
+                parameters.add(ParameterDeclaration(scanner.consume(TokenType.IDENTIFIER) { "Parameter name expected." }.text))
             } while (scanner.tryConsume(","))
             scanner.consume(")") { "Closing brace or comma (')' or ',') expected after parameter" }
         }
         scanner.consume(":") { "Colon expected after function parameter list." }
         val body = parseBody(0)
-        val fn = Lambda(parameters, body)
+        val fn = LambdaDeclaration(parameters, body)
         functions[name] = fn
     }
 
@@ -55,16 +57,16 @@ class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
         val depth = currentIndent()
         println("ParseBody; parentDepth: $parentDepth; depth: $depth")
         if (depth <= parentDepth) {
-            return Symbol("seq", false)
+            return SymbolReference("seq")
         }
         scanner.consume(TokenType.NEWLINE)
-        val result = mutableListOf<Parameter>()
+        val result = mutableListOf<ParameterReference>()
         while(true) {
             println("parsebody loop parsing at depth $depth")
             if (scanner.current.type != TokenType.NEWLINE) {
                 val statement = parseStatement(depth)
                 println("parsed @$depth: $statement")
-                result.add(Parameter("", statement))
+                result.add(ParameterReference("", statement))
             }
             if (currentIndent() != depth) {
                 println("leaving b/c currentDepth = ${currentIndent()} != $depth")
@@ -72,7 +74,7 @@ class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
             }
             scanner.consume(TokenType.NEWLINE)
         }
-        return if (result.size == 1) result.first().value else Symbol(null, "seq", result)
+        return if (result.size == 1) result.first().value else SymbolReference(null, "seq", result)
     }
 
     fun parseStatement(depth: Int): Evaluable {

@@ -1,14 +1,17 @@
-package org.kobjects.sugarcoat
+package org.kobjects.sugarcoat.function
+
+import org.kobjects.sugarcoat.Evaluable
+import org.kobjects.sugarcoat.ParameterReference
 
 
 class ParameterListBuilder {
-    val list = mutableListOf<Parameter>()
+    val list = mutableListOf<ParameterReference>()
 
     fun add(value: Evaluable) = add("", value)
 
-    fun add(name: String, value: Evaluable) = add(Parameter(name, value))
+    fun add(name: String, value: Evaluable) = add(ParameterReference(name, value))
 
-    fun add(parameter: Parameter) {
+    fun add(parameter: ParameterReference) {
         if (parameter.name.isEmpty()) {
             require(list.isEmpty() || list.last().name.isEmpty()) { "Can't add unnamed parameters after named parameters."}
         } else {

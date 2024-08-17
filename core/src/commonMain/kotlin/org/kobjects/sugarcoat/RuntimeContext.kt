@@ -1,8 +1,13 @@
 package org.kobjects.sugarcoat
 
+import org.kobjects.sugarcoat.datatype.BooleanContext
+import org.kobjects.sugarcoat.datatype.DoubleContext
+import org.kobjects.sugarcoat.datatype.LongContext
+import org.kobjects.sugarcoat.datatype.StringContext
+
 
 interface RuntimeContext {
-    fun evalSymbol(name: String, children: List<Parameter>, parameterContext: RuntimeContext): RuntimeContext
+    fun evalSymbol(name: String, children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext
 
 
     companion object {

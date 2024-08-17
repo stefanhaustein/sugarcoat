@@ -1,9 +1,12 @@
-package org.kobjects.sugarcoat
+package org.kobjects.sugarcoat.datatype
+
+import org.kobjects.sugarcoat.ParameterReference
+import org.kobjects.sugarcoat.RuntimeContext
 
 class LongContext(val value: Long) : RuntimeContext {
     override fun evalSymbol(
         name: String,
-        children: List<Parameter>,
+        children: List<ParameterReference>,
         parameterContext: RuntimeContext
     ): RuntimeContext = when (name) {
         "+" -> LongContext(children.fold(value) { acc, current -> acc + current.value.evalLong(parameterContext) })

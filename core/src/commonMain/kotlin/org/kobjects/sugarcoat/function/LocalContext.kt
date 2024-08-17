@@ -1,6 +1,6 @@
-package org.kobjects.sugarcoat
+package org.kobjects.sugarcoat.function
 
-import org.kobjects.sugarcoat.Evaluable
+import org.kobjects.sugarcoat.ParameterReference
 import org.kobjects.sugarcoat.RuntimeContext
 
 class LocalContext(
@@ -8,10 +8,10 @@ class LocalContext(
 ) : RuntimeContext {
     val symbols = mutableMapOf<String, RuntimeContext>()
 
-    override fun evalSymbol(name: String, children: List<Parameter>, parameterContext: RuntimeContext): RuntimeContext =
+    override fun evalSymbol(name: String, children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext =
         when (val resolved = symbols[name]) {
             null -> parentContext.evalSymbol(name, children, parameterContext)
-            is Lambda -> resolved.eval(children, parameterContext)
+            is LambdaDeclaration -> resolved.eval(children, parameterContext)
             else -> resolved
     }
 

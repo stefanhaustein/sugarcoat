@@ -1,5 +1,7 @@
 package org.kobjects.sugarcoat
 
+import org.kobjects.sugarcoat.datatype.StringContext
+
 class Literal(value: Any) : Evaluable {
     val value = RuntimeContext.of(value)
 

@@ -2,19 +2,22 @@ package org.kobjects.sugarcoat
 
 import org.kobjects.parsek.expressionparser.ConfigurableExpressionParser
 import org.kobjects.parsek.tokenizer.Scanner
+import org.kobjects.sugarcoat.function.LambdaDeclaration
+import org.kobjects.sugarcoat.function.ParameterDeclaration
+import org.kobjects.sugarcoat.function.ParameterListBuilder
 
 
 object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, ParsingContext, Evaluable>(
     { scanner, context -> ExpressionParser.parsePrimary(scanner, context) },
-    prefix(9, "+", "-") { _, _, name, operand -> Symbol(operand, name, 9) },
-    infix(8, "**") { _, _, _, left, right -> Symbol(left, "**", 8, right) },
-    infix(7, "*", "/", "%", "//") { _, _, name, left, right -> Symbol(left, name, 7, right) },
-    infix(6, "+", "-") { _, _, name, left, right -> Symbol(left, name, 6, right) },
-    infix(5, "<", "<=", ">", ">=") { _, _, name, left, right -> Symbol(left, name, 5, right) },
-    infix(4, "==", "!=") { _, _, name, left, right -> Symbol(left, name, 4, right) },
-    infix(3, "&&") { _, _, _, left, right -> Symbol(left, "&&", 3, right) },
-    infix(2, "||") { _, _, _, left, right -> Symbol(left, "||", 2, right) },
-    prefix(1, "!") { _, _, _, operand -> Symbol(operand, "!", 1) }
+    prefix(9, "+", "-") { _, _, name, operand -> SymbolReference(operand, name, 9) },
+    infix(8, "**") { _, _, _, left, right -> SymbolReference(left, "**", 8, right) },
+    infix(7, "*", "/", "%", "//") { _, _, name, left, right -> SymbolReference(left, name, 7, right) },
+    infix(6, "+", "-") { _, _, name, left, right -> SymbolReference(left, name, 6, right) },
+    infix(5, "<", "<=", ">", ">=") { _, _, name, left, right -> SymbolReference(left, name, 5, right) },
+    infix(4, "==", "!=") { _, _, name, left, right -> SymbolReference(left, name, 4, right) },
+    infix(3, "&&") { _, _, _, left, right -> SymbolReference(left, "&&", 3, right) },
+    infix(2, "||") { _, _, _, left, right -> SymbolReference(left, "||", 2, right) },
+    prefix(1, "!") { _, _, _, operand -> SymbolReference(operand, "!", 1) }
 ) {
     private fun parsePrimary(tokenizer: Scanner<TokenType>, context: ParsingContext): Evaluable =
         when (tokenizer.current.type) {
@@ -32,7 +35,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             TokenType.IDENTIFIER -> {
                 var name = tokenizer.consume().text
                 val children = parseParameterList(tokenizer, context)
-                Symbol(null, name, children)
+                SymbolReference(null, name, children)
             }
             TokenType.SYMBOL -> {
                 if (!tokenizer.tryConsume("(")) {
@@ -46,7 +49,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
                 throw tokenizer.exception("Unrecognized primary expression.")
     }
 
-    fun parseParameterList(scanner: Scanner<TokenType>, context: ParsingContext): List<Parameter> {
+    fun parseParameterList(scanner: Scanner<TokenType>, context: ParsingContext): List<ParameterReference> {
         val builder = ParameterListBuilder()
         if (scanner.tryConsume("(")) {
             if (scanner.current.text != ")") {
@@ -78,7 +81,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             if (expr == null) {
                 builder.add(property, body)
             } else {
-                builder.add(property, Symbol("pair", false, expr, body))
+                builder.add(property, SymbolReference("pair", expr, body))
             }
         }
 
@@ -89,15 +92,15 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
 
     fun parseLambdaArgumentsAndBody(scanner: Scanner<TokenType>, context: ParsingContext): Evaluable {
 
-        val parmeters = mutableListOf<DeclaredParameter>()
+        val parmeters = mutableListOf<ParameterDeclaration>()
         if (scanner.current.type == TokenType.IDENTIFIER) {
             do {
-                parmeters.add(DeclaredParameter(scanner.consume(TokenType.IDENTIFIER).text))
+                parmeters.add(ParameterDeclaration(scanner.consume(TokenType.IDENTIFIER).text))
             } while (scanner.tryConsume(","))
         }
 
         val parsedBody = context.parser.parseBody(context.depth)
-        return if (parmeters.isEmpty()) parsedBody else Lambda(parmeters.toList(), parsedBody)
+        return if (parmeters.isEmpty()) parsedBody else LambdaDeclaration(parmeters.toList(), parsedBody)
     }
 
 

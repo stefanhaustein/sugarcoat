@@ -1,12 +1,14 @@
-package org.kobjects.sugarcoat
+package org.kobjects.sugarcoat.datatype
 
+import org.kobjects.sugarcoat.ParameterReference
+import org.kobjects.sugarcoat.RuntimeContext
 import kotlin.math.pow
 
 class DoubleContext(val value: Double) : RuntimeContext {
 
     override fun evalSymbol(
         name: String,
-        children: List<Parameter>,
+        children: List<ParameterReference>,
         parameterContext: RuntimeContext
     ): RuntimeContext = when (name) {
         "+" -> DoubleContext(children.fold(value) { acc, current -> acc + current.value.evalDouble(parameterContext) })
