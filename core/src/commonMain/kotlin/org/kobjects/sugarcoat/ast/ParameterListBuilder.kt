@@ -4,9 +4,9 @@ package org.kobjects.sugarcoat.ast
 class ParameterListBuilder {
     val list = mutableListOf<ParameterReference>()
 
-    fun add(value: Node) = add("", value)
+    fun add(value: Expression) = add("", value)
 
-    fun add(name: String, value: Node) = add(ParameterReference(name, value))
+    fun add(name: String, value: Expression) = add(ParameterReference(name, value))
 
     fun add(parameter: ParameterReference) {
         if (parameter.name.isEmpty()) {

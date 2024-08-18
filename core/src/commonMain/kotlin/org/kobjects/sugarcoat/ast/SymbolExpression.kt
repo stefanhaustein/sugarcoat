@@ -3,14 +3,14 @@ package org.kobjects.sugarcoat.ast
 import org.kobjects.sugarcoat.runtime.RuntimeContext
 
 
-class SymbolNode(
-    val receiver: Node?,
+class SymbolExpression(
+    val receiver: Expression?,
     val name: String,
     val children: List<ParameterReference>,
     val precedence: Int = 0
-) : Node {
-    constructor(receiver: Node?, name: String, precedence: Int, vararg children: Node) : this(receiver, name, children.map { ParameterReference("", it) }, precedence)
-    constructor(name: String, vararg children: Node) : this(null, name, children.map { ParameterReference("", it) })
+) : Expression {
+    constructor(receiver: Expression?, name: String, precedence: Int, vararg children: Expression) : this(receiver, name, children.map { ParameterReference("", it) }, precedence)
+    constructor(name: String, vararg children: Expression) : this(null, name, children.map { ParameterReference("", it) })
     override fun eval(context: RuntimeContext): RuntimeContext = if (receiver == null) context.evalSymbol(name, children, context)
         else {
             val baseContext = receiver.eval(context)

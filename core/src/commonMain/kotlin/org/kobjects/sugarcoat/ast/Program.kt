@@ -3,7 +3,7 @@ package org.kobjects.sugarcoat.ast
 import org.kobjects.sugarcoat.runtime.ProgramContext
 
 class Program(
-    val functions: Map<String, LambdaDeclaration>
+    val functions: Map<String, FunctionDefinition>
 )  {
 
     override fun toString() =
@@ -17,7 +17,7 @@ class Program(
 
     fun run(vararg parameters: Any, printFn: (String) -> Unit = { print(it) }): Any {
 
-        return functions["main"]?.eval(parameters.map { ParameterReference("", LiteralNode(it)) }, ProgramContext(this, printFn)) ?: throw IllegalStateException("main function not found.")
+        return functions["main"]?.call(parameters.map { ParameterReference("", LiteralExpression(it)) }, ProgramContext(this, printFn)) ?: throw IllegalStateException("main function not found.")
 
     }
 }

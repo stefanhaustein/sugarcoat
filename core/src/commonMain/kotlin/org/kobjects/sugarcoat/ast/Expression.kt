@@ -5,7 +5,7 @@ import org.kobjects.sugarcoat.datatype.BooleanContext
 import org.kobjects.sugarcoat.datatype.DoubleContext
 import org.kobjects.sugarcoat.datatype.LongContext
 
-interface Node {
+interface Expression {
     fun eval(context: RuntimeContext): RuntimeContext
 
     fun evalDouble(context: RuntimeContext) = (eval(context) as DoubleContext).value
