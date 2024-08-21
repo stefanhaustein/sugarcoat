@@ -7,6 +7,7 @@ import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.ast.Program
 import org.kobjects.sugarcoat.ast.SymbolExpression
+import org.kobjects.sugarcoat.ast.VariableDeclaration
 
 class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
     val functions = mutableMapOf<String, FunctionDefinition>()
@@ -94,7 +95,10 @@ class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
     }
 
     fun parseVariableDeclaration(depth: Int): Expression {
-        throw UnsupportedOperationException("let")
+        val name = scanner.consume(TokenType.IDENTIFIER).text
+        scanner.consume("=")
+        val value = parseExpression(depth)
+        return VariableDeclaration(name, value)
     }
 
 
