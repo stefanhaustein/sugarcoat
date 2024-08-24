@@ -1,16 +1,18 @@
 package org.kobjects.sugarcoat.parser
 
 import org.kobjects.parsek.tokenizer.Scanner
+import org.kobjects.sugarcoat.ast.Callable
 import org.kobjects.sugarcoat.ast.FunctionDefinition
 import org.kobjects.sugarcoat.ast.ParameterDefinition
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.ast.Program
+import org.kobjects.sugarcoat.ast.StructDefinition
 import org.kobjects.sugarcoat.ast.SymbolExpression
 import org.kobjects.sugarcoat.ast.VariableDeclaration
 
 class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
-    val functions = mutableMapOf<String, FunctionDefinition>()
+    val functions = mutableMapOf<String, Callable>()
 
     internal fun parseExpression(depth: Int): Expression = ExpressionParser.parseExpression(scanner, ParsingContext(depth, this))
 
@@ -30,7 +32,8 @@ class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
                 scanner.consume()
             } else {
                 when (scanner.current.text) {
-                    "fn" -> parseFn()
+                    "fn" -> parseFn(0)
+                    "struct" -> parseStruct(0)
                     else -> throw scanner.exception("Unexpected token.")
                 }
             }
@@ -41,7 +44,7 @@ class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
         return Program(functions.toMap())
     }
 
-    fun parseFn() {
+    fun parseFn(parentDepth: Int) {
         scanner.consume("fn")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'def'." }.text
         scanner.consume("(") { "Opening brace expected after function name '$name'." }
@@ -53,9 +56,32 @@ class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
             scanner.consume(")") { "Closing brace or comma (')' or ',') expected after parameter" }
         }
         scanner.consume(":") { "Colon expected after function parameter list." }
-        val body = parseBody(0)
+        val body = parseBody(parentDepth)
         val fn = FunctionDefinition(parameters, body)
         functions[name] = fn
+    }
+
+    fun parseStruct(parentDepth: Int) {
+        scanner.consume("struct")
+        val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'def'." }.text
+        scanner.consume(":") { "Colon expected after function parameter list." }
+        val depth = currentIndent()
+        if (depth <= parentDepth) {
+            functions[name] = StructDefinition()
+            return
+        }
+        scanner.consume(TokenType.NEWLINE)
+        while (true) {
+            if (scanner.current.type != TokenType.NEWLINE) {
+                throw RuntimeException("NYI")
+            }
+            if (currentIndent() != depth) {
+                println("leaving b/c currentDepth = ${currentIndent()} != $depth")
+                break
+            }
+            scanner.consume(TokenType.NEWLINE)
+        }
+        functions[name] = StructDefinition()
     }
 
     fun parseBody(parentDepth: Int): Expression {

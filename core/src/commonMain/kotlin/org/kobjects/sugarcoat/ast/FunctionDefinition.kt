@@ -12,11 +12,15 @@ data class FunctionDefinition(
         children: List<ParameterReference>,
         parameterContext: RuntimeContext
     ): RuntimeContext {
+
+        val parameterConsumer = ParameterConsumer(children)
+        val resolvedParameters = List(parameters.size) {  }
+
+
         val localContext = LocalContext(parameterContext)
-        for (i in parameters.indices) {
-            localContext.symbols[parameters[i].name] =
-                if (parameters[i].resolve) children[i].value.eval(parameterContext)
-                else Closure(children[i].value, parameterContext)
+        for (p in parameters) {
+            localContext.symbols[p.name] = parameterConsumer.read(p, parameterContext)
+
         }
         return body.eval(localContext)
     }

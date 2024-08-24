@@ -3,7 +3,7 @@ package org.kobjects.sugarcoat.ast
 import org.kobjects.sugarcoat.runtime.ProgramContext
 
 class Program(
-    val functions: Map<String, FunctionDefinition>
+    val functions: Map<String, Callable>
 )  {
 
     override fun toString() =
