@@ -4,7 +4,9 @@ import org.kobjects.sugarcoat.runtime.LocalContext
 import org.kobjects.sugarcoat.runtime.RuntimeContext
 
 data class FunctionDefinition(
+    val receiverType: Type?,
     val parameters: List<ParameterDefinition>,
+    val returnType: Type,
     val body: Expression
 ) : RuntimeContext, Callable {
 

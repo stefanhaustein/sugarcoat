@@ -1,9 +1,9 @@
 package org.kobjects.sugarcoat.runtime
 
-import org.kobjects.sugarcoat.datatype.BooleanContext
-import org.kobjects.sugarcoat.datatype.DoubleContext
-import org.kobjects.sugarcoat.datatype.LongContext
-import org.kobjects.sugarcoat.datatype.StringContext
+import org.kobjects.sugarcoat.datatype.BoolType
+import org.kobjects.sugarcoat.datatype.F64Type
+import org.kobjects.sugarcoat.datatype.I64Type
+import org.kobjects.sugarcoat.datatype.StringType
 import org.kobjects.sugarcoat.ast.ParameterReference
 
 
@@ -14,10 +14,10 @@ interface RuntimeContext {
     companion object {
 
         fun of(value: Any) = when(value) {
-            is Double -> DoubleContext(value)
-            is Boolean -> BooleanContext(value)
-            is Long -> LongContext(value)
-            is String -> StringContext(value)
+            is Double -> F64Type.Instance(value)
+            is Boolean -> BoolType.Instance(value)
+            is Long -> I64Type.Instance(value)
+            is String -> StringType.Instance(value)
             else -> throw IllegalArgumentException("Unsupported type: ${value::class}")
         }
     }

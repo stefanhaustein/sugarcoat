@@ -1,6 +1,6 @@
 package org.kobjects.sugarcoat
 
-import org.kobjects.sugarcoat.datatype.DoubleContext
+import org.kobjects.sugarcoat.datatype.F64Type
 import org.kobjects.sugarcoat.parser.SugarcoatParser
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -9,7 +9,7 @@ import kotlin.test.assertTrue
 class SugarcoatTest {
 
     val SQR = """
-fn main(x):
+fn main(x: F64):
     x * x
 """
 
@@ -35,8 +35,8 @@ fn main():
     fun sqrTest() {
         val program = SugarcoatParser.parseProgram(SQR)
 
-        assertEquals("fn main(x):\n  x * x\n", program.toString())
-        assertEquals(DoubleContext(4.0), program.run(2.0))
+        assertEquals("fn main(x: F64):\n  x * x\n", program.toString())
+        assertEquals(F64Type.Instance(4.0), program.run(2.0))
     }
 
     @Test

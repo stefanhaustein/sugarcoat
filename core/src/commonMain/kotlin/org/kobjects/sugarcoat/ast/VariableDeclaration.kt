@@ -1,6 +1,6 @@
 package org.kobjects.sugarcoat.ast
 
-import org.kobjects.sugarcoat.datatype.VoidContext
+import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.runtime.LocalContext
 import org.kobjects.sugarcoat.runtime.RuntimeContext
 
@@ -16,7 +16,7 @@ class VariableDeclaration(
             "Local variable '$name' already declared in this context."
         }
         context.symbols["name"] = value.eval(context)
-        return VoidContext
+        return VoidType.Instance
     }
 
     override fun toString() = "$name = $value"

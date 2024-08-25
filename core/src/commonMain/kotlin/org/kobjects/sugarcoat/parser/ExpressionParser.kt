@@ -7,6 +7,7 @@ import org.kobjects.sugarcoat.ast.FunctionDefinition
 import org.kobjects.sugarcoat.ast.LambdaExpression
 import org.kobjects.sugarcoat.ast.ParameterDefinition
 import org.kobjects.sugarcoat.ast.Expression
+import org.kobjects.sugarcoat.ast.ImplicitType
 import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.ast.ParameterListBuilder
 import org.kobjects.sugarcoat.ast.ParameterReference
@@ -96,18 +97,17 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
     }
 
 
-
     fun parseLambdaArgumentsAndBody(scanner: Scanner<TokenType>, context: ParsingContext): Expression {
 
         val parmeters = mutableListOf<ParameterDefinition>()
         if (scanner.current.type == TokenType.IDENTIFIER) {
             do {
-                parmeters.add(ParameterDefinition(scanner.consume(TokenType.IDENTIFIER).text))
+                parmeters.add(ParameterDefinition(scanner.consume(TokenType.IDENTIFIER).text, ImplicitType()))
             } while (scanner.tryConsume(","))
         }
 
         val parsedBody = context.parser.parseBody(context.depth)
-        return if (parmeters.isEmpty()) parsedBody else LambdaExpression(FunctionDefinition(parmeters.toList(), parsedBody))
+        return if (parmeters.isEmpty()) parsedBody else LambdaExpression(FunctionDefinition(null, parmeters.toList(), ImplicitType(), parsedBody))
     }
 
 
@@ -116,6 +116,6 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
         val parsed = parseExpression(
             scanner, ParsingContext(0, SugarcoatParser(scanner))
         )
-        return parsed.eval(ProgramContext(Program(emptyMap())))
+        return parsed.eval(ProgramContext(Program()))
     }
 }

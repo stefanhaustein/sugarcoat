@@ -1,6 +1,6 @@
 package org.kobjects.sugarcoat.ast
 
-import org.kobjects.sugarcoat.datatype.ListContext
+import org.kobjects.sugarcoat.datatype.ListType
 import org.kobjects.sugarcoat.runtime.RuntimeContext
 
 class ParameterConsumer(
@@ -19,7 +19,7 @@ class ParameterConsumer(
                 }
                 result.add(p)
             }
-            return ListContext(result.toList())
+            return ListType.Instance(result.toList())
         }
         return readSingle(parameterDefinition, parameterContext) ?: throw IllegalStateException("Parameter $parameterDefinition not found in argument list $parameterReferences")
     }
@@ -40,7 +40,7 @@ class ParameterConsumer(
             }
         }
         return if (rawResult == null) null
-            else if (parameterDefinition.resolve) rawResult.eval(parameterContext)
+            else if (parameterDefinition.type is FunctionType) rawResult.eval(parameterContext)
             else Closure(rawResult, parameterContext)
     }
 }
