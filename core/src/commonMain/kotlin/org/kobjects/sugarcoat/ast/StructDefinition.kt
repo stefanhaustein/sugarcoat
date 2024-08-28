@@ -6,6 +6,7 @@ class StructDefinition(
 
 ): Callable, ResolvedType {
     override fun call(
+        receiver: RuntimeContext,
         children: List<ParameterReference>,
         parameterContext: RuntimeContext
     ): RuntimeContext {
@@ -18,4 +19,6 @@ class StructDefinition(
     fun addField(name: String, type: Type) {
         fields[name] = type
     }
+
+
 }

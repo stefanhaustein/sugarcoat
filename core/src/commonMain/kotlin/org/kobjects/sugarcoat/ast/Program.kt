@@ -16,8 +16,9 @@ class Program {
         }
 
     fun run(vararg parameters: Any, printFn: (String) -> Unit = { print(it) }): Any {
+        val programContext = ProgramContext(this, printFn)
 
-        return functions["main"]?.call(parameters.map { ParameterReference("", LiteralExpression(it)) }, ProgramContext(this, printFn)) ?: throw IllegalStateException("main function not found.")
+        return functions["main"]?.call(programContext, parameters.map { ParameterReference("", LiteralExpression(it)) }, programContext) ?: throw IllegalStateException("main function not found.")
 
     }
 

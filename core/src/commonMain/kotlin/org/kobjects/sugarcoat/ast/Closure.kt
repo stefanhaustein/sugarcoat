@@ -16,10 +16,11 @@ data class Closure(
     }
 
     override fun call(
+        receiver: RuntimeContext,
         children: List<ParameterReference>,
         parameterContext: RuntimeContext
     ): RuntimeContext = when (expression) {
-        is LambdaExpression -> expression.lambda.call(children, context)
+        is LambdaExpression -> expression.lambda.call(receiver, children, context)
         else -> expression.eval(context)
     }
 }

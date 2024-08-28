@@ -36,7 +36,7 @@ class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
             } else {
                 when (scanner.current.text) {
                     "fn" -> {
-                        val f = parseFn(0, null)
+                        val f = parseFn(0, VoidType)
                         program.addFunction(f.first, f.second)
                     }
                     "struct" -> {
@@ -53,7 +53,7 @@ class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
         return program
     }
 
-    fun parseFn(parentDepth: Int, receiverType: Type?): Pair<String, FunctionDefinition> {
+    fun parseFn(parentDepth: Int, receiverType: Type): Pair<String, FunctionDefinition> {
         scanner.consume("fn")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'fn'." }.text
         scanner.consume("(") { "Opening brace expected after function name '$name'." }

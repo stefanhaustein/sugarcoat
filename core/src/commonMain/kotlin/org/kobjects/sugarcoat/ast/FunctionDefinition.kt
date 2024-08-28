@@ -4,26 +4,26 @@ import org.kobjects.sugarcoat.runtime.LocalContext
 import org.kobjects.sugarcoat.runtime.RuntimeContext
 
 data class FunctionDefinition(
-    val receiverType: Type?,
+    val receiverType: Type,
     val parameters: List<ParameterDefinition>,
     val returnType: Type,
     val body: Expression
 ) : RuntimeContext, Callable {
 
     override fun call(
+        receiver: RuntimeContext,
         children: List<ParameterReference>,
         parameterContext: RuntimeContext
     ): RuntimeContext {
 
         val parameterConsumer = ParameterConsumer(children)
-        val resolvedParameters = List(parameters.size) {  }
 
-
-        val localContext = LocalContext(parameterContext)
+        val localContext = LocalContext(receiver)
         for (p in parameters) {
             localContext.symbols[p.name] = parameterConsumer.read(p, parameterContext)
-
         }
+        parameterConsumer.done()
+
         return body.eval(localContext)
     }
 

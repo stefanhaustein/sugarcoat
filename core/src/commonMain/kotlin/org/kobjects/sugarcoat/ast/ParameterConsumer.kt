@@ -43,4 +43,10 @@ class ParameterConsumer(
             else if (parameterDefinition.type is FunctionType) rawResult.eval(parameterContext)
             else Closure(rawResult, parameterContext)
     }
+
+    fun done() {
+        require(consumed.size == parameterReferences.size) {
+            "Not all ${parameterReferences.size} parameters consumed: $consumed"
+        }
+    }
 }

@@ -14,7 +14,7 @@ class ProgramContext(
 ) : RuntimeContext {
 
     override fun evalSymbol(name: String, children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext =
-        program.functions[name]?.call(children, parameterContext) ?: when (name) {
+        program.functions[name]?.call(this, children, parameterContext) ?: when (name) {
             "for" -> evalFor(children, parameterContext)
             "if" -> evalIf(children, parameterContext)
             "print" -> {
@@ -71,7 +71,7 @@ class ProgramContext(
     fun evalFor(children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext {
         val range = (children[0].value.eval(parameterContext) as I64RangeType.Instance).value
         for (value in range) {
-            (children[1].value as LambdaExpression).lambda.call(listOf(ParameterReference("", LiteralExpression(value))), parameterContext)
+            (children[1].value as LambdaExpression).lambda.call(this, listOf(ParameterReference("", LiteralExpression(value))), parameterContext)
         }
         return VoidType.Instance
     }

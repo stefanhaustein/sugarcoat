@@ -3,6 +3,7 @@ package org.kobjects.sugarcoat.runtime
 import org.kobjects.sugarcoat.ast.Callable
 import org.kobjects.sugarcoat.ast.FunctionDefinition
 import org.kobjects.sugarcoat.ast.ParameterReference
+import org.kobjects.sugarcoat.datatype.VoidType
 
 class LocalContext(
     val parentContext: RuntimeContext
@@ -12,7 +13,7 @@ class LocalContext(
     override fun evalSymbol(name: String, children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext =
         when (val resolved = symbols[name]) {
             null -> parentContext.evalSymbol(name, children, parameterContext)
-            is Callable -> resolved.call(children, parameterContext)
+            is Callable -> resolved.call(VoidType.Instance, children, parameterContext)
             else -> resolved
     }
 

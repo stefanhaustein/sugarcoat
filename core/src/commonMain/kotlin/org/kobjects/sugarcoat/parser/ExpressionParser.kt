@@ -13,6 +13,7 @@ import org.kobjects.sugarcoat.ast.ParameterListBuilder
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.ast.Program
 import org.kobjects.sugarcoat.ast.SymbolExpression
+import org.kobjects.sugarcoat.datatype.VoidType
 
 
 object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, ParsingContext, Expression>(
@@ -107,7 +108,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
         }
 
         val parsedBody = context.parser.parseBody(context.depth)
-        return if (parmeters.isEmpty()) parsedBody else LambdaExpression(FunctionDefinition(null, parmeters.toList(), ImplicitType(), parsedBody))
+        return if (parmeters.isEmpty()) parsedBody else LambdaExpression(FunctionDefinition(VoidType, parmeters.toList(), ImplicitType(), parsedBody))
     }
 
 
