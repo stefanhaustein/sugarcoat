@@ -1,7 +1,6 @@
 package org.kobjects.sugarcoat.parser
 
 import org.kobjects.parsek.tokenizer.Scanner
-import org.kobjects.sugarcoat.ast.Callable
 import org.kobjects.sugarcoat.ast.FunctionDefinition
 import org.kobjects.sugarcoat.ast.ParameterDefinition
 import org.kobjects.sugarcoat.ast.Expression
@@ -14,12 +13,12 @@ import org.kobjects.sugarcoat.ast.TypeReference
 import org.kobjects.sugarcoat.ast.VariableDeclaration
 import org.kobjects.sugarcoat.datatype.VoidType
 
-class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
-    val program = Program()
+object SugarcoatParser {
 
-    internal fun parseExpression(depth: Int): Expression = ExpressionParser.parseExpression(scanner, ParsingContext(depth, this))
+    internal fun parseExpression(scanner: Scanner<TokenType>, parsingContext: ParsingContext): Expression =
+        ExpressionParser.parseExpression(scanner, parsingContext)
 
-    internal fun currentIndent(): Int {
+    internal fun currentIndent(scanner: Scanner<TokenType>): Int {
         if (scanner.current.type == TokenType.EOF) {
             return 0
         }
@@ -28,19 +27,21 @@ class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
         return scanner.current.text.length - newlinePos - 1
     }
 
-    private fun parseProgram(): Program {
+    private fun parseProgram(scanner: Scanner<TokenType>): Program {
+        val program = Program()
+        val parsingContext = ParsingContext(program, 0)
         while (scanner.current.type != TokenType.EOF) {
             if (scanner.current.type == TokenType.NEWLINE) {
-                scanner.require(currentIndent() == 0) { "Unexpected indent: ${currentIndent()}." }
+                scanner.require(currentIndent(scanner) == 0) { "Unexpected indent: ${currentIndent(scanner)}." }
                 scanner.consume()
             } else {
                 when (scanner.current.text) {
                     "fn" -> {
-                        val f = parseFn(0, VoidType)
+                        val f = parseFn(scanner, parsingContext, VoidType)
                         program.addFunction(f.first, f.second)
                     }
                     "struct" -> {
-                        val s = parseStruct(0)
+                        val s = parseStruct(scanner,parsingContext)
                         program.addType(s.first, s.second)
                     }
                     else -> throw scanner.exception("Unexpected token.")
@@ -53,7 +54,7 @@ class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
         return program
     }
 
-    fun parseFn(parentDepth: Int, receiverType: Type): Pair<String, FunctionDefinition> {
+    fun parseFn(scanner: Scanner<TokenType>, parentContext: ParsingContext, receiverType: Type): Pair<String, FunctionDefinition> {
         scanner.consume("fn")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'fn'." }.text
         scanner.consume("(") { "Opening brace expected after function name '$name'." }
@@ -62,41 +63,42 @@ class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
             do {
                 val name = scanner.consume(TokenType.IDENTIFIER) { "Parameter name expected." }.text
                 scanner.consume(":") { "Colon separating parameter name and type expected." }
-                val type = parseType(parentDepth)
+                val type = parseType(scanner, parentContext)
                 parameters.add(ParameterDefinition(name, type))
             } while (scanner.tryConsume(","))
             scanner.consume(")") { "Closing brace or comma (')' or ',') expected after parameter" }
         }
-        val returnType = if (scanner.tryConsume("->")) parseType(parentDepth) else VoidType
+        val returnType = if (scanner.tryConsume("->")) parseType(scanner, parentContext) else VoidType
         scanner.consume(":") { "Colon expected after function parameter list." }
-        val body = parseBody(parentDepth)
+        val body = parseBody(scanner, parentContext)
         val fn = FunctionDefinition(receiverType, parameters, returnType, body)
         return name to fn
     }
 
-    fun parseStruct(parentDepth: Int): Pair<String, StructDefinition> {
+    fun parseStruct(scanner: Scanner<TokenType>, parentContext: ParsingContext): Pair<String, StructDefinition> {
         scanner.consume("struct")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'struct'." }.text
         scanner.consume(":") { "Colon expected after function parameter list." }
         val struct = StructDefinition()
-        val depth = currentIndent()
-        if (depth <= parentDepth) {
+        val depth = currentIndent(scanner)
+        if (depth <= parentContext.depth) {
             return name to struct
         }
+        val parsingContext = parentContext.copy(depth = depth)
         scanner.consume(TokenType.NEWLINE)
         while (true) {
             if (scanner.current.type != TokenType.NEWLINE) {
                 if (scanner.current.text == "fn") {
-                    parseFn(depth, struct)
+                    parseFn(scanner, parsingContext, struct)
                 } else {
                     val name = scanner.consume(TokenType.IDENTIFIER) { "Field name expected" }.text
                     scanner.consume(":") { "Colon separating field name and type expected." }
-                    val type = parseType(depth)
+                    val type = parseType(scanner, parsingContext)
                     struct.addField(name, type)
                 }
             }
-            if (currentIndent() != depth) {
-                println("leaving b/c currentDepth = ${currentIndent()} != $depth")
+            if (currentIndent(scanner) != depth) {
+                println("leaving b/c currentDepth = ${currentIndent(scanner)} != $depth")
                 break
             }
             scanner.consume(TokenType.NEWLINE)
@@ -104,23 +106,26 @@ class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
         return name to struct
     }
 
-    fun parseBody(parentDepth: Int): Expression {
-        val depth = currentIndent()
-        println("ParseBody; parentDepth: $parentDepth; depth: $depth")
-        if (depth <= parentDepth) {
+    fun parseBody(scanner: Scanner<TokenType>, parentContext: ParsingContext): Expression {
+        val depth = currentIndent(scanner)
+        println("ParseBody; parent: $parentContext; depth: $depth")
+        if (depth <= parentContext.depth) {
             return SymbolExpression("seq")
         }
         scanner.consume(TokenType.NEWLINE)
+
+        val parsingContext = parentContext.copy(depth = depth)
+
         val result = mutableListOf<ParameterReference>()
         while(true) {
             println("parsebody loop parsing at depth $depth")
             if (scanner.current.type != TokenType.NEWLINE) {
-                val statement = parseStatement(depth)
+                val statement = parseStatement(scanner, parsingContext)
                 println("parsed @$depth: $statement")
                 result.add(ParameterReference("", statement))
             }
-            if (currentIndent() != depth) {
-                println("leaving b/c currentDepth = ${currentIndent()} != $depth")
+            if (currentIndent(scanner) != depth) {
+                println("leaving b/c currentDepth = ${currentIndent(scanner)} != $depth")
                 break
             }
             scanner.consume(TokenType.NEWLINE)
@@ -128,11 +133,11 @@ class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
         return if (result.size == 1) result.first().value else SymbolExpression(null, "seq", result)
     }
 
-    fun parseStatement(depth: Int): Expression {
+    fun parseStatement(scanner: Scanner<TokenType>, parsingContext: ParsingContext): Expression {
         return if (scanner.tryConsume("let")) {
-            parseVariableDeclaration(depth)
+            parseVariableDeclaration(scanner, parsingContext)
         } else {
-            var result = parseExpression(depth)
+            var result = parseExpression(scanner, parsingContext)
             if (scanner.tryConsume("=")) {
                 throw RuntimeException("TBD")
             }
@@ -140,23 +145,20 @@ class SugarcoatParser internal constructor(val scanner: Scanner<TokenType>) {
         }
     }
 
-    fun parseType(depth: Int): Type {
+    fun parseType(scanner: Scanner<TokenType>, parsingContext: ParsingContext): Type {
         val name = (scanner.consume(TokenType.IDENTIFIER) { "Type name identifier expected." }).text
         return TypeReference(name)
     }
 
 
-    fun parseVariableDeclaration(depth: Int): Expression {
+    fun parseVariableDeclaration(scanner: Scanner<TokenType>, parsingContext: ParsingContext): Expression {
         val name = scanner.consume(TokenType.IDENTIFIER).text
         scanner.consume("=")
-        val value = parseExpression(depth)
+        val value = parseExpression(scanner, parsingContext)
         return VariableDeclaration(name, value)
     }
 
-
-    companion object {
-
         fun parseProgram(code: String) =
-            SugarcoatParser(Scanner(NewlineFilter(SugarcoatLexer(code)), TokenType.EOF)).parseProgram()
-    }
+            parseProgram(Scanner(NewlineFilter(SugarcoatLexer(code)), TokenType.EOF))
+
 }

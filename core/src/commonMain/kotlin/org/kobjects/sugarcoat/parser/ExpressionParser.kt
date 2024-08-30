@@ -13,7 +13,6 @@ import org.kobjects.sugarcoat.ast.ParameterListBuilder
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.ast.Program
 import org.kobjects.sugarcoat.ast.SymbolExpression
-import org.kobjects.sugarcoat.datatype.VoidType
 
 
 object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, ParsingContext, Expression>(
@@ -80,11 +79,11 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             builder.add(parseLambdaArgumentsAndBody(scanner, context))
         }
 
-        while (scanner.current.type == TokenType.NEWLINE && context.parser.currentIndent() == context.depth && scanner.lookAhead(1).text == "--") {
+        while (scanner.current.type == TokenType.NEWLINE && SugarcoatParser.currentIndent(scanner) == context.depth && scanner.lookAhead(1).text == "--") {
             scanner.consume(TokenType.NEWLINE)
             scanner.consume("--")
             val property = scanner.consume(TokenType.IDENTIFIER).text
-            val expr = if (scanner.current.text == "(") context.parser.parseExpression(context.depth) else null
+            val expr = if (scanner.current.text == "(") SugarcoatParser.parseExpression(scanner, context) else null
             scanner.consume(":") { "Colon expected" }
             val body = parseLambdaArgumentsAndBody(scanner, context)
             if (expr == null) {
@@ -107,15 +106,15 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             } while (scanner.tryConsume(","))
         }
 
-        val parsedBody = context.parser.parseBody(context.depth)
-        return if (parmeters.isEmpty()) parsedBody else LambdaExpression(FunctionDefinition(VoidType, parmeters.toList(), ImplicitType(), parsedBody))
+        val parsedBody = SugarcoatParser.parseBody(scanner, context)
+        return if (parmeters.isEmpty()) parsedBody else LambdaExpression(FunctionDefinition(context.program, parmeters.toList(), ImplicitType(), parsedBody))
     }
 
 
     fun eval(expression: String): Any {
         val scanner = Scanner(SugarcoatLexer(expression), TokenType.EOF)
         val parsed = parseExpression(
-            scanner, ParsingContext(0, SugarcoatParser(scanner))
+            scanner, ParsingContext(Program(), 0)
         )
         return parsed.eval(ProgramContext(Program()))
     }

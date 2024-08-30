@@ -4,7 +4,7 @@ import org.kobjects.sugarcoat.runtime.RuntimeContext
 
 class StructDefinition(
 
-): Callable, ResolvedType {
+): Callable, ResolvedType, Namespace {
     override fun call(
         receiver: RuntimeContext,
         children: List<ParameterReference>,

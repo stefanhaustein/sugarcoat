@@ -2,7 +2,7 @@ package org.kobjects.sugarcoat.ast
 
 import org.kobjects.sugarcoat.runtime.ProgramContext
 
-class Program {
+class Program : ResolvedType, Namespace {
     val functions = mutableMapOf<String, FunctionDefinition>()
     val types = mutableMapOf<String, Type>()
 
