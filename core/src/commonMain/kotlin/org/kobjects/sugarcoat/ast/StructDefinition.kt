@@ -2,9 +2,10 @@ package org.kobjects.sugarcoat.ast
 
 import org.kobjects.sugarcoat.runtime.RuntimeContext
 
-class StructDefinition(
+class StructDefinition: Callable, ResolvedType, Definition {
 
-): Callable, ResolvedType, Namespace {
+    val definitions = mutableMapOf<String, Definition>()
+
     override fun call(
         receiver: RuntimeContext,
         children: List<ParameterReference>,
@@ -13,11 +14,10 @@ class StructDefinition(
         TODO("Not yet implemented")
     }
 
-    val fields = mutableMapOf<String, Type>()
-    val methods = mutableMapOf<String, FunctionDefinition>()
 
-    fun addField(name: String, type: Type) {
-        fields[name] = type
+
+    override fun addDefinition(name: String, value: Definition) {
+        definitions[name] = value
     }
 
 

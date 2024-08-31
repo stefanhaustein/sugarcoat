@@ -1,5 +1,7 @@
 package org.kobjects.sugarcoat.runtime
 
+import org.kobjects.sugarcoat.ast.Callable
+import org.kobjects.sugarcoat.ast.FunctionDefinition
 import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.ast.Program
@@ -13,37 +15,60 @@ class ProgramContext(
     val printFn: (String) -> Unit = ::print
 ) : RuntimeContext {
 
-    override fun evalSymbol(name: String, children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext =
-        program.functions[name]?.call(this, children, parameterContext) ?: when (name) {
+    override fun evalSymbol(name: String, children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext {
+        val def = program.definitions[name]
+        return if (def is Callable) def.call(this, children, parameterContext)
+        else when (name) {
             "for" -> evalFor(children, parameterContext)
             "if" -> evalIf(children, parameterContext)
             "print" -> {
                 printFn(children.joinToString { it.value.eval(parameterContext).toString() })
                 VoidType.Instance
             }
+
             "range" -> when (children.size) {
-                1 -> I64RangeType.Instance(LongRange(0, children[0].value.evalLong(parameterContext) - 1))
-                2 -> I64RangeType.Instance(LongRange(
-                    children.first().value.evalLong(parameterContext),
-                    children.last().value.evalLong(parameterContext) - 1
-                ))
+                1 -> I64RangeType.Instance(
+                    LongRange(
+                        0,
+                        children[0].value.evalLong(parameterContext) - 1
+                    )
+                )
+
+                2 -> I64RangeType.Instance(
+                    LongRange(
+                        children.first().value.evalLong(parameterContext),
+                        children.last().value.evalLong(parameterContext) - 1
+                    )
+                )
+
                 else -> throw IllegalArgumentException("2 or 3 parameter expected for range, but got ${children.size}")
             }
 
-            "seq" -> children.fold<ParameterReference, RuntimeContext>(VoidType.Instance) { _, current -> current.value.eval(parameterContext) }
+            "seq" -> children.fold<ParameterReference, RuntimeContext>(VoidType.Instance) { _, current ->
+                current.value.eval(
+                    parameterContext
+                )
+            }
+
             "=" -> {
-                require(children.size == 2) { "Two parameters expected for assignment"}
+                require(children.size == 2) { "Two parameters expected for assignment" }
                 val target = (children.first() as LiteralExpression).value as String
-                (parameterContext as LocalContext).symbols[target] = children.last().value.eval(parameterContext)
+                (parameterContext as LocalContext).symbols[target] =
+                    children.last().value.eval(parameterContext)
                 VoidType.Instance
             }
+
             "while" -> {
-                require(children.size == 2) { "Two parameters expected for 'while'."}
-                while (children[0].value.evalBoolean(parameterContext)) children[1].value.eval(parameterContext)
+                require(children.size == 2) { "Two parameters expected for 'while'." }
+                while (children[0].value.evalBoolean(parameterContext)) children[1].value.eval(
+                    parameterContext
+                )
                 VoidType.Instance
             }
+
             else -> throw IllegalStateException("Unrecognized symbol: $name")
         }
+    }
 
     fun evalIf(children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext {
         if (children[0].value.evalBoolean(parameterContext)) {

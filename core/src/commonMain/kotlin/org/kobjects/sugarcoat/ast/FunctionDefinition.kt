@@ -8,7 +8,7 @@ data class FunctionDefinition(
     val parameters: List<ParameterDefinition>,
     val returnType: Type,
     val body: Expression
-) : RuntimeContext, Callable {
+) : RuntimeContext, Callable, Definition {
 
     override fun call(
         receiver: RuntimeContext,
@@ -33,6 +33,10 @@ data class FunctionDefinition(
         parameterContext: RuntimeContext
     ): RuntimeContext {
         throw UnsupportedOperationException("'$name' not supported for functions")
+    }
+
+    override fun addDefinition(name: String, value: Definition) {
+        throw IllegalArgumentException("Adding $value to functions is not supported.")
     }
 
     override fun toString() =

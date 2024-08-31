@@ -4,6 +4,7 @@ import org.kobjects.parsek.tokenizer.Scanner
 import org.kobjects.sugarcoat.ast.FunctionDefinition
 import org.kobjects.sugarcoat.ast.ParameterDefinition
 import org.kobjects.sugarcoat.ast.Expression
+import org.kobjects.sugarcoat.ast.FieldDefinition
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.ast.Program
 import org.kobjects.sugarcoat.ast.StructDefinition
@@ -38,17 +39,17 @@ object SugarcoatParser {
                 when (scanner.current.text) {
                     "fn" -> {
                         val f = parseFn(scanner, parsingContext, VoidType)
-                        program.addFunction(f.first, f.second)
+                        program.addDefinition(f.first, f.second)
                     }
                     "struct" -> {
                         val s = parseStruct(scanner,parsingContext)
-                        program.addType(s.first, s.second)
+                        program.addDefinition(s.first, s.second)
                     }
                     else -> throw scanner.exception("Unexpected token.")
                 }
             }
         }
-        require(program.functions.containsKey("main")) {
+        require(program.definitions["main"] is FunctionDefinition) {
             "main() function not found."
         }
         return program
@@ -94,7 +95,7 @@ object SugarcoatParser {
                     val name = scanner.consume(TokenType.IDENTIFIER) { "Field name expected" }.text
                     scanner.consume(":") { "Colon separating field name and type expected." }
                     val type = parseType(scanner, parsingContext)
-                    struct.addField(name, type)
+                    struct.addDefinition(name, FieldDefinition(type))
                 }
             }
             if (currentIndent(scanner) != depth) {
