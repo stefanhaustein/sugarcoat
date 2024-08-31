@@ -27,12 +27,13 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
     infix(2, "||") { _, _, _, left, right -> SymbolExpression(left, "||", 2, right) },
     prefix(1, "!") { _, _, _, operand -> SymbolExpression(operand, "!", 1) }
 ) {
-    private fun parsePrimary(tokenizer: Scanner<TokenType>, context: ParsingContext): Expression =
-        when (tokenizer.current.type) {
+    private fun parsePrimary(tokenizer: Scanner<TokenType>, context: ParsingContext): Expression {
+        var expr = when (tokenizer.current.type) {
             TokenType.NUMBER -> {
                 val text = tokenizer.consume().text
                 LiteralExpression(if (text.contains(".") || text.contains("e") || text.contains("E")) text.toDouble() else text.toLong())
             }
+
             TokenType.STRING -> {
                 val text = tokenizer.consume().text
                 LiteralExpression(
@@ -40,11 +41,13 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
                         .replace("\\n", "\n")
                 )
             }
+
             TokenType.IDENTIFIER -> {
                 var name = tokenizer.consume().text
                 val children = parseParameterList(tokenizer, context)
                 SymbolExpression(null, name, children)
             }
+
             TokenType.SYMBOL -> {
                 if (!tokenizer.tryConsume("(")) {
                     throw tokenizer.exception("Unrecognized primary expression.")
@@ -53,8 +56,16 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
                 tokenizer.consume(")")
                 expr
             }
+
             else ->
                 throw tokenizer.exception("Unrecognized primary expression.")
+        }
+        while (tokenizer.current.type == TokenType.PROPERTY) {
+            val name = tokenizer.consume().text.substring(1)
+            val parameterList = parseParameterList(tokenizer, context)
+            expr = SymbolExpression(expr, name, parameterList)
+        }
+        return expr
     }
 
     fun parseParameterList(scanner: Scanner<TokenType>, context: ParsingContext): List<ParameterReference> {
