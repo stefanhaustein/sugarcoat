@@ -20,7 +20,7 @@ data class FunctionDefinition(
 
         val localContext = LocalContext(receiver)
         for (p in parameters) {
-            localContext.symbols[p.name] = parameterConsumer.read(p, parameterContext)
+            localContext.symbols[p.name] = parameterConsumer.read(parameterContext, p)
         }
         parameterConsumer.done()
 

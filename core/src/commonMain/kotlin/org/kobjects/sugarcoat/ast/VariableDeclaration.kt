@@ -15,7 +15,7 @@ class VariableDeclaration(
         require (!context.symbols.containsKey(name)) {
             "Local variable '$name' already declared in this context."
         }
-        context.symbols["name"] = value.eval(context)
+        context.symbols[name] = value.eval(context)
         return VoidType.Instance
     }
 

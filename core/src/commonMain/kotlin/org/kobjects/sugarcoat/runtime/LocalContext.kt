@@ -12,7 +12,10 @@ class LocalContext(
 
     override fun evalSymbol(name: String, children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext =
         when (val resolved = symbols[name]) {
-            null -> parentContext.evalSymbol(name, children, parameterContext)
+            null -> {
+                println("$name not found in $symbols")
+                parentContext.evalSymbol(name, children, parameterContext)
+            }
             is Callable -> resolved.call(VoidType.Instance, children, parameterContext)
             else -> resolved
     }

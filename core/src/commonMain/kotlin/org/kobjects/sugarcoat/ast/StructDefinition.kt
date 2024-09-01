@@ -1,6 +1,7 @@
 package org.kobjects.sugarcoat.ast
 
 import org.kobjects.sugarcoat.runtime.RuntimeContext
+import org.kobjects.sugarcoat.runtime.StructInstance
 
 class StructDefinition: Callable, ResolvedType, Definition {
 
@@ -11,7 +12,18 @@ class StructDefinition: Callable, ResolvedType, Definition {
         children: List<ParameterReference>,
         parameterContext: RuntimeContext
     ): RuntimeContext {
-        TODO("Not yet implemented")
+        val parameterConsumer = ParameterConsumer(children)
+        val instance = StructInstance(this)
+
+        for ((name, definition) in definitions) {
+            if (definition is FieldDefinition) {
+                instance.fields[name] = parameterConsumer.read(parameterContext, name, definition.type)
+            }
+        }
+
+        println("struct instance created: $instance")
+
+        return instance
     }
 
 
