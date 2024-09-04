@@ -15,17 +15,17 @@ fn main(x: F64):
 
     val FIZZBUZZ = """
 fn main():
-   for (range(1, 20)): x
-     if (x % 3 == 0): 
+   for (range(1, 20)) :: x: I64 -> Unit
+     if (x % 3 == 0) 
        print("Fizz")
        
-       if (x % 5 == 0):
+       if (x % 5 == 0)
          print("Buzz")
      
-     --elif (x % 5 == 0):
+     --elif (x % 5 == 0)
        print("Buzz")
      
-     --else:
+     --else
        print(x)
      
      print("\n")    

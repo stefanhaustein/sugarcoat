@@ -11,12 +11,14 @@ class ComplexTest {
 
     val CODE = """
 
-struct Complex:
+struct Complex
   a: F64
   b: F64
   
+  fn abs() -> F64
+    sqrt(self.a*self.a + self.b*self.b)
         
-fn main():
+fn main()
   let c = Complex(1.0, 2.0)     
   print(c.b)    
 """
