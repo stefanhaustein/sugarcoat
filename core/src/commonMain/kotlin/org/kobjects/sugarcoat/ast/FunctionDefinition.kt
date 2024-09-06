@@ -40,5 +40,5 @@ data class FunctionDefinition(
     }
 
     override fun toString() =
-        "(${parameters.joinToString (", ")}):\n  $body"
+        "(${parameters.joinToString (", ")})\n  $body"
 }

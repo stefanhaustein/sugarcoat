@@ -15,12 +15,12 @@ struct Complex
   a: F64
   b: F64
   
-  fn abs() -> F64
-    sqrt(self.a*self.a + self.b*self.b)
+  fn abs() 
+    sqrt(a*a + b*b)
         
-fn main()
+fn main() 
   let c = Complex(1.0, 2.0)     
-  print(c.b)    
+  print(c.abs)    
 """
 
     @Test
@@ -32,7 +32,7 @@ fn main()
             result.append(it)
         }
 
-        assertEquals("2.0", result.toString())
+        assertEquals("2.23606797749979", result.toString())
     }
 
 }

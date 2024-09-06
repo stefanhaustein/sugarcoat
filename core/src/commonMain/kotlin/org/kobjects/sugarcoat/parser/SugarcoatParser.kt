@@ -70,7 +70,6 @@ object SugarcoatParser {
             scanner.consume(")") { "Closing brace or comma (')' or ',') expected after parameter" }
         }
         val returnType = if (scanner.tryConsume("->")) parseType(scanner, parentContext) else VoidType
-        scanner.consume(":") { "Colon expected after function parameter list." }
         val body = parseBody(scanner, parentContext)
         val fn = FunctionDefinition(receiverType, parameters, returnType, body)
         return name to fn
@@ -79,7 +78,7 @@ object SugarcoatParser {
     fun parseStruct(scanner: Scanner<TokenType>, parentContext: ParsingContext): Pair<String, StructDefinition> {
         scanner.consume("struct")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'struct'." }.text
-        scanner.consume(":") { "Colon expected after function parameter list." }
+        // scanner.consume(":") { "Colon expected after function parameter list." }
         val struct = StructDefinition()
         val depth = currentIndent(scanner)
         if (depth <= parentContext.depth) {
@@ -90,7 +89,8 @@ object SugarcoatParser {
         while (true) {
             if (scanner.current.type != TokenType.NEWLINE) {
                 if (scanner.current.text == "fn") {
-                    parseFn(scanner, parsingContext, struct)
+                    val fn = parseFn(scanner, parsingContext, struct)
+                    struct.addDefinition(fn.first, fn.second)
                 } else {
                     val name = scanner.consume(TokenType.IDENTIFIER) { "Field name expected" }.text
                     scanner.consume(":") { "Colon separating field name and type expected." }

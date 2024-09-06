@@ -8,7 +8,9 @@ import org.kobjects.sugarcoat.ast.Program
 import org.kobjects.sugarcoat.ast.SymbolExpression
 import org.kobjects.sugarcoat.datatype.I64RangeType
 import org.kobjects.sugarcoat.ast.LambdaExpression
+import org.kobjects.sugarcoat.datatype.F64Type
 import org.kobjects.sugarcoat.datatype.VoidType
+import kotlin.math.sqrt
 
 class ProgramContext(
     val program: Program,
@@ -25,6 +27,7 @@ class ProgramContext(
                 printFn(children.joinToString { it.value.eval(parameterContext).toString() })
                 VoidType.Instance
             }
+            "sqrt" -> F64Type.Instance(sqrt(children[0].value.evalDouble(parameterContext)))
 
             "range" -> when (children.size) {
                 1 -> I64RangeType.Instance(

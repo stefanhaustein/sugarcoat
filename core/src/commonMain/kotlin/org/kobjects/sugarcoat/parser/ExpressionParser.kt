@@ -86,25 +86,44 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             scanner.consume(")")
         }
 
-        if (scanner.tryConsume(":")) {
-            builder.add(parseLambdaArgumentsAndBody(scanner, context))
+        val optionalLambda = parseOptionalLambda(scanner, context)
+        if (optionalLambda != null) {
+            builder.add(optionalLambda)
         }
+
 
         while (scanner.current.type == TokenType.NEWLINE && SugarcoatParser.currentIndent(scanner) == context.depth && scanner.lookAhead(1).text == "--") {
             scanner.consume(TokenType.NEWLINE)
             scanner.consume("--")
             val property = scanner.consume(TokenType.IDENTIFIER).text
             val expr = if (scanner.current.text == "(") SugarcoatParser.parseExpression(scanner, context) else null
-            scanner.consume(":") { "Colon expected" }
-            val body = parseLambdaArgumentsAndBody(scanner, context)
-            if (expr == null) {
-                builder.add(property, body)
+            val optionalLambda = parseOptionalLambda(scanner, context)
+            if (expr != null) {
+                if (optionalLambda != null) {
+                    builder.add(property, SymbolExpression("pair", expr, optionalLambda))
+                } else {
+                    builder.add(property, expr)
+                }
+            } else if (optionalLambda != null) {
+                builder.add(property, optionalLambda)
             } else {
-                builder.add(property, SymbolExpression("pair", expr, body))
+                throw scanner.exception("Parameter expression expected")
             }
         }
 
         return builder.build()
+    }
+
+    fun parseOptionalLambda(scanner: Scanner<TokenType>, context: ParsingContext): Expression? {
+        if (scanner.tryConsume("::")) {
+            return parseLambdaArgumentsAndBody(scanner, context)
+        }
+
+        if (scanner.current.type == TokenType.NEWLINE && SugarcoatParser.currentIndent(scanner) > context.depth) {
+            return SugarcoatParser.parseBody(scanner, context)
+        }
+
+        return null
     }
 
 

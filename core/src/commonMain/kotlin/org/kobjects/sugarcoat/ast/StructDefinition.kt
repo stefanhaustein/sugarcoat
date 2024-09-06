@@ -13,7 +13,7 @@ class StructDefinition: Callable, ResolvedType, Definition {
         parameterContext: RuntimeContext
     ): RuntimeContext {
         val parameterConsumer = ParameterConsumer(children)
-        val instance = StructInstance(this)
+        val instance = StructInstance(receiver, this)
 
         for ((name, definition) in definitions) {
             if (definition is FieldDefinition) {

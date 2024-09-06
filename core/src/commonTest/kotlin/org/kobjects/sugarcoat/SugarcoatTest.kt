@@ -9,13 +9,13 @@ import kotlin.test.assertTrue
 class SugarcoatTest {
 
     val SQR = """
-fn main(x: F64):
+fn main(x: F64)
     x * x
 """
 
     val FIZZBUZZ = """
-fn main():
-   for (range(1, 20)) :: x: I64 -> Unit
+fn main()
+   for (range(1, 20)) :: x
      if (x % 3 == 0) 
        print("Fizz")
        
@@ -35,7 +35,7 @@ fn main():
     fun sqrTest() {
         val program = SugarcoatParser.parseProgram(SQR)
 
-        assertEquals("fn main(x: F64):\n  x * x\n", program.toString())
+        assertEquals("fn main(x: F64)\n  x * x\n", program.toString())
         assertEquals(F64Type.Instance(4.0), program.run(2.0))
     }
 
