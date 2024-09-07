@@ -120,7 +120,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
         }
 
         if (scanner.current.type == TokenType.NEWLINE && SugarcoatParser.currentIndent(scanner) > context.depth) {
-            return SugarcoatParser.parseBody(scanner, context)
+            return SugarcoatParser.parseBlock(scanner, context)
         }
 
         return null
@@ -136,7 +136,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             } while (scanner.tryConsume(","))
         }
 
-        val parsedBody = SugarcoatParser.parseBody(scanner, context)
+        val parsedBody = SugarcoatParser.parseBlock(scanner, context)
         return if (parmeters.isEmpty()) parsedBody else LambdaExpression(FunctionDefinition(context.program, parmeters.toList(), ImplicitType(), parsedBody))
     }
 
@@ -144,7 +144,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
     fun eval(expression: String): Any {
         val scanner = Scanner(SugarcoatLexer(expression), TokenType.EOF)
         val parsed = parseExpression(
-            scanner, ParsingContext(Program(), 0)
+            scanner, ParsingContext(Program())
         )
         return parsed.eval(ProgramContext(Program()))
     }

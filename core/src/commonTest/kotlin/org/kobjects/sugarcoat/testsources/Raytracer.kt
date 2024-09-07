@@ -1,8 +1,5 @@
 package org.kobjects.sugarcoat.testsources
 val RAYTRACER_SOURCE = """
-
-import graphics.Color
-
 struct Vector
   x: F64
   y: F64
@@ -42,61 +39,61 @@ struct Camera
     let up = forward.cross(right).norm().times(1.5)
     Camera(pos, forward, right, up)
 
-  struct Ray
-    start: Vector
-    dir: Vector
+struct Ray
+  start: Vector
+  dir: Vector
 
-  struct Intersection
-    thing: Thing
-    ray: Ray
-    dist: F64
+struct Intersection
+  thing: Thing
+  ray: Ray
+  dist: F64
 
-  trait Surface
-    fn roughness() -> F64
-    fn diffuse(pos: Vector) -> Color
-    fn specular(pos: Vector) -> Color
-    fn reflect(pos: Vector) -> F64
+trait Surface
+  fn roughness() -> F64
+  fn diffuse(pos: Vector) -> Color
+  fn specular(pos: Vector) -> Color
+  fn reflect(pos: Vector) -> F64
 
-  trait Thing
-    fn surface() -> Surface
-    fn normal(pos: Vector) -> Vector
-    fn intersect(ray: Ray) -> Intersection
+trait Thing
+  fn surface() -> Surface
+  fn normal(pos: Vector) -> Vector
+  fn intersect(ray: Ray) -> Intersection
 
-  struct Light
+struct Light
     pos: Vector
     color: Color
 
-  struct Scene
+struct Scene
     things: List<Thing>
     lights: List<Light>
     camera: Camera
     background: Color
 
-  struct Sphere
-    center: Vector
-    radius2: F64
-    surface: Surface
+struct Sphere
+  center: Vector
+  radius2: F64
+  surface: Surface
 
   static fn create(center: Vector, radius: F64, surface: Surface) -> Sphere
     Sphere(center, radius * radius, surface)
 
-  impl Thing for Sphere
-    fn surface() -> Surface
-      surface
+impl Thing for Sphere
+  fn surface() -> Surface
+    surface
 
-    fn normal(pos: Vector) -> Vector
-      pos.minus(center).norm()
+  fn normal(pos: Vector) -> Vector
+    pos.minus(center).norm()
 
-    fn intersect(r: Ray) -> Intersection
-      let eo = center.minus(r.start)
-      let v = eo.dot(r.dir)
-      let mut dist = 1/0
-      if (v >= 0)
-        let disc = radius2 - (eo.dot(eo) - v * v)
-        if (disc >= 0)
-          dist = v - sqrt(disc)
+  fn intersect(r: Ray) -> Intersection
+    let eo = center.minus(r.start)
+    let v = eo.dot(r.dir)
+    let mut dist = 1/0
+    if (v >= 0)
+      let disc = radius2 - (eo.dot(eo) - v * v)
+      if (disc >= 0)
+        dist = v - sqrt(disc)
 
-      Intersection(self, r, dist)
+    Intersection(self, r, dist)
 
 struct Plane
   norm: Vector

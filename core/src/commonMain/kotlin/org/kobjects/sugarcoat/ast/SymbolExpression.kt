@@ -32,7 +32,9 @@ class SymbolExpression(
                             stringBuilder.append("'$name'")
                         } else {
                             stringBuilder.append(name)
-                            children.first().value.stringify(stringBuilder, precedence)
+                            if (children.isNotEmpty()) {
+                                children.first().value.stringify(stringBuilder, precedence)
+                            }
                         }
                     }
                     else -> {

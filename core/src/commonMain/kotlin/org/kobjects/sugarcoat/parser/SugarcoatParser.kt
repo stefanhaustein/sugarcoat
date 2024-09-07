@@ -1,14 +1,17 @@
 package org.kobjects.sugarcoat.parser
 
 import org.kobjects.parsek.tokenizer.Scanner
+import org.kobjects.sugarcoat.ast.Definition
 import org.kobjects.sugarcoat.ast.FunctionDefinition
 import org.kobjects.sugarcoat.ast.ParameterDefinition
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.FieldDefinition
+import org.kobjects.sugarcoat.ast.ImplDefinition
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.ast.Program
 import org.kobjects.sugarcoat.ast.StructDefinition
 import org.kobjects.sugarcoat.ast.SymbolExpression
+import org.kobjects.sugarcoat.ast.TraitDefinition
 import org.kobjects.sugarcoat.ast.Type
 import org.kobjects.sugarcoat.ast.TypeReference
 import org.kobjects.sugarcoat.ast.VariableDeclaration
@@ -30,21 +33,17 @@ object SugarcoatParser {
 
     private fun parseProgram(scanner: Scanner<TokenType>): Program {
         val program = Program()
-        val parsingContext = ParsingContext(program, 0)
+        val parsingContext = ParsingContext(program)
         while (scanner.current.type != TokenType.EOF) {
             if (scanner.current.type == TokenType.NEWLINE) {
                 scanner.require(currentIndent(scanner) == 0) { "Unexpected indent: ${currentIndent(scanner)}." }
                 scanner.consume()
             } else {
                 when (scanner.current.text) {
-                    "fn" -> {
-                        val f = parseFn(scanner, parsingContext, VoidType)
-                        program.addDefinition(f.first, f.second)
-                    }
-                    "struct" -> {
-                        val s = parseStruct(scanner,parsingContext)
-                        program.addDefinition(s.first, s.second)
-                    }
+                    "fn" -> parseFn(scanner, parsingContext, VoidType)
+                    "impl" -> parseImpl(scanner, parsingContext)
+                    "struct" -> parseStruct(scanner, parsingContext)
+                    "trait" -> parseTrait(scanner, parsingContext)
                     else -> throw scanner.exception("Unexpected token.")
                 }
             }
@@ -55,7 +54,7 @@ object SugarcoatParser {
         return program
     }
 
-    fun parseFn(scanner: Scanner<TokenType>, parentContext: ParsingContext, receiverType: Type): Pair<String, FunctionDefinition> {
+    fun parseFn(scanner: Scanner<TokenType>, parentContext: ParsingContext, receiverType: Type) {
         scanner.consume("fn")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'fn'." }.text
         scanner.consume("(") { "Opening brace expected after function name '$name'." }
@@ -70,32 +69,63 @@ object SugarcoatParser {
             scanner.consume(")") { "Closing brace or comma (')' or ',') expected after parameter" }
         }
         val returnType = if (scanner.tryConsume("->")) parseType(scanner, parentContext) else VoidType
-        val body = parseBody(scanner, parentContext)
+        val body = parseBlock(scanner, parentContext)
         val fn = FunctionDefinition(receiverType, parameters, returnType, body)
-        return name to fn
+        parentContext.definition.addDefinition(name, fn)
     }
 
-    fun parseStruct(scanner: Scanner<TokenType>, parentContext: ParsingContext): Pair<String, StructDefinition> {
+
+    fun parseImpl(scanner: Scanner<TokenType>, parentContext: ParsingContext) {
+        scanner.consume("impl")
+        val trait = parseType(scanner, parentContext)
+        scanner.consume("for")
+        val struct = parseType(scanner, parentContext)
+
+        val impl = ImplDefinition(trait, struct)
+
+        parseStructLike(scanner, parentContext, impl)
+        parentContext.definition.addDefinition("$trait for $struct", impl)
+    }
+
+
+    fun parseStruct(scanner: Scanner<TokenType>, parentContext: ParsingContext) {
         scanner.consume("struct")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'struct'." }.text
-        // scanner.consume(":") { "Colon expected after function parameter list." }
         val struct = StructDefinition()
+        parseStructLike(scanner, parentContext, struct)
+        parentContext.definition.addDefinition(name, struct)
+    }
+
+    fun parseTrait(scanner: Scanner<TokenType>, parentContext: ParsingContext) {
+        scanner.consume("trait")
+        val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'trait'." }.text
+        val trait = TraitDefinition()
+        parseStructLike(scanner, parentContext, trait)
+        parentContext.definition.addDefinition(name, trait)
+    }
+
+    fun parseStructLike(
+        scanner: Scanner<TokenType>,
+        parentContext: ParsingContext,
+        definition: Definition
+    ) {
         val depth = currentIndent(scanner)
         if (depth <= parentContext.depth) {
-            return name to struct
+            return
         }
-        val parsingContext = parentContext.copy(depth = depth)
+        val parsingContext = parentContext.copy(depth = depth, definition = definition)
         scanner.consume(TokenType.NEWLINE)
         while (true) {
             if (scanner.current.type != TokenType.NEWLINE) {
+                val isStatic =  scanner.tryConsume("static")
+
                 if (scanner.current.text == "fn") {
-                    val fn = parseFn(scanner, parsingContext, struct)
-                    struct.addDefinition(fn.first, fn.second)
+                    parseFn(scanner, parsingContext, definition as Type)
                 } else {
                     val name = scanner.consume(TokenType.IDENTIFIER) { "Field name expected" }.text
                     scanner.consume(":") { "Colon separating field name and type expected." }
                     val type = parseType(scanner, parsingContext)
-                    struct.addDefinition(name, FieldDefinition(type))
+                    definition.addDefinition(name, FieldDefinition(type))
                 }
             }
             if (currentIndent(scanner) != depth) {
@@ -104,10 +134,10 @@ object SugarcoatParser {
             }
             scanner.consume(TokenType.NEWLINE)
         }
-        return name to struct
     }
 
-    fun parseBody(scanner: Scanner<TokenType>, parentContext: ParsingContext): Expression {
+
+    fun parseBlock(scanner: Scanner<TokenType>, parentContext: ParsingContext): Expression {
         val depth = currentIndent(scanner)
         println("ParseBody; parent: $parentContext; depth: $depth")
         if (depth <= parentContext.depth) {

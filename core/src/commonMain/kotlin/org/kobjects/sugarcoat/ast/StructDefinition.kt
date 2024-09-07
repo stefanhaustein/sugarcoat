@@ -7,6 +7,10 @@ class StructDefinition: Callable, ResolvedType, Definition {
 
     val definitions = mutableMapOf<String, Definition>()
 
+    override fun addDefinition(name: String, value: Definition) {
+        definitions[name] = value
+    }
+
     override fun call(
         receiver: RuntimeContext,
         children: List<ParameterReference>,
@@ -27,10 +31,6 @@ class StructDefinition: Callable, ResolvedType, Definition {
     }
 
 
-
-    override fun addDefinition(name: String, value: Definition) {
-        definitions[name] = value
-    }
 
 
 }
