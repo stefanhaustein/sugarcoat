@@ -96,7 +96,8 @@ object SugarcoatParser {
     fun parseStruct(scanner: Scanner<TokenType>, parentContext: ParsingContext) {
         scanner.consume("struct")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'struct'." }.text
-        val struct = StructDefinition(parentContext.definition)
+        val constructorName = if (scanner.tryConsume("constructor")) scanner.consume(TokenType.IDENTIFIER).text else "create"
+        val struct = StructDefinition(parentContext.definition, constructorName)
         parseClassifier(scanner, parentContext, struct)
         parentContext.definition.addDefinition(name, struct)
     }

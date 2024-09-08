@@ -6,13 +6,13 @@ struct Vector
   z: F64
 
   fn times(k: F64) -> Vector
-    Vector(k * x, k * y, k * z)
+    Vector.create(k * x, k * y, k * z)
 
   fn minus(v2: Vector) -> Vector
-    Vector(x - v2.x, y - v2.y, z - v2.z)
+    Vector.create(x - v2.x, y - v2.y, z - v2.z)
 
   fn plus(v2: Vector) -> Vector
-    Vector(x + v2.x, y + v2.y, z + v2.z)
+    Vector.create(x + v2.x, y + v2.y, z + v2.z)
 
   fn dot(v2: Vector) -> F64
     x * v2.x + y * v2.y + z * v2.z
@@ -24,7 +24,7 @@ struct Vector
     times(1.0 / mag())
 
   fn cross(v2: Vector) -> Vector
-    Vector(y * v2.z - z * v2.y, z * v2.x - x * v2.z, x * v2.y - y * v2.x)
+    Vector.create(y * v2.z - z * v2.y, z * v2.x - x * v2.z, x * v2.y - y * v2.x)
 
 struct Camera
   pos: Vector
@@ -37,7 +37,7 @@ struct Camera
     let forward = lookAt.minus(pos).norm()
     let right = forward.cross(down).norm().times(1.5)
     let up = forward.cross(right).norm().times(1.5)
-    Camera(pos, forward, right, up)
+    Camera.create(pos, forward, right, up)
 
 struct Ray
   start: Vector
@@ -69,13 +69,13 @@ struct Scene
     camera: Camera
     background: Color
 
-struct Sphere
+struct Sphere constructor createImpl
   center: Vector
   radius2: F64
   surface: Surface
 
   static fn create(center: Vector, radius: F64, surface: Surface) -> Sphere
-    Sphere(center, radius * radius, surface)
+    createImpl(center, radius * radius, surface)
 
 impl Thing for Sphere
   fn surface() -> Surface
@@ -93,7 +93,7 @@ impl Thing for Sphere
       if (disc >= 0)
         dist = v - sqrt(disc)
 
-    Intersection(self, r, dist)
+    Intersection.create(self, r, dist)
 
 struct Plane
   norm: Vector
@@ -113,7 +113,7 @@ impl Thing for Plane
     if (denom <= 0)
       dist = (norm.dot(r.start) + offset) / -denom
 
-    Intersection(self, r, dist)
+    Intersection.create(self, r, dist)
 
 
 object Shiny
@@ -237,9 +237,9 @@ struct RayTracer
       let color = traceRay(Ray(s.camera.pos, getPoint((x - cx) * scale, (cy - y) * scale, s.camera)), s, 0)
       b.set(x, y, color)
 
-  defaultThings: List<Thing> = [Plane(Vector(0,1,0), 0, Checkerboard), Sphere(Vector(0,1,-0.25), 1, Shiny), Sphere(Vector(-1,0.5,1.5),0.5, Shiny)]
-  defaultLights = [Light(Vector(-2,2.5,0), Color(0.49,0.07,0.07)), Light(Vector(1.5,2.5,1.5), Color(0.07,0.07,0.49)), Light(Vector(1.5,2.5,-1.5), Color(0.07,0.49,0.071)), Light(Vector(0,3.5,0), Color(0.21,0.21,0.35))]
-  defaultCamera = Camera.lookingAt(Vector(3,2,4), Vector(-1,0.5,0))
+  defaultThings: List<Thing> = [Plane.create(Vector.create(0,1,0), 0, Checkerboard), Sphere.create(Vector.create(0,1,-0.25), 1, Shiny), Sphere.create(Vector.create(-1,0.5,1.5),0.5, Shiny)]
+  defaultLights = [Light.create(Vector.create(-2,2.5,0), Color(0.49,0.07,0.07)), Light.create(Vector.create(1.5,2.5,1.5), Color.create(0.07,0.07,0.49)), Light.create(Vector.create(1.5,2.5,-1.5), Color.create(0.07,0.49,0.071)), Light.create(Vector.create(0,3.5,0), Color.create(0.21,0.21,0.35))]
+  defaultCamera = Camera.lookingAt(Vector.create(3,2,4), Vector.create(-1,0.5,0))
   defaultScene = Scene(defaultThings, defaultLights, defaultCamera, Color.BLACK)
 
 fn main()
