@@ -13,4 +13,4 @@ class SugarcoatLexer(input: String) : Lexer<TokenType>(
     RegularExpressions.NUMBER to { TokenType.NUMBER },
     RegularExpressions.DOUBLE_QUOTED_STRING to { TokenType.STRING },
     RegularExpressions.IDENTIFIER to { TokenType.IDENTIFIER },
-    Regex("""\+\+|\+|--|->|-|\*\*|\*|%|<=|>=|==|=|<>|<|>|&&|&|\|\||\||\^|!=|!|\(|\)|,|\?|;|::|:|~|\[|]|\{|\}|/""") to { TokenType.SYMBOL })
+    Regex("""\+\+|\+|--|->|-|\*\*|\*|%|<=|>=|==|=|<>|<|>|&&|&|\|\||\||\^|!=|!|\(|\)|,|\?|;|::|:|~|\[|]|\{|\}|//|/""") to { TokenType.SYMBOL })

@@ -4,7 +4,7 @@ import org.kobjects.sugarcoat.runtime.LocalContext
 import org.kobjects.sugarcoat.runtime.RuntimeContext
 
 data class FunctionDefinition(
-    val receiverType: Type,
+    override val parent: Definition,
     val parameters: List<ParameterDefinition>,
     val returnType: Type,
     val body: Expression

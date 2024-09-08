@@ -8,7 +8,7 @@ struct Complex
     sqrt(a*a + b*b)
         
 fn main() 
-  let c = Complex(1.0, 2.0)     
+  let c = Complex.create(1.0, 2.0)     
   print(c.abs)    
 """,
 "2.23606797749979")

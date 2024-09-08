@@ -1,29 +1,27 @@
 package org.kobjects.sugarcoat.ast
 
-import org.kobjects.sugarcoat.runtime.ProgramContext
+import org.kobjects.sugarcoat.datatype.VoidType
+import org.kobjects.sugarcoat.runtime.RootContext
+import org.kobjects.sugarcoat.runtime.RuntimeContext
 
-class Program : ResolvedType, Definition {
-    val definitions = mutableMapOf<String, Definition>()
+class Program(
+    val printFn: (String) -> Unit = ::print
+) : AbstractClassifierDefinition(null) {
 
-    override fun addDefinition(name: String, value: Definition) {
-        definitions[name] = value
+
+
+    override fun evalSymbol(name: String, children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext {
+        return if (name == "print") {
+                printFn(children.joinToString { it.value.eval(parameterContext).toString() })
+                VoidType.Instance
+        }
+        else super.evalSymbol(name, children, parameterContext)
     }
 
-    override fun toString() =
-        buildString {
-            for ((name, definition) in definitions) {
-                when (definition) {
-                    is FunctionDefinition -> {
-                        append("fn $name$definition\n")
-                    }
-                }
-            }
-        }
 
-    fun run(vararg parameters: Any, printFn: (String) -> Unit = { print(it) }): Any {
-        val programContext = ProgramContext(this, printFn)
+    fun run(vararg parameters: Any): Any {
 
-        return (definitions["main"] as FunctionDefinition).call(programContext, parameters.map { ParameterReference("", LiteralExpression(it)) }, programContext) ?: throw IllegalStateException("main function not found.")
+        return (definitions["main"] as FunctionDefinition).call(this, parameters.map { ParameterReference("", LiteralExpression(it)) }, this) ?: throw IllegalStateException("main function not found.")
 
     }
 

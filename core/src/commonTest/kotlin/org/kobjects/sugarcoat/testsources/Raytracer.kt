@@ -104,10 +104,10 @@ impl Thing for Plane
   fn surface() -> Surface
     surface
 
-  fn normal(pos: Vector) -> Vector:
+  fn normal(pos: Vector) -> Vector
     norm
 
-  fn intersect(r: Ray) -> Intersection:
+  fn intersect(r: Ray) -> Intersection
     let denom = norm.dot(r.dir)
     let mut dist = 1/0
     if (denom <= 0)
@@ -118,7 +118,7 @@ impl Thing for Plane
 
 object Shiny
 
-impl Surface for Shiny:
+impl Surface for Shiny
   fn roughness() -> F64
     250
 
@@ -133,7 +133,7 @@ impl Surface for Shiny:
 
 object Checkerboard
 
-impl Surface for Checkerboard:
+impl Surface for Checkerboard
   fn roughness() -> F64
     150
 
@@ -196,7 +196,7 @@ struct RayTracer
     let nearIsect = testRay(Ray(pos, livec), s)
     let isInShadow = (nearIsect <= ldis.mag())
     if (isInShadow) 
-      return col
+      return (col)
 
     let illum = livec.dot(norm)
     let mut lcolor = defaultColor
@@ -237,10 +237,10 @@ struct RayTracer
       let color = traceRay(Ray(s.camera.pos, getPoint((x - cx) * scale, (cy - y) * scale, s.camera)), s, 0)
       b.set(x, y, color)
 
-defaultThings = [Plane(Vector(0,1,0), 0, Checkerboard) as Thing, Sphere(Vector(0,1,-0.25), 1, Shiny) as Thing, Sphere(Vector(-1,0.5,1.5),0.5, Shiny) as Thing]
-defaultLights = [Light(Vector(-2,2.5,0), Color(0.49,0.07,0.07)), Light(Vector(1.5,2.5,1.5), Color(0.07,0.07,0.49)), Light(Vector(1.5,2.5,-1.5), Color(0.07,0.49,0.071)), Light(Vector(0,3.5,0), Color(0.21,0.21,0.35))]
-defaultCamera = Camera.lookingAt(Vector(3,2,4), Vector(-1,0.5,0))
-defaultScene = Scene(defaultThings, defaultLights, defaultCamera, Color.BLACK)
+  defaultThings: List<Thing> = [Plane(Vector(0,1,0), 0, Checkerboard), Sphere(Vector(0,1,-0.25), 1, Shiny), Sphere(Vector(-1,0.5,1.5),0.5, Shiny)]
+  defaultLights = [Light(Vector(-2,2.5,0), Color(0.49,0.07,0.07)), Light(Vector(1.5,2.5,1.5), Color(0.07,0.07,0.49)), Light(Vector(1.5,2.5,-1.5), Color(0.07,0.49,0.071)), Light(Vector(0,3.5,0), Color(0.21,0.21,0.35))]
+  defaultCamera = Camera.lookingAt(Vector(3,2,4), Vector(-1,0.5,0))
+  defaultScene = Scene(defaultThings, defaultLights, defaultCamera, Color.BLACK)
 
 fn main()
   let rayTracer = RayTracer()

@@ -1,35 +1,35 @@
 package org.kobjects.sugarcoat.ast
 
+import org.kobjects.sugarcoat.runtime.RootContext
 import org.kobjects.sugarcoat.runtime.RuntimeContext
 import org.kobjects.sugarcoat.runtime.StructInstance
 
-class StructDefinition: Callable, ResolvedType, Definition {
-
-    val definitions = mutableMapOf<String, Definition>()
+class StructDefinition(parent: Definition): ResolvedType, AbstractClassifierDefinition(parent) {
 
     override fun addDefinition(name: String, value: Definition) {
-        definitions[name] = value
+        super.addDefinition(name, value)
     }
 
-    override fun call(
-        receiver: RuntimeContext,
+    override fun evalSymbol(
+        name: String,
         children: List<ParameterReference>,
         parameterContext: RuntimeContext
     ): RuntimeContext {
-        val parameterConsumer = ParameterConsumer(children)
-        val instance = StructInstance(receiver, this)
+        return if (name == "create") {
+            val parameterConsumer = ParameterConsumer(children)
+            val instance = StructInstance(this, this)
 
-        for ((name, definition) in definitions) {
-            if (definition is FieldDefinition) {
-                instance.fields[name] = parameterConsumer.read(parameterContext, name, definition.type)
+            for ((name, definition) in definitions) {
+                if (definition is FieldDefinition) {
+                    instance.fields[name] = parameterConsumer.read(parameterContext, name, definition.type)
+                }
             }
-        }
 
-        println("struct instance created: $instance")
+            println("struct instance created: $instance")
 
-        return instance
+            return instance
+        } else super.evalSymbol(name, children, parameterContext)
     }
-
 
 
 

@@ -16,7 +16,7 @@ class LocalContext(
                 println("$name not found in $symbols")
                 parentContext.evalSymbol(name, children, parameterContext)
             }
-            is Callable -> resolved.call(VoidType.Instance, children, parameterContext)
+            is Callable -> resolved.call(parameterContext, children, parameterContext)
             else -> resolved
     }
 

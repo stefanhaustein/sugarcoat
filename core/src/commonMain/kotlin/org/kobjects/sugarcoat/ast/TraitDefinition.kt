@@ -1,10 +1,5 @@
 package org.kobjects.sugarcoat.ast
 
-class TraitDefinition : Definition, ResolvedType {
+class TraitDefinition(parent: Definition) : ResolvedType, AbstractClassifierDefinition(parent) {
 
-    val definitions = mutableMapOf<String, Definition>()
-
-    override fun addDefinition(name: String, value: Definition) {
-       definitions[name] = value
-    }
 }

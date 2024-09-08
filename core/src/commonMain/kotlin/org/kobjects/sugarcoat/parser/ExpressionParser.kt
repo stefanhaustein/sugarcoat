@@ -2,7 +2,6 @@ package org.kobjects.sugarcoat.parser
 
 import org.kobjects.parsek.expressionparser.ConfigurableExpressionParser
 import org.kobjects.parsek.tokenizer.Scanner
-import org.kobjects.sugarcoat.runtime.ProgramContext
 import org.kobjects.sugarcoat.ast.FunctionDefinition
 import org.kobjects.sugarcoat.ast.LambdaExpression
 import org.kobjects.sugarcoat.ast.ParameterDefinition
@@ -49,21 +48,42 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             }
 
             TokenType.SYMBOL -> {
-                if (!tokenizer.tryConsume("(")) {
-                    throw tokenizer.exception("Unrecognized primary expression.")
+                if (tokenizer.tryConsume("(")) {
+                    val expr = parseExpression(tokenizer, context)
+                    tokenizer.consume(")")
+                    expr
+                } else if (tokenizer.tryConsume("[")) {
+                    val builder = ParameterListBuilder()
+                    if (tokenizer.current.text != "]") {
+                        do {
+                            builder.add(parseExpression(tokenizer, context))
+                        } while (tokenizer.tryConsume(","))
+                    }
+                    tokenizer.consume("]") { "',' or ']' expected" }
+                    SymbolExpression(null, "listOf", builder.build())
+                } else {
+                    throw tokenizer.exception("'(' or '[' expected.")
                 }
-                val expr = parseExpression(tokenizer, context)
-                tokenizer.consume(")")
-                expr
             }
 
             else ->
                 throw tokenizer.exception("Unrecognized primary expression.")
         }
-        while (tokenizer.current.type == TokenType.PROPERTY) {
-            val name = tokenizer.consume().text.substring(1)
-            val parameterList = parseParameterList(tokenizer, context)
-            expr = SymbolExpression(expr, name, parameterList)
+        while (tokenizer.current.type == TokenType.PROPERTY || tokenizer.current.text == "[") {
+            if (tokenizer.tryConsume("[")) {
+                val builder = ParameterListBuilder()
+                if (tokenizer.current.text != "]") {
+                    do {
+                        builder.add(parseExpression(tokenizer, context))
+                    } while (tokenizer.tryConsume(","))
+                }
+                tokenizer.consume("]") { "',' or ']' expected" }
+                expr = SymbolExpression(expr, "[]", builder.build())
+            } else {
+                val name = tokenizer.consume().text.substring(1)
+                val parameterList = parseParameterList(tokenizer, context)
+                expr = SymbolExpression(expr, name, parameterList)
+            }
         }
         return expr
     }
@@ -146,6 +166,6 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
         val parsed = parseExpression(
             scanner, ParsingContext(Program())
         )
-        return parsed.eval(ProgramContext(Program()))
+        return parsed.eval(Program())
     }
 }

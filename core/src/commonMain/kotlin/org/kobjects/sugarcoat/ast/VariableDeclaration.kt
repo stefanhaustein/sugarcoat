@@ -6,6 +6,7 @@ import org.kobjects.sugarcoat.runtime.RuntimeContext
 
 class VariableDeclaration(
     val name: String,
+    val mutable: Boolean,
     val value: Expression) : Expression {
 
     override fun eval(context: RuntimeContext): RuntimeContext {

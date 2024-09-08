@@ -21,13 +21,10 @@ class TestSourceTest {
             val source = case[1]
             val expected = trim(case[2])
 
-            val program = SugarcoatParser.parseProgram(source)
             val result = StringBuilder()
+            val program = SugarcoatParser.parseProgram(source) { result.append(it) }
 
-            program.run {
-                result.append(it)
-            }
-
+            program.run()
             val actual = trim(result.toString())
 
             assertEquals(expected, actual, "Unexpected result for $name.")

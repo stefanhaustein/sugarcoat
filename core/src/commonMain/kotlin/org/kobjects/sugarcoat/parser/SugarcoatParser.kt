@@ -1,12 +1,16 @@
 package org.kobjects.sugarcoat.parser
 
 import org.kobjects.parsek.tokenizer.Scanner
+import org.kobjects.sugarcoat.ast.AbstractClassifierDefinition
+import org.kobjects.sugarcoat.ast.AssignmentExpression
 import org.kobjects.sugarcoat.ast.Definition
 import org.kobjects.sugarcoat.ast.FunctionDefinition
 import org.kobjects.sugarcoat.ast.ParameterDefinition
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.FieldDefinition
 import org.kobjects.sugarcoat.ast.ImplDefinition
+import org.kobjects.sugarcoat.ast.ImplicitType
+import org.kobjects.sugarcoat.ast.ObjectDefinition
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.ast.Program
 import org.kobjects.sugarcoat.ast.StructDefinition
@@ -31,8 +35,8 @@ object SugarcoatParser {
         return scanner.current.text.length - newlinePos - 1
     }
 
-    private fun parseProgram(scanner: Scanner<TokenType>): Program {
-        val program = Program()
+    private fun parseProgram(scanner: Scanner<TokenType>, printFn: (Any) -> Unit = ::print): Program {
+        val program = Program(printFn)
         val parsingContext = ParsingContext(program)
         while (scanner.current.type != TokenType.EOF) {
             if (scanner.current.type == TokenType.NEWLINE) {
@@ -40,8 +44,9 @@ object SugarcoatParser {
                 scanner.consume()
             } else {
                 when (scanner.current.text) {
-                    "fn" -> parseFn(scanner, parsingContext, VoidType)
+                    "fn" -> parseFn(scanner, parsingContext)
                     "impl" -> parseImpl(scanner, parsingContext)
+                    "object" -> parseObject(scanner, parsingContext)
                     "struct" -> parseStruct(scanner, parsingContext)
                     "trait" -> parseTrait(scanner, parsingContext)
                     else -> throw scanner.exception("Unexpected token.")
@@ -54,7 +59,7 @@ object SugarcoatParser {
         return program
     }
 
-    fun parseFn(scanner: Scanner<TokenType>, parentContext: ParsingContext, receiverType: Type) {
+    fun parseFn(scanner: Scanner<TokenType>, parentContext: ParsingContext) {
         scanner.consume("fn")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'fn'." }.text
         scanner.consume("(") { "Opening brace expected after function name '$name'." }
@@ -70,7 +75,7 @@ object SugarcoatParser {
         }
         val returnType = if (scanner.tryConsume("->")) parseType(scanner, parentContext) else VoidType
         val body = parseBlock(scanner, parentContext)
-        val fn = FunctionDefinition(receiverType, parameters, returnType, body)
+        val fn = FunctionDefinition(parentContext.definition, parameters, returnType, body)
         parentContext.definition.addDefinition(name, fn)
     }
 
@@ -81,9 +86,9 @@ object SugarcoatParser {
         scanner.consume("for")
         val struct = parseType(scanner, parentContext)
 
-        val impl = ImplDefinition(trait, struct)
+        val impl = ImplDefinition(parentContext.definition, trait, struct)
 
-        parseStructLike(scanner, parentContext, impl)
+        parseClassifier(scanner, parentContext, impl)
         parentContext.definition.addDefinition("$trait for $struct", impl)
     }
 
@@ -91,41 +96,53 @@ object SugarcoatParser {
     fun parseStruct(scanner: Scanner<TokenType>, parentContext: ParsingContext) {
         scanner.consume("struct")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'struct'." }.text
-        val struct = StructDefinition()
-        parseStructLike(scanner, parentContext, struct)
+        val struct = StructDefinition(parentContext.definition)
+        parseClassifier(scanner, parentContext, struct)
         parentContext.definition.addDefinition(name, struct)
+    }
+
+
+    fun parseObject(scanner: Scanner<TokenType>, parentContext: ParsingContext) {
+        scanner.consume("object")
+        val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'object'." }.text
+        val o = ObjectDefinition(parentContext.definition)
+        parseClassifier(scanner, parentContext, o)
+        parentContext.definition.addDefinition(name, o)
     }
 
     fun parseTrait(scanner: Scanner<TokenType>, parentContext: ParsingContext) {
         scanner.consume("trait")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'trait'." }.text
-        val trait = TraitDefinition()
-        parseStructLike(scanner, parentContext, trait)
+        val trait = TraitDefinition(parentContext.definition)
+        parseClassifier(scanner, parentContext, trait)
         parentContext.definition.addDefinition(name, trait)
     }
 
-    fun parseStructLike(
+    fun parseClassifier(
         scanner: Scanner<TokenType>,
         parentContext: ParsingContext,
-        definition: Definition
+        classifier: AbstractClassifierDefinition
     ) {
         val depth = currentIndent(scanner)
         if (depth <= parentContext.depth) {
             return
         }
-        val parsingContext = parentContext.copy(depth = depth, definition = definition)
+        val parsingContext = parentContext.copy(depth = depth, definition = classifier)
         scanner.consume(TokenType.NEWLINE)
         while (true) {
             if (scanner.current.type != TokenType.NEWLINE) {
                 val isStatic =  scanner.tryConsume("static")
 
                 if (scanner.current.text == "fn") {
-                    parseFn(scanner, parsingContext, definition as Type)
+                    parseFn(scanner, parsingContext)
                 } else {
                     val name = scanner.consume(TokenType.IDENTIFIER) { "Field name expected" }.text
-                    scanner.consume(":") { "Colon separating field name and type expected." }
-                    val type = parseType(scanner, parsingContext)
-                    definition.addDefinition(name, FieldDefinition(type))
+                    var type = ImplicitType()
+                    if (scanner.tryConsume(":")) {
+                        parseType(scanner, parsingContext)
+                    }
+                    val defaultExpr = if (scanner.tryConsume("=")) parseExpression(scanner, parsingContext) else null
+                    classifier.addDefinition(name, FieldDefinition(classifier, type, defaultExpr))
                 }
             }
             if (currentIndent(scanner) != depth) {
@@ -170,26 +187,38 @@ object SugarcoatParser {
         } else {
             var result = parseExpression(scanner, parsingContext)
             if (scanner.tryConsume("=")) {
-                throw RuntimeException("TBD")
+                result = AssignmentExpression(result, parseExpression(scanner, parsingContext))
             }
             result
         }
     }
 
     fun parseType(scanner: Scanner<TokenType>, parsingContext: ParsingContext): Type {
-        val name = (scanner.consume(TokenType.IDENTIFIER) { "Type name identifier expected." }).text
-        return TypeReference(name)
+        var name = (scanner.consume(TokenType.IDENTIFIER) { "Type name identifier expected." }).text
+        while (scanner.current.type == TokenType.PROPERTY) {
+            name += scanner.consume().text
+        }
+
+        val genericParameters = mutableListOf<String>()
+        if (scanner.tryConsume("<")) {
+            do {
+                genericParameters.add(scanner.consume(TokenType.IDENTIFIER) { "Generic parameter name expected" }.text)
+            } while (scanner.tryConsume(","))
+            scanner.consume(">") { "'>' expected at the end of the generic parameter name list." }
+        }
+        return TypeReference(name, genericParameters.toList())
     }
 
 
     fun parseVariableDeclaration(scanner: Scanner<TokenType>, parsingContext: ParsingContext): Expression {
+        val mutable = scanner.tryConsume("mut")
         val name = scanner.consume(TokenType.IDENTIFIER).text
         scanner.consume("=")
         val value = parseExpression(scanner, parsingContext)
-        return VariableDeclaration(name, value)
+        return VariableDeclaration(name, mutable, value)
     }
 
-        fun parseProgram(code: String) =
-            parseProgram(Scanner(NewlineFilter(SugarcoatLexer(code)), TokenType.EOF))
+        fun parseProgram(code: String, printFn: (Any) -> Unit = ::print) =
+            parseProgram(Scanner(NewlineFilter(SugarcoatLexer(code)), TokenType.EOF), printFn)
 
 }

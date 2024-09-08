@@ -1,32 +1,23 @@
 package org.kobjects.sugarcoat.runtime
 
-import org.kobjects.sugarcoat.ast.Callable
-import org.kobjects.sugarcoat.ast.FunctionDefinition
+import org.kobjects.sugarcoat.ast.LambdaExpression
 import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.ast.Program
 import org.kobjects.sugarcoat.ast.SymbolExpression
-import org.kobjects.sugarcoat.datatype.I64RangeType
-import org.kobjects.sugarcoat.ast.LambdaExpression
 import org.kobjects.sugarcoat.datatype.F64Type
+import org.kobjects.sugarcoat.datatype.I64RangeType
 import org.kobjects.sugarcoat.datatype.VoidType
 import kotlin.math.sqrt
 
-class ProgramContext(
-    val program: Program,
-    val printFn: (String) -> Unit = ::print
-) : RuntimeContext {
-
-    override fun evalSymbol(name: String, children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext {
-        val def = program.definitions[name]
-        return if (def is Callable) def.call(this, children, parameterContext)
-        else when (name) {
+object RootContext : RuntimeContext {
+    override fun evalSymbol(
+        name: String,
+        children: List<ParameterReference>,
+        parameterContext: RuntimeContext
+    ): RuntimeContext = when (name) {
             "for" -> evalFor(children, parameterContext)
             "if" -> evalIf(children, parameterContext)
-            "print" -> {
-                printFn(children.joinToString { it.value.eval(parameterContext).toString() })
-                VoidType.Instance
-            }
+
             "sqrt" -> F64Type.Instance(sqrt(children[0].value.evalDouble(parameterContext)))
 
             "range" -> when (children.size) {
@@ -71,36 +62,36 @@ class ProgramContext(
 
             else -> throw IllegalStateException("Unrecognized symbol: $name")
         }
-    }
 
-    fun evalIf(children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext {
-        if (children[0].value.evalBoolean(parameterContext)) {
-            return children[1].value.eval(parameterContext)
-        }
-        for (i in 2 until children.size) {
-            val child = children[i]
-            val value = child.value
-            when (child.name) {
-                "elif" -> {
-                    require (value is SymbolExpression && value.name == "pair")
-                    if (value.children[0].value.evalBoolean(parameterContext)) {
-                        return value.children[1].value.eval(parameterContext)
-                    }
+
+fun evalIf(children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext {
+    if (children[0].value.evalBoolean(parameterContext)) {
+        return children[1].value.eval(parameterContext)
+    }
+    for (i in 2 until children.size) {
+        val child = children[i]
+        val value = child.value
+        when (child.name) {
+            "elif" -> {
+                require (value is SymbolExpression && value.name == "pair")
+                if (value.children[0].value.evalBoolean(parameterContext)) {
+                    return value.children[1].value.eval(parameterContext)
                 }
-                "else" -> {
-                    return value.eval(parameterContext)
-                }
-                else -> throw IllegalStateException("else or elif expected; got: '${child.name}'")
             }
+            "else" -> {
+                return value.eval(parameterContext)
+            }
+            else -> throw IllegalStateException("else or elif expected; got: '${child.name}'")
         }
-        return VoidType.Instance
     }
+    return VoidType.Instance
+}
 
-    fun evalFor(children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext {
-        val range = (children[0].value.eval(parameterContext) as I64RangeType.Instance).value
-        for (value in range) {
-            (children[1].value as LambdaExpression).lambda.call(this, listOf(ParameterReference("", LiteralExpression(value))), parameterContext)
-        }
-        return VoidType.Instance
+fun evalFor(children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext {
+    val range = (children[0].value.eval(parameterContext) as I64RangeType.Instance).value
+    for (value in range) {
+        (children[1].value as LambdaExpression).lambda.call(parameterContext, listOf(ParameterReference("", LiteralExpression(value))), parameterContext)
     }
+    return VoidType.Instance
+}
 }
