@@ -2,6 +2,7 @@ package org.kobjects.sugarcoat.parser
 
 import org.kobjects.parsek.expressionparser.ConfigurableExpressionParser
 import org.kobjects.parsek.tokenizer.Scanner
+import org.kobjects.sugarcoat.ast.AsExpression
 import org.kobjects.sugarcoat.ast.FunctionDefinition
 import org.kobjects.sugarcoat.ast.LambdaExpression
 import org.kobjects.sugarcoat.ast.ParameterDefinition
@@ -16,8 +17,9 @@ import org.kobjects.sugarcoat.ast.SymbolExpression
 
 object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, ParsingContext, Expression>(
     { scanner, context -> ExpressionParser.parsePrimary(scanner, context) },
-    prefix(9, "+", "-") { _, _, name, operand -> SymbolExpression(operand, name, 9) },
-    infix(8, "**") { _, _, _, left, right -> SymbolExpression(left, "**", 8, right) },
+    prefix(10, "+", "-") { _, _, name, operand -> SymbolExpression(operand, name, 10) },
+    infix(9, "**") { _, _, _, left, right -> SymbolExpression(left, "**", 9, right) },
+    infix(8, "as") { _, _, _, left, right -> AsExpression(left, right) },
     infix(7, "*", "/", "%", "//") { _, _, name, left, right -> SymbolExpression(left, name, 7, right) },
     infix(6, "+", "-") { _, _, name, left, right -> SymbolExpression(left, name, 6, right) },
     infix(5, "<", "<=", ">", ">=") { _, _, name, left, right -> SymbolExpression(left, name, 5, right) },
@@ -157,7 +159,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
         }
 
         val parsedBody = SugarcoatParser.parseBlock(scanner, context)
-        return if (parmeters.isEmpty()) parsedBody else LambdaExpression(FunctionDefinition(context.program, parmeters.toList(), ImplicitType(), parsedBody))
+        return if (parmeters.isEmpty()) parsedBody else LambdaExpression(FunctionDefinition(context.program, true, "", parmeters.toList(), ImplicitType(), parsedBody))
     }
 
 

@@ -1,5 +1,17 @@
 package org.kobjects.sugarcoat.testsources
-val RAYTRACER_SOURCE = """
+val RAYTRACER_SOURCE: String = """
+struct Color
+  static BLACK = Color.create(0.0, 0.0, 0.0)
+  static GRAY = Color.create(0.5, 0.5, 0.5)
+  static WHITE = Color.create(1.0, 1.0, 1.0)
+  
+  r: F64
+  g: F64
+  b: F64
+         
+  fn toAnsi(bg: Bool) -> String
+    "\u001b[" + if(bg, "38", "48") + "2;" + s255(r) + ";" + s255(g) + s255(b)
+
 struct Vector
   x: F64
   y: F64
@@ -222,27 +234,24 @@ struct RayTracer
   fn getPoint(x: F64, y: F64, cam: Camera) -> Vector
     cam.forward.plus(cam.right.times(x / 200)).plus(cam.up.times(y / 200)).norm()
 
-  fn render(s: Scene, b: graphics.BitmapImage) 
-    let y0 = b.height // 2
-    let scale = 150.0 / min(b.width, b.height)
-    renderRow(s, b, scale, y0)
-    for (range(0, y0)) :: y
-      renderRow(s, b, scale, y0 - y)
-      renderRow(s, b, scale, y0 + y)
-
-  fn renderRow(s: Scene, b: graphics.BitmapImage, scale: F64, y: int)
-    let cx = b.width//2
-    let cy = b.height//2
-    for (range(0, b.width)) :: x
-      let color = traceRay(Ray(s.camera.pos, getPoint((x - cx) * scale, (cy - y) * scale, s.camera)), s, 0)
-      b.set(x, y, color)
-
+  fn render(s: Scene, width: I64, height: I64) 
+    let cx = width // 2
+    let cy = height // 2
+    for (range(0, height // 2)) :: yy
+      let y = y * 2    
+      for (range(0, width)) :: x
+        let color1 = traceRay(Ray(s.camera.pos, getPoint((x - cx) * scale, (cy - y) * scale, s.camera)), s, 0)
+        let color2 = traceRay(Ray(s.camera.pos, getPoint((x - cx) * scale, (cy - y - 1) * scale, s.camera)), s, 0)
+        print(color1.toAnsi(true) + color2.toAnsi(false) + "▀")
+      
+      print("\n")
+        
   defaultThings: List<Thing> = [Plane.create(Vector.create(0,1,0), 0, Checkerboard), Sphere.create(Vector.create(0,1,-0.25), 1, Shiny), Sphere.create(Vector.create(-1,0.5,1.5),0.5, Shiny)]
-  defaultLights = [Light.create(Vector.create(-2,2.5,0), Color(0.49,0.07,0.07)), Light.create(Vector.create(1.5,2.5,1.5), Color.create(0.07,0.07,0.49)), Light.create(Vector.create(1.5,2.5,-1.5), Color.create(0.07,0.49,0.071)), Light.create(Vector.create(0,3.5,0), Color.create(0.21,0.21,0.35))]
+  defaultLights = [Light.create(Vector.create(-2,2.5,0), Color.create(0.49,0.07,0.07)), Light.create(Vector.create(1.5,2.5,1.5), Color.create(0.07,0.07,0.49)), Light.create(Vector.create(1.5,2.5,-1.5), Color.create(0.07,0.49,0.071)), Light.create(Vector.create(0,3.5,0), Color.create(0.21,0.21,0.35))]
   defaultCamera = Camera.lookingAt(Vector.create(3,2,4), Vector.create(-1,0.5,0))
   defaultScene = Scene(defaultThings, defaultLights, defaultCamera, Color.BLACK)
 
 fn main()
   let rayTracer = RayTracer()
-  rayTracer.render(defaultScene, screen.image)
+  rayTracer.render(defaultScene, 72, 40)
 """

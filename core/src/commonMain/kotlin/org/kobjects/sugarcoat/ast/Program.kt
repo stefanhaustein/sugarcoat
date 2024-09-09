@@ -6,7 +6,7 @@ import org.kobjects.sugarcoat.runtime.RuntimeContext
 
 class Program(
     val printFn: (String) -> Unit = ::print
-) : AbstractClassifierDefinition(null) {
+) : AbstractClassifierDefinition(null, "") {
 
 
 

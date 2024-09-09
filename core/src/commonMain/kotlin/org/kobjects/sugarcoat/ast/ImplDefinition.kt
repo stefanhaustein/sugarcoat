@@ -4,6 +4,6 @@ class ImplDefinition(
     parent: Definition,
     val trait: Type,
     val struct: Type
-) : AbstractClassifierDefinition(parent) {
+) : AbstractClassifierDefinition(parent, "$trait for $struct") {
 
 }

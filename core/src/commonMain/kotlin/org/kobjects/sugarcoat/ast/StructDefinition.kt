@@ -4,7 +4,10 @@ import org.kobjects.sugarcoat.runtime.RootContext
 import org.kobjects.sugarcoat.runtime.RuntimeContext
 import org.kobjects.sugarcoat.runtime.StructInstance
 
-class StructDefinition(parent: Definition, val constructorName: String = "create"): ResolvedType, AbstractClassifierDefinition(parent) {
+class StructDefinition(
+    parent: Definition,
+    name: String,
+    val constructorName: String = "create"): ResolvedType, AbstractClassifierDefinition(parent, name) {
 
     override fun addDefinition(name: String, value: Definition) {
         super.addDefinition(name, value)

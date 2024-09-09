@@ -4,7 +4,8 @@ import org.kobjects.sugarcoat.runtime.RootContext
 import org.kobjects.sugarcoat.runtime.RuntimeContext
 
 abstract class AbstractClassifierDefinition(
-    override val parent: Definition?
+    override val parent: Definition?,
+    val name: String
 ): Definition, RuntimeContext {
     val definitions = mutableMapOf<String, Definition>()
 

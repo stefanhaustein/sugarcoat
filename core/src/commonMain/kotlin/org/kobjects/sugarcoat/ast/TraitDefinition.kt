@@ -1,5 +1,5 @@
 package org.kobjects.sugarcoat.ast
 
-class TraitDefinition(parent: Definition) : ResolvedType, AbstractClassifierDefinition(parent) {
+class TraitDefinition(parent: Definition, name: String) : ResolvedType, AbstractClassifierDefinition(parent, name) {
 
 }

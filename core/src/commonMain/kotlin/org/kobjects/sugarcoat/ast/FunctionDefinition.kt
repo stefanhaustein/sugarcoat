@@ -5,6 +5,8 @@ import org.kobjects.sugarcoat.runtime.RuntimeContext
 
 data class FunctionDefinition(
     override val parent: Definition,
+    val static: Boolean,
+    val name: String,
     val parameters: List<ParameterDefinition>,
     val returnType: Type,
     val body: Expression

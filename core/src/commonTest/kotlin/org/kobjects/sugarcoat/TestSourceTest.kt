@@ -2,16 +2,17 @@ package org.kobjects.sugarcoat
 
 import org.kobjects.sugarcoat.parser.SugarcoatParser
 import org.kobjects.sugarcoat.testsources.COMPLEX_CASE
+import org.kobjects.sugarcoat.testsources.FARM_CASE
 import org.kobjects.sugarcoat.testsources.FIZZBUZZ_CASE
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class TestSourceTest {
 
     val CASES = arrayOf(
         COMPLEX_CASE,
-        FIZZBUZZ_CASE
+        FIZZBUZZ_CASE,
+        FARM_CASE
     )
 
     @Test

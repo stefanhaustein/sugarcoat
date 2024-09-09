@@ -6,7 +6,7 @@ struct Complex
   
   fn abs() 
     sqrt(a*a + b*b)
-        
+
 fn main() 
   let c = Complex.create(1.0, 2.0)     
   print(c.abs)    
