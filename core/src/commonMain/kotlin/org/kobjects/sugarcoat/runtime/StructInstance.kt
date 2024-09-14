@@ -6,8 +6,8 @@ import org.kobjects.sugarcoat.ast.StructDefinition
 
 class StructInstance(
     val parentContext: RuntimeContext,
-    val definition: StructDefinition
-) : RuntimeContext {
+    override val type: StructDefinition
+) : Instance {
     val fields = mutableMapOf<String, RuntimeContext>()
 
     override fun evalSymbol(
@@ -22,7 +22,7 @@ class StructInstance(
             }
             return resolvedField
         }
-        val method = definition.definitions[name]
+        val method = type.definitions[name]
         if (method != null) {
             require(method is Callable) {
                 "Unrecogized method $name: $method"
@@ -32,5 +32,5 @@ class StructInstance(
         return parentContext.evalSymbol(name, children, parameterContext)
     }
 
-    override fun toString() = "StructInstance; def: $definition; fields: $fields"
+    override fun toString() = "StructInstance; def: $type; fields: $fields"
 }

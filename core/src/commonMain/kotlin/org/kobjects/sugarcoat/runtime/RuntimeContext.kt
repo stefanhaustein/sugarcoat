@@ -10,6 +10,11 @@ import org.kobjects.sugarcoat.ast.ParameterReference
 interface RuntimeContext {
     fun evalSymbol(name: String, children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext
 
+    fun i32(): Int = throw UnsupportedOperationException()
+    fun i64(): Long = throw UnsupportedOperationException()
+    fun f32(): Float = throw UnsupportedOperationException()
+    fun f64(): Double = throw UnsupportedOperationException()
+
 
     companion object {
 
