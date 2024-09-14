@@ -1,11 +1,12 @@
 package org.kobjects.sugarcoat.datatype
 
+import org.kobjects.sugarcoat.ast.AbstractClassifierDefinition
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.ast.ResolvedType
 import org.kobjects.sugarcoat.runtime.RuntimeContext
 import kotlin.math.pow
 
-class F64Type : ResolvedType {
+object F64Type : ResolvedType, AbstractClassifierDefinition(null, "F64") {
 
     class Instance(val value: Double) : RuntimeContext {
 
