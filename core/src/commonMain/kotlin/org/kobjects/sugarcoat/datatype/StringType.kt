@@ -4,10 +4,12 @@ import org.kobjects.sugarcoat.fn.ParameterReference
 import org.kobjects.sugarcoat.base.ResolvedType
 import org.kobjects.sugarcoat.base.RuntimeContext
 
-class StringType : ResolvedType {
+object StringType : NativeType("String") {
 
 
-    class Instance(val value: String) : RuntimeContext {
+    data class Instance(val value: String) : NativeInstance() {
+        override val type: NativeType
+            get() = StringType
 
         override fun evalSymbol(
             name: String,
@@ -20,10 +22,5 @@ class StringType : ResolvedType {
         }
 
         override fun toString() = value
-
-        override fun equals(other: Any?) = other is Instance && other.value == value
-
-        override fun hashCode() = value.hashCode()
-
     }
 }

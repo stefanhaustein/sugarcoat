@@ -3,18 +3,13 @@ package org.kobjects.sugarcoat.datatype
 import org.kobjects.sugarcoat.fn.ParameterReference
 import org.kobjects.sugarcoat.base.RuntimeContext
 
-class I64RangeType {
+object I64RangeType : NativeType("I64Range") {
 
-
-    class Instance(
+    data class Instance(
         val value: LongRange
-    ) : RuntimeContext {
-        override fun evalSymbol(
-            name: String,
-            children: List<ParameterReference>,
-            parameterContext: RuntimeContext
-        ): RuntimeContext {
-            TODO("Not yet implemented")
-        }
+    ) : NativeInstance() {
+
+        override val type: NativeType
+            get() = I64RangeType
     }
 }

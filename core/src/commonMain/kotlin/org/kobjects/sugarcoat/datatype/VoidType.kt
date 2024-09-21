@@ -4,19 +4,11 @@ import org.kobjects.sugarcoat.fn.ParameterReference
 import org.kobjects.sugarcoat.base.ResolvedType
 import org.kobjects.sugarcoat.base.RuntimeContext
 
-object VoidType : ResolvedType {
+object VoidType : NativeType("Void") {
 
 
-
-    object Instance : RuntimeContext {
-        override fun evalSymbol(
-            name: String,
-            children: List<ParameterReference>,
-            parameterContext: RuntimeContext
-        ): RuntimeContext {
-            when (name) {
-                else -> throw UnsupportedOperationException("Method $name unsupported for Void.")
-            }
-        }
+    object Instance : NativeInstance() {
+        override val type: NativeType
+            get() = VoidType
     }
 }
