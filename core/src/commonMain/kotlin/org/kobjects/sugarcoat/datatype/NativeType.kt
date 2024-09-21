@@ -1,13 +1,9 @@
 package org.kobjects.sugarcoat.datatype
 
-import org.kobjects.sugarcoat.ast.AbstractClassifierDefinition
-import org.kobjects.sugarcoat.ast.Callable
-import org.kobjects.sugarcoat.ast.Definition
-import org.kobjects.sugarcoat.ast.ParameterConsumer
-import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.ast.ResolvedType
-import org.kobjects.sugarcoat.ast.Type
-import org.kobjects.sugarcoat.runtime.RuntimeContext
+import org.kobjects.sugarcoat.model.AbstractClassifierDefinition
+import org.kobjects.sugarcoat.base.ResolvedType
+import org.kobjects.sugarcoat.base.Type
+import org.kobjects.sugarcoat.base.RuntimeContext
 
 abstract class NativeType(
     name: String,

@@ -3,15 +3,15 @@ package org.kobjects.sugarcoat.parser
 import org.kobjects.parsek.expressionparser.ConfigurableExpressionParser
 import org.kobjects.parsek.tokenizer.Scanner
 import org.kobjects.sugarcoat.ast.AsExpression
-import org.kobjects.sugarcoat.ast.FunctionDefinition
+import org.kobjects.sugarcoat.fn.FunctionDefinition
 import org.kobjects.sugarcoat.ast.LambdaExpression
-import org.kobjects.sugarcoat.ast.ParameterDefinition
+import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.ast.Expression
-import org.kobjects.sugarcoat.ast.ImplicitType
+import org.kobjects.sugarcoat.base.ImplicitType
 import org.kobjects.sugarcoat.ast.LiteralExpression
-import org.kobjects.sugarcoat.ast.ParameterListBuilder
-import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.ast.Program
+import org.kobjects.sugarcoat.fn.ParameterListBuilder
+import org.kobjects.sugarcoat.fn.ParameterReference
+import org.kobjects.sugarcoat.model.Program
 import org.kobjects.sugarcoat.ast.SymbolExpression
 
 

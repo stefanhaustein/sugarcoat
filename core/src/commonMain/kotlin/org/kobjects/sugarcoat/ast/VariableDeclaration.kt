@@ -1,8 +1,8 @@
 package org.kobjects.sugarcoat.ast
 
 import org.kobjects.sugarcoat.datatype.VoidType
-import org.kobjects.sugarcoat.runtime.LocalContext
-import org.kobjects.sugarcoat.runtime.RuntimeContext
+import org.kobjects.sugarcoat.fn.LocalContext
+import org.kobjects.sugarcoat.base.RuntimeContext
 
 class VariableDeclaration(
     val name: String,

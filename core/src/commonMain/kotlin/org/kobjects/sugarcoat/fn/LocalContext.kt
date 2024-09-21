@@ -1,9 +1,6 @@
-package org.kobjects.sugarcoat.runtime
+package org.kobjects.sugarcoat.fn
 
-import org.kobjects.sugarcoat.ast.Callable
-import org.kobjects.sugarcoat.ast.FunctionDefinition
-import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.datatype.VoidType
+import org.kobjects.sugarcoat.base.RuntimeContext
 
 class LocalContext(
     val parentContext: RuntimeContext

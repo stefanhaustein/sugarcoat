@@ -1,4 +1,6 @@
-package org.kobjects.sugarcoat.ast
+package org.kobjects.sugarcoat.fn
+
+import org.kobjects.sugarcoat.base.Type
 
 data class ParameterDefinition(
     val name: String,

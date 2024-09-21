@@ -1,6 +1,8 @@
-package org.kobjects.sugarcoat.ast
+package org.kobjects.sugarcoat.fn
 
-import org.kobjects.sugarcoat.runtime.RuntimeContext
+import org.kobjects.sugarcoat.ast.Expression
+import org.kobjects.sugarcoat.ast.LambdaExpression
+import org.kobjects.sugarcoat.base.RuntimeContext
 
 data class Closure(
     val expression: Expression,

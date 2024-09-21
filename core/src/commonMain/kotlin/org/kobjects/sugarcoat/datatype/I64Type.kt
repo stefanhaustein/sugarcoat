@@ -1,8 +1,5 @@
 package org.kobjects.sugarcoat.datatype
 
-import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.runtime.RuntimeContext
-
 object I64Type : NativeType("I64") {
 
     init {

@@ -1,4 +1,4 @@
-package org.kobjects.sugarcoat.ast
+package org.kobjects.sugarcoat.base
 
 class TypeReference(
     val name: String,

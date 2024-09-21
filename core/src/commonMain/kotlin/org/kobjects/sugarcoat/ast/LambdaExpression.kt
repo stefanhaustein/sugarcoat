@@ -1,6 +1,7 @@
 package org.kobjects.sugarcoat.ast
 
-import org.kobjects.sugarcoat.runtime.RuntimeContext
+import org.kobjects.sugarcoat.fn.FunctionDefinition
+import org.kobjects.sugarcoat.base.RuntimeContext
 
 class LambdaExpression(
     val lambda: FunctionDefinition

@@ -1,7 +1,7 @@
 package org.kobjects.sugarcoat.parser
 
-import org.kobjects.sugarcoat.ast.Definition
-import org.kobjects.sugarcoat.ast.Program
+import org.kobjects.sugarcoat.base.Definition
+import org.kobjects.sugarcoat.model.Program
 
 data class ParsingContext(
     val program: Program,

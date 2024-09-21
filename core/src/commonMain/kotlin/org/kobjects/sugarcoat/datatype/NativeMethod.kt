@@ -1,11 +1,11 @@
 package org.kobjects.sugarcoat.datatype
 
-import org.kobjects.sugarcoat.ast.Callable
-import org.kobjects.sugarcoat.ast.Definition
-import org.kobjects.sugarcoat.ast.ParameterConsumer
-import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.ast.Type
-import org.kobjects.sugarcoat.runtime.RuntimeContext
+import org.kobjects.sugarcoat.fn.Callable
+import org.kobjects.sugarcoat.base.Definition
+import org.kobjects.sugarcoat.fn.ParameterConsumer
+import org.kobjects.sugarcoat.fn.ParameterReference
+import org.kobjects.sugarcoat.base.Type
+import org.kobjects.sugarcoat.base.RuntimeContext
 
 class NativeMethod(
     override val parent: NativeType,

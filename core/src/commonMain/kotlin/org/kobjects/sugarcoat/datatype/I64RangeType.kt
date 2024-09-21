@@ -1,7 +1,7 @@
 package org.kobjects.sugarcoat.datatype
 
-import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.runtime.RuntimeContext
+import org.kobjects.sugarcoat.fn.ParameterReference
+import org.kobjects.sugarcoat.base.RuntimeContext
 
 class I64RangeType {
 

@@ -1,4 +1,8 @@
-package org.kobjects.sugarcoat.ast
+package org.kobjects.sugarcoat.model
+
+import org.kobjects.sugarcoat.base.Definition
+import org.kobjects.sugarcoat.ast.Expression
+import org.kobjects.sugarcoat.base.Type
 
 class FieldDefinition(
     override val parent: Definition,

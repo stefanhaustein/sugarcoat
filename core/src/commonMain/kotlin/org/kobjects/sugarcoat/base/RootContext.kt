@@ -1,12 +1,13 @@
-package org.kobjects.sugarcoat.runtime
+package org.kobjects.sugarcoat.base
 
 import org.kobjects.sugarcoat.ast.LambdaExpression
 import org.kobjects.sugarcoat.ast.LiteralExpression
-import org.kobjects.sugarcoat.ast.ParameterReference
+import org.kobjects.sugarcoat.fn.ParameterReference
 import org.kobjects.sugarcoat.ast.SymbolExpression
 import org.kobjects.sugarcoat.datatype.F64Type
 import org.kobjects.sugarcoat.datatype.I64RangeType
 import org.kobjects.sugarcoat.datatype.VoidType
+import org.kobjects.sugarcoat.fn.LocalContext
 import kotlin.math.sqrt
 
 object RootContext : RuntimeContext {
@@ -90,7 +91,9 @@ fun evalIf(children: List<ParameterReference>, parameterContext: RuntimeContext)
 fun evalFor(children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext {
     val range = (children[0].value.eval(parameterContext) as I64RangeType.Instance).value
     for (value in range) {
-        (children[1].value as LambdaExpression).lambda.call(parameterContext, listOf(ParameterReference("", LiteralExpression(value))), parameterContext)
+        (children[1].value as LambdaExpression).lambda.call(parameterContext, listOf(
+            ParameterReference("", LiteralExpression(value))
+        ), parameterContext)
     }
     return VoidType.Instance
 }

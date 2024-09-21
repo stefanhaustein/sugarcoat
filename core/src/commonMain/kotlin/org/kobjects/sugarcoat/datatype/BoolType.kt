@@ -1,10 +1,5 @@
 package org.kobjects.sugarcoat.datatype
 
-import org.kobjects.sugarcoat.ast.AbstractClassifierDefinition
-import org.kobjects.sugarcoat.ast.Definition
-import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.runtime.RuntimeContext
-
 object BoolType : NativeType( "Bool") {
 
 

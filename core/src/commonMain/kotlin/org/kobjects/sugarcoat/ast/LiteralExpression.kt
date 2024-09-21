@@ -1,6 +1,6 @@
 package org.kobjects.sugarcoat.ast
 
-import org.kobjects.sugarcoat.runtime.RuntimeContext
+import org.kobjects.sugarcoat.base.RuntimeContext
 import org.kobjects.sugarcoat.datatype.StringType
 
 class LiteralExpression(value: Any) : Expression {

@@ -1,7 +1,11 @@
-package org.kobjects.sugarcoat.ast
+package org.kobjects.sugarcoat.model
 
-import org.kobjects.sugarcoat.runtime.RootContext
-import org.kobjects.sugarcoat.runtime.RuntimeContext
+import org.kobjects.sugarcoat.base.Definition
+import org.kobjects.sugarcoat.fn.Callable
+import org.kobjects.sugarcoat.fn.FunctionDefinition
+import org.kobjects.sugarcoat.fn.ParameterReference
+import org.kobjects.sugarcoat.base.RootContext
+import org.kobjects.sugarcoat.base.RuntimeContext
 
 abstract class AbstractClassifierDefinition(
     override val parent: Definition?,

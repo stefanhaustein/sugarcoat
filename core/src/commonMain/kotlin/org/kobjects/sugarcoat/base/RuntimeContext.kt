@@ -1,10 +1,10 @@
-package org.kobjects.sugarcoat.runtime
+package org.kobjects.sugarcoat.base
 
 import org.kobjects.sugarcoat.datatype.BoolType
 import org.kobjects.sugarcoat.datatype.F64Type
 import org.kobjects.sugarcoat.datatype.I64Type
 import org.kobjects.sugarcoat.datatype.StringType
-import org.kobjects.sugarcoat.ast.ParameterReference
+import org.kobjects.sugarcoat.fn.ParameterReference
 
 
 interface RuntimeContext {

@@ -1,23 +1,22 @@
 package org.kobjects.sugarcoat.parser
 
 import org.kobjects.parsek.tokenizer.Scanner
-import org.kobjects.sugarcoat.ast.AbstractClassifierDefinition
+import org.kobjects.sugarcoat.model.AbstractClassifierDefinition
 import org.kobjects.sugarcoat.ast.AssignmentExpression
-import org.kobjects.sugarcoat.ast.Definition
-import org.kobjects.sugarcoat.ast.FunctionDefinition
-import org.kobjects.sugarcoat.ast.ParameterDefinition
+import org.kobjects.sugarcoat.fn.FunctionDefinition
+import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.ast.Expression
-import org.kobjects.sugarcoat.ast.FieldDefinition
-import org.kobjects.sugarcoat.ast.ImplDefinition
-import org.kobjects.sugarcoat.ast.ImplicitType
-import org.kobjects.sugarcoat.ast.ObjectDefinition
-import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.ast.Program
-import org.kobjects.sugarcoat.ast.StructDefinition
+import org.kobjects.sugarcoat.model.FieldDefinition
+import org.kobjects.sugarcoat.model.ImplDefinition
+import org.kobjects.sugarcoat.base.ImplicitType
+import org.kobjects.sugarcoat.model.ObjectDefinition
+import org.kobjects.sugarcoat.fn.ParameterReference
+import org.kobjects.sugarcoat.model.Program
+import org.kobjects.sugarcoat.model.StructDefinition
 import org.kobjects.sugarcoat.ast.SymbolExpression
-import org.kobjects.sugarcoat.ast.TraitDefinition
-import org.kobjects.sugarcoat.ast.Type
-import org.kobjects.sugarcoat.ast.TypeReference
+import org.kobjects.sugarcoat.model.TraitDefinition
+import org.kobjects.sugarcoat.base.Type
+import org.kobjects.sugarcoat.base.TypeReference
 import org.kobjects.sugarcoat.ast.VariableDeclaration
 import org.kobjects.sugarcoat.datatype.VoidType
 

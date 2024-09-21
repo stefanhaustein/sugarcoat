@@ -1,8 +1,8 @@
-package org.kobjects.sugarcoat.runtime
+package org.kobjects.sugarcoat.model
 
-import org.kobjects.sugarcoat.ast.Callable
-import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.ast.StructDefinition
+import org.kobjects.sugarcoat.base.RuntimeContext
+import org.kobjects.sugarcoat.fn.Callable
+import org.kobjects.sugarcoat.fn.ParameterReference
 
 class StructInstance(
     val parentContext: RuntimeContext,

@@ -3,7 +3,7 @@ package org.kobjects.sugarcoat.ast
 import org.kobjects.sugarcoat.datatype.BoolType
 import org.kobjects.sugarcoat.datatype.F64Type
 import org.kobjects.sugarcoat.datatype.I64Type
-import org.kobjects.sugarcoat.runtime.RuntimeContext
+import org.kobjects.sugarcoat.base.RuntimeContext
 
 interface Expression {
     fun eval(context: RuntimeContext): RuntimeContext

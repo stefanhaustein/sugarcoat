@@ -1,11 +1,5 @@
 package org.kobjects.sugarcoat.datatype
 
-import org.kobjects.sugarcoat.ast.AbstractClassifierDefinition
-import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.ast.ResolvedType
-import org.kobjects.sugarcoat.datatype.I64Type.Instance
-import org.kobjects.sugarcoat.datatype.I64Type.addNativeMethod
-import org.kobjects.sugarcoat.runtime.RuntimeContext
 import kotlin.math.pow
 
 object F64Type : NativeType("F64") {
