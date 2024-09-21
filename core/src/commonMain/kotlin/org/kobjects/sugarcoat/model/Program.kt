@@ -4,11 +4,12 @@ import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.FunctionDefinition
 import org.kobjects.sugarcoat.ast.ParameterReference
+import org.kobjects.sugarcoat.base.ResolvedType
 import org.kobjects.sugarcoat.base.RuntimeContext
 
 class Program(
     val printFn: (String) -> Unit = ::print
-) : AbstractClassifierDefinition(null, "") {
+) : ResolvedType, AbstractClassifierDefinition(null, "") {
 
 
 
@@ -20,10 +21,12 @@ class Program(
         else super.evalSymbol(name, children, parameterContext)
     }
 
+    override fun resolve(): ResolvedType = this
+
 
     fun run(vararg parameters: Any): Any {
 
-        return (definitions["main"] as FunctionDefinition).call(this, parameters.map { ParameterReference("", LiteralExpression(it)) }, this) ?: throw IllegalStateException("main function not found.")
+        return (definitions["main"] as FunctionDefinition).call(null, parameters.map { ParameterReference("", LiteralExpression(it)) }, this) ?: throw IllegalStateException("main function not found.")
 
     }
 

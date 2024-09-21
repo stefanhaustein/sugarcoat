@@ -25,7 +25,7 @@ class StructInstance(
         val method = type.definitions[name]
         if (method != null) {
             require(method is Callable) {
-                "Unrecogized method $name: $method"
+                "Unrecognized method $name: $method"
             }
             return method.call(this, children, parameterContext)
         }

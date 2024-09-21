@@ -9,11 +9,8 @@ import org.kobjects.sugarcoat.base.RuntimeContext
 class StructDefinition(
     parent: Definition,
     name: String,
-    val constructorName: String = "create"): ResolvedType, AbstractClassifierDefinition(parent, name) {
-
-    override fun addDefinition(name: String, value: Definition) {
-        super.addDefinition(name, value)
-    }
+    val constructorName: String = "create"
+): ResolvedType, AbstractClassifierDefinition(parent, name) {
 
     override fun evalSymbol(
         name: String,

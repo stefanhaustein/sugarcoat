@@ -61,7 +61,7 @@ object RootContext : RuntimeContext {
                 VoidType.Instance
             }
 
-            else -> throw IllegalStateException("Unrecognized symbol: $name")
+            else -> throw IllegalStateException("Unrecognized symbol: '$name'")
         }
 
 
@@ -91,7 +91,7 @@ fun evalIf(children: List<ParameterReference>, parameterContext: RuntimeContext)
 fun evalFor(children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext {
     val range = (children[0].value.eval(parameterContext) as I64RangeType.Instance).value
     for (value in range) {
-        (children[1].value as LambdaExpression).lambda.call(parameterContext, listOf(
+        (children[1].value as LambdaExpression).lambda.call(null, listOf(
             ParameterReference("", LiteralExpression(value))
         ), parameterContext)
     }

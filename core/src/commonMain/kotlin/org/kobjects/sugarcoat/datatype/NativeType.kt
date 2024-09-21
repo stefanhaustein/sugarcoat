@@ -10,14 +10,22 @@ abstract class NativeType(
 
 ) : AbstractClassifierDefinition(null, name), ResolvedType {
 
-
     fun addNativeMethod(
         returnType: Type,
         name: String,
         vararg args: Pair<String, Type>,
         op: (List<RuntimeContext>) -> RuntimeContext
-        ) {
-        addDefinition(name, NativeMethod(this, returnType, name, args, op))
+    ) {
+        addDefinition(NativeFunction(this, false, returnType, name, args, op))
+    }
+
+    fun addNativeFunction(
+        returnType: Type,
+        name: String,
+        vararg args: Pair<String, Type>,
+        op: (List<RuntimeContext>) -> RuntimeContext
+    ) {
+        addDefinition(NativeFunction(this, true, returnType, name, args, op))
     }
 
 

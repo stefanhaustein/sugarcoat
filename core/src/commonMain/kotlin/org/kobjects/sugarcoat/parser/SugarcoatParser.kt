@@ -75,7 +75,7 @@ object SugarcoatParser {
         val returnType = if (scanner.tryConsume("->")) parseType(scanner, parentContext) else VoidType
         val body = parseBlock(scanner, parentContext)
         val fn = FunctionDefinition(parentContext.definition, static, name, parameters, returnType, body)
-        parentContext.definition.addDefinition(name, fn)
+        parentContext.definition.addDefinition(fn)
     }
 
 
@@ -88,7 +88,7 @@ object SugarcoatParser {
         val impl = ImplDefinition(parentContext.definition, trait, struct)
 
         parseClassifier(scanner, parentContext, impl)
-        parentContext.definition.addDefinition("$trait for $struct", impl)
+        parentContext.definition.addDefinition(impl)
     }
 
 
@@ -96,9 +96,9 @@ object SugarcoatParser {
         scanner.consume("struct")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'struct'." }.text
         val constructorName = if (scanner.tryConsume("constructor")) scanner.consume(TokenType.IDENTIFIER).text else "create"
-        val struct = StructDefinition(parentContext.definition, constructorName)
+        val struct = StructDefinition(parentContext.definition, name)
         parseClassifier(scanner, parentContext, struct)
-        parentContext.definition.addDefinition(name, struct)
+        parentContext.definition.addDefinition(struct)
     }
 
 
@@ -107,7 +107,7 @@ object SugarcoatParser {
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'object'." }.text
         val o = ObjectDefinition(parentContext.definition, name)
         parseClassifier(scanner, parentContext, o)
-        parentContext.definition.addDefinition(name, o)
+        parentContext.definition.addDefinition(o)
     }
 
     fun parseTrait(scanner: Scanner<TokenType>, parentContext: ParsingContext) {
@@ -115,7 +115,7 @@ object SugarcoatParser {
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'trait'." }.text
         val trait = TraitDefinition(parentContext.definition, name)
         parseClassifier(scanner, parentContext, trait)
-        parentContext.definition.addDefinition(name, trait)
+        parentContext.definition.addDefinition(trait)
     }
 
     fun parseClassifier(
@@ -142,7 +142,7 @@ object SugarcoatParser {
                         parseType(scanner, parsingContext)
                     }
                     val defaultExpr = if (scanner.tryConsume("=")) parseExpression(scanner, parsingContext) else null
-                    classifier.addDefinition(name, FieldDefinition(classifier, type, defaultExpr))
+                    classifier.addDefinition(FieldDefinition(classifier, name, type, defaultExpr))
                 }
             }
             if (currentIndent(scanner) != depth) {

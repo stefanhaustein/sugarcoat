@@ -6,26 +6,29 @@ import org.kobjects.sugarcoat.fn.ParameterConsumer
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.base.RuntimeContext
+import org.kobjects.sugarcoat.model.Instance
 
-class NativeMethod(
+class NativeFunction(
     override val parent: NativeType,
+    val static: Boolean,
     val returnType: Type,
-    val name: String,
+    override val name: String,
     val args: Array<out Pair<String, Type>>,
     val op: (List<RuntimeContext>) -> RuntimeContext
 ) : Definition, Callable {
 
-    override fun addDefinition(name: String, value: Definition) {
-        throw UnsupportedOperationException()
-    }
 
     override fun call(
-        receiver: RuntimeContext,
+        receiver: Instance?,
         children: List<ParameterReference>,
         parameterContext: RuntimeContext
     ): RuntimeContext {
+        require(static == (receiver == null)) {
+            if (static) "Unexpected receiver for static method." else "Receiver expected for instance method."
+        }
         val parameterConsumer = ParameterConsumer(children)
-        val parameterList = mutableListOf(receiver)
+        val parameterList: MutableList<RuntimeContext> =
+            if (static) mutableListOf() else mutableListOf(receiver!!)
         for (parameter in args) {
             parameterList.add(parameterConsumer.read(parameterContext, parameter.first, parameter.second))
         }

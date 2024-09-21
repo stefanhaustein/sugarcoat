@@ -6,10 +6,7 @@ import org.kobjects.sugarcoat.base.Type
 
 class FieldDefinition(
     override val parent: Definition,
+    override val name: String,
     val type: Type,
     val defaultExpression: Expression?
-) : Definition {
-    override fun addDefinition(name: String, value: Definition) {
-        throw IllegalArgumentException("Adding $value to fields is not supported.")
-    }
-}
+) : Definition

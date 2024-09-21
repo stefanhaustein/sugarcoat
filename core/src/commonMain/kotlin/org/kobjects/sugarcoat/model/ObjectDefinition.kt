@@ -1,7 +1,8 @@
 package org.kobjects.sugarcoat.model
 
 import org.kobjects.sugarcoat.base.Definition
+import org.kobjects.sugarcoat.base.ResolvedType
 
-class ObjectDefinition(parent: Definition, name: String) : AbstractClassifierDefinition(parent, name) {
+class ObjectDefinition(parent: Definition, name: String) : ResolvedType, AbstractClassifierDefinition(parent, name) {
 
 }
