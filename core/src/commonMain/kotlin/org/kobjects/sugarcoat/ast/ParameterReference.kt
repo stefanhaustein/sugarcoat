@@ -1,6 +1,4 @@
-package org.kobjects.sugarcoat.fn
-
-import org.kobjects.sugarcoat.ast.Expression
+package org.kobjects.sugarcoat.ast
 
 data class ParameterReference(
     val name: String,

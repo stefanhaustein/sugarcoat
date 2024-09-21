@@ -10,7 +10,7 @@ import org.kobjects.sugarcoat.model.FieldDefinition
 import org.kobjects.sugarcoat.model.ImplDefinition
 import org.kobjects.sugarcoat.base.ImplicitType
 import org.kobjects.sugarcoat.model.ObjectDefinition
-import org.kobjects.sugarcoat.fn.ParameterReference
+import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.model.Program
 import org.kobjects.sugarcoat.model.StructDefinition
 import org.kobjects.sugarcoat.ast.SymbolExpression

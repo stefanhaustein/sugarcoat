@@ -1,5 +1,6 @@
 package org.kobjects.sugarcoat.fn
 
+import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.RuntimeContext
 
 class LocalContext(

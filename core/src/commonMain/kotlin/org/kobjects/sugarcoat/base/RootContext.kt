@@ -2,7 +2,7 @@ package org.kobjects.sugarcoat.base
 
 import org.kobjects.sugarcoat.ast.LambdaExpression
 import org.kobjects.sugarcoat.ast.LiteralExpression
-import org.kobjects.sugarcoat.fn.ParameterReference
+import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.ast.SymbolExpression
 import org.kobjects.sugarcoat.datatype.F64Type
 import org.kobjects.sugarcoat.datatype.I64RangeType

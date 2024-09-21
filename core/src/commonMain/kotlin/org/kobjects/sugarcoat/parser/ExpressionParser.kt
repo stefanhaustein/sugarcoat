@@ -9,8 +9,8 @@ import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.base.ImplicitType
 import org.kobjects.sugarcoat.ast.LiteralExpression
-import org.kobjects.sugarcoat.fn.ParameterListBuilder
-import org.kobjects.sugarcoat.fn.ParameterReference
+import org.kobjects.sugarcoat.ast.ParameterListBuilder
+import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.model.Program
 import org.kobjects.sugarcoat.ast.SymbolExpression
 
