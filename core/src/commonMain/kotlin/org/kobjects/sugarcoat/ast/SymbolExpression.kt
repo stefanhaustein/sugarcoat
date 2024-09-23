@@ -1,6 +1,8 @@
 package org.kobjects.sugarcoat.ast
 
-import org.kobjects.sugarcoat.base.RuntimeContext
+import org.kobjects.sugarcoat.base.Scope
+import org.kobjects.sugarcoat.base.Type
+import org.kobjects.sugarcoat.model.Instance
 
 
 class SymbolExpression(
@@ -11,7 +13,8 @@ class SymbolExpression(
 ) : Expression {
     constructor(receiver: Expression?, name: String, precedence: Int, vararg children: Expression) : this(receiver, name, children.map { ParameterReference("", it) }, precedence)
     constructor(name: String, vararg children: Expression) : this(null, name, children.map { ParameterReference("", it) })
-    override fun eval(context: RuntimeContext): RuntimeContext = if (receiver == null) context.evalSymbol(name, children, context)
+
+    override fun eval(context: Scope) = if (receiver == null) context.evalSymbol(name, children, context)
         else {
             val baseContext = receiver.eval(context)
             baseContext.evalSymbol(name, children, context)
@@ -58,4 +61,6 @@ class SymbolExpression(
         }
 
     }
+
+    override fun getType(): Type = throw UnsupportedOperationException()
 }

@@ -3,7 +3,7 @@ package org.kobjects.sugarcoat.datatype
 object VoidType : NativeType("Void") {
 
 
-    object Instance : NativeInstance() {
+    object VoidInstance : NativeInstance() {
         override val type: NativeType
             get() = VoidType
     }

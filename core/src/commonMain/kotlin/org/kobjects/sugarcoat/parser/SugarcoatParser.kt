@@ -74,8 +74,8 @@ object SugarcoatParser {
         }
         val returnType = if (scanner.tryConsume("->")) parseType(scanner, parentContext) else VoidType
         val body = parseBlock(scanner, parentContext)
-        val fn = FunctionDefinition(parentContext.definition, static, name, parameters, returnType, body)
-        parentContext.definition.addDefinition(fn)
+        val fn = FunctionDefinition(parentContext.namespace, static, name, parameters, returnType, body)
+        parentContext.namespace.addDefinition(fn)
     }
 
 
@@ -85,10 +85,10 @@ object SugarcoatParser {
         scanner.consume("for")
         val struct = parseType(scanner, parentContext)
 
-        val impl = ImplDefinition(parentContext.definition, trait, struct)
+        val impl = ImplDefinition(parentContext.namespace, trait, struct)
 
         parseClassifier(scanner, parentContext, impl)
-        parentContext.definition.addDefinition(impl)
+        parentContext.namespace.addDefinition(impl)
     }
 
 
@@ -96,26 +96,26 @@ object SugarcoatParser {
         scanner.consume("struct")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'struct'." }.text
         val constructorName = if (scanner.tryConsume("constructor")) scanner.consume(TokenType.IDENTIFIER).text else "create"
-        val struct = StructDefinition(parentContext.definition, name)
+        val struct = StructDefinition(parentContext.namespace, name, constructorName)
         parseClassifier(scanner, parentContext, struct)
-        parentContext.definition.addDefinition(struct)
+        parentContext.namespace.addDefinition(struct)
     }
 
 
     fun parseObject(scanner: Scanner<TokenType>, parentContext: ParsingContext) {
         scanner.consume("object")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'object'." }.text
-        val o = ObjectDefinition(parentContext.definition, name)
+        val o = ObjectDefinition(parentContext.namespace, name)
         parseClassifier(scanner, parentContext, o)
-        parentContext.definition.addDefinition(o)
+        parentContext.namespace.addDefinition(o)
     }
 
     fun parseTrait(scanner: Scanner<TokenType>, parentContext: ParsingContext) {
         scanner.consume("trait")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'trait'." }.text
-        val trait = TraitDefinition(parentContext.definition, name)
+        val trait = TraitDefinition(parentContext.namespace, name)
         parseClassifier(scanner, parentContext, trait)
-        parentContext.definition.addDefinition(trait)
+        parentContext.namespace.addDefinition(trait)
     }
 
     fun parseClassifier(
@@ -127,7 +127,7 @@ object SugarcoatParser {
         if (depth <= parentContext.depth) {
             return
         }
-        val parsingContext = parentContext.copy(depth = depth, definition = classifier)
+        val parsingContext = parentContext.copy(depth = depth, namespace = classifier)
         scanner.consume(TokenType.NEWLINE)
         while (true) {
             if (scanner.current.type != TokenType.NEWLINE) {
@@ -206,7 +206,7 @@ object SugarcoatParser {
             } while (scanner.tryConsume(","))
             scanner.consume(">") { "'>' expected at the end of the generic parameter name list." }
         }
-        return TypeReference(name, genericParameters.toList())
+        return TypeReference(parsingContext.namespace, name, genericParameters.toList())
     }
 
 

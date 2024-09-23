@@ -19,7 +19,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
     { scanner, context -> ExpressionParser.parsePrimary(scanner, context) },
     prefix(10, "+", "-") { _, _, name, operand -> SymbolExpression(operand, name, 10) },
     infix(9, "**") { _, _, _, left, right -> SymbolExpression(left, "**", 9, right) },
-    infix(8, "as") { _, _, _, left, right -> AsExpression(left, right) },
+    infix(8, "as") { _, context, _, left, right -> AsExpression(context.namespace, left, right) },
     infix(7, "*", "/", "%", "//") { _, _, name, left, right -> SymbolExpression(left, name, 7, right) },
     infix(6, "+", "-") { _, _, name, left, right -> SymbolExpression(left, name, 6, right) },
     infix(5, "<", "<=", ">", ">=") { _, _, name, left, right -> SymbolExpression(left, name, 5, right) },

@@ -1,13 +1,13 @@
 package org.kobjects.sugarcoat.model
 
-import org.kobjects.sugarcoat.base.Definition
+import org.kobjects.sugarcoat.base.Namespace
 import org.kobjects.sugarcoat.base.ResolvedType
 import org.kobjects.sugarcoat.fn.ParameterConsumer
 import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.base.RuntimeContext
+import org.kobjects.sugarcoat.base.Scope
 
 class StructDefinition(
-    parent: Definition,
+    parent: Namespace,
     name: String,
     val constructorName: String = "create"
 ): ResolvedType, AbstractClassifierDefinition(parent, name) {
@@ -15,8 +15,8 @@ class StructDefinition(
     override fun evalSymbol(
         name: String,
         children: List<ParameterReference>,
-        parameterContext: RuntimeContext
-    ): RuntimeContext {
+        parameterContext: Scope
+    ): Scope {
         return if (name == constructorName) {
             val parameterConsumer = ParameterConsumer(children)
             val instance = StructInstance(this, this)

@@ -8,14 +8,15 @@ import org.kobjects.sugarcoat.datatype.F64Type
 import org.kobjects.sugarcoat.datatype.I64RangeType
 import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.LocalContext
+import org.kobjects.sugarcoat.model.Instance
 import kotlin.math.sqrt
 
-object RootContext : RuntimeContext {
+object RootContext : Scope {
     override fun evalSymbol(
         name: String,
         children: List<ParameterReference>,
-        parameterContext: RuntimeContext
-    ): RuntimeContext = when (name) {
+        parameterContext: Scope
+    ) = when (name) {
             "for" -> evalFor(children, parameterContext)
             "if" -> evalIf(children, parameterContext)
 
@@ -39,7 +40,7 @@ object RootContext : RuntimeContext {
                 else -> throw IllegalArgumentException("2 or 3 parameter expected for range, but got ${children.size}")
             }
 
-            "seq" -> children.fold<ParameterReference, RuntimeContext>(VoidType.Instance) { _, current ->
+            "seq" -> children.fold<ParameterReference, Scope>(VoidType.VoidInstance) { _, current ->
                 current.value.eval(
                     parameterContext
                 )
@@ -50,7 +51,7 @@ object RootContext : RuntimeContext {
                 val target = (children.first() as LiteralExpression).value as String
                 (parameterContext as LocalContext).symbols[target] =
                     children.last().value.eval(parameterContext)
-                VoidType.Instance
+                VoidType.VoidInstance
             }
 
             "while" -> {
@@ -58,14 +59,14 @@ object RootContext : RuntimeContext {
                 while (children[0].value.evalBoolean(parameterContext)) children[1].value.eval(
                     parameterContext
                 )
-                VoidType.Instance
+                VoidType.VoidInstance
             }
 
             else -> throw IllegalStateException("Unrecognized symbol: '$name'")
         }
 
 
-fun evalIf(children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext {
+fun evalIf(children: List<ParameterReference>, parameterContext: Scope): Scope {
     if (children[0].value.evalBoolean(parameterContext)) {
         return children[1].value.eval(parameterContext)
     }
@@ -85,16 +86,16 @@ fun evalIf(children: List<ParameterReference>, parameterContext: RuntimeContext)
             else -> throw IllegalStateException("else or elif expected; got: '${child.name}'")
         }
     }
-    return VoidType.Instance
+    return VoidType.VoidInstance
 }
 
-fun evalFor(children: List<ParameterReference>, parameterContext: RuntimeContext): RuntimeContext {
+fun evalFor(children: List<ParameterReference>, parameterContext: Scope): Instance {
     val range = (children[0].value.eval(parameterContext) as I64RangeType.Instance).value
     for (value in range) {
         (children[1].value as LambdaExpression).lambda.call(null, listOf(
             ParameterReference("", LiteralExpression(value))
         ), parameterContext)
     }
-    return VoidType.Instance
+    return VoidType.VoidInstance
 }
 }

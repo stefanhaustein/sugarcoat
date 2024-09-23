@@ -2,17 +2,18 @@ package org.kobjects.sugarcoat.model
 
 import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.base.RuntimeContext
+import org.kobjects.sugarcoat.base.Scope
+import org.kobjects.sugarcoat.base.Type
 
-interface Instance : RuntimeContext {
+interface Instance : Scope {
     val type: AbstractClassifierDefinition
 
 
     override fun evalSymbol(
         name: String,
         children: List<ParameterReference>,
-        parameterContext: RuntimeContext
-    ): RuntimeContext {
+        parameterContext: Scope
+    ): Scope {
         val method = type.definitions[name]
         require(method is Callable) {
             "Unrecogized method $name: $method"

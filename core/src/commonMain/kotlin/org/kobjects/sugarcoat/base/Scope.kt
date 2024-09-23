@@ -5,14 +5,15 @@ import org.kobjects.sugarcoat.datatype.F64Type
 import org.kobjects.sugarcoat.datatype.I64Type
 import org.kobjects.sugarcoat.datatype.StringType
 import org.kobjects.sugarcoat.ast.ParameterReference
+import org.kobjects.sugarcoat.model.Instance
 
 
-interface RuntimeContext {
+interface Scope {
     fun evalSymbol(
         name: String,
         children: List<ParameterReference>,
-        parameterContext: RuntimeContext
-    ): RuntimeContext
+        parameterContext: Scope
+    ): Scope
 
     fun i32(): Int = throw UnsupportedOperationException()
     fun i64(): Long = throw UnsupportedOperationException()

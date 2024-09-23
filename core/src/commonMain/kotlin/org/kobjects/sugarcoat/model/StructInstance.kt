@@ -1,20 +1,20 @@
 package org.kobjects.sugarcoat.model
 
-import org.kobjects.sugarcoat.base.RuntimeContext
+import org.kobjects.sugarcoat.base.Scope
 import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.ast.ParameterReference
 
 class StructInstance(
-    val parentContext: RuntimeContext,
+    val parentContext: Scope,
     override val type: StructDefinition
 ) : Instance {
-    val fields = mutableMapOf<String, RuntimeContext>()
+    val fields = mutableMapOf<String, Scope>()
 
     override fun evalSymbol(
         name: String,
         children: List<ParameterReference>,
-        parameterContext: RuntimeContext
-    ): RuntimeContext {
+        parameterContext: Scope
+    ): Scope {
         val resolvedField = fields[name]
         if (resolvedField != null) {
             require(children.isEmpty()) {
