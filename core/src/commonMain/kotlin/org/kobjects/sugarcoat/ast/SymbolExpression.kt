@@ -1,18 +1,20 @@
 package org.kobjects.sugarcoat.ast
 
+import org.kobjects.sugarcoat.base.Namespace
 import org.kobjects.sugarcoat.base.Scope
 import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.model.Instance
 
 
 class SymbolExpression(
+    val namespace: Namespace,
     val receiver: Expression?,
     val name: String,
     val children: List<ParameterReference>,
     val precedence: Int = 0
 ) : Expression {
-    constructor(receiver: Expression?, name: String, precedence: Int, vararg children: Expression) : this(receiver, name, children.map { ParameterReference("", it) }, precedence)
-    constructor(name: String, vararg children: Expression) : this(null, name, children.map { ParameterReference("", it) })
+    constructor(namespace: Namespace, receiver: Expression, name: String, precedence: Int, vararg children: Expression) : this(namespace, receiver, name, children.map { ParameterReference("", it) }, precedence)
+    constructor(namespace: Namespace, name: String, vararg children: Expression) : this(namespace, null, name, children.map { ParameterReference("", it) })
 
     override fun eval(context: Scope) = if (receiver == null) context.evalSymbol(name, children, context)
         else {

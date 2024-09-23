@@ -12,7 +12,7 @@ class TestSourceTest {
     val CASES = arrayOf(
         COMPLEX_CASE,
         FIZZBUZZ_CASE,
-    //    FARM_CASE
+       FARM_CASE
     )
 
     @Test

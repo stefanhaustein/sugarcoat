@@ -158,7 +158,7 @@ object SugarcoatParser {
         val depth = currentIndent(scanner)
         println("ParseBody; parent: $parentContext; depth: $depth")
         if (depth <= parentContext.depth) {
-            return SymbolExpression("seq")
+            return SymbolExpression(parentContext.namespace, "seq")
         }
         scanner.consume(TokenType.NEWLINE)
 
@@ -178,7 +178,7 @@ object SugarcoatParser {
             }
             scanner.consume(TokenType.NEWLINE)
         }
-        return if (result.size == 1) result.first().value else SymbolExpression(null, "seq", result)
+        return if (result.size == 1) result.first().value else SymbolExpression(parentContext.namespace, null, "seq", result)
     }
 
     fun parseStatement(scanner: Scanner<TokenType>, parsingContext: ParsingContext): Expression {
