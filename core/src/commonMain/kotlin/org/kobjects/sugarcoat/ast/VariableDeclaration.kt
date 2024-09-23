@@ -1,8 +1,7 @@
 package org.kobjects.sugarcoat.ast
 
 import org.kobjects.sugarcoat.datatype.VoidType
-import org.kobjects.sugarcoat.fn.LocalContext
-import org.kobjects.sugarcoat.base.Scope
+import org.kobjects.sugarcoat.fn.RuntimeContext
 import org.kobjects.sugarcoat.model.Instance
 
 class VariableDeclaration(
@@ -10,15 +9,13 @@ class VariableDeclaration(
     val mutable: Boolean,
     val value: Expression) : Expression {
 
-    override fun eval(context: Scope): Instance {
-        require(context is LocalContext) {
-            "Local context required"
-        }
+    override fun eval(context: RuntimeContext): Any {
+
         require (!context.symbols.containsKey(name)) {
             "Local variable '$name' already declared in this context."
         }
         context.symbols[name] = value.eval(context)
-        return VoidType.VoidInstance
+        return Unit
     }
 
     override fun getType() = VoidType

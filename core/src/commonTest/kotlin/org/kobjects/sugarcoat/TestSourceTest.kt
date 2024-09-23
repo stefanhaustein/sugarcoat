@@ -9,15 +9,16 @@ import kotlin.test.assertEquals
 
 class TestSourceTest {
 
-    val CASES = arrayOf(
-        COMPLEX_CASE,
-        FIZZBUZZ_CASE,
-       FARM_CASE
-    )
+    @Test
+    fun testComplex() = testSource(COMPLEX_CASE)
 
     @Test
-    fun testSources() {
-        for (case in CASES) {
+    fun testFizzBuzz() = testSource(FIZZBUZZ_CASE)
+
+    @Test
+    fun testFarm() = testSource(FARM_CASE)
+
+    fun testSource(case: Array<String>) {
             val name = case[0]
             val source = case[1]
             val expected = trim(case[2])
@@ -29,7 +30,6 @@ class TestSourceTest {
             val actual = trim(result.toString())
 
             assertEquals(expected, actual, "Unexpected result for $name.")
-        }
     }
 
     companion object {

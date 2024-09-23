@@ -11,8 +11,8 @@ class ExpressionsTest {
     @Test
     fun testSimpleExpressions() {
 
-        assertEquals(I64Type.Instance(-4), ExpressionParser.eval("4-4-4"))
+        assertEquals(-4L, ExpressionParser.eval("4-4-4"))
         // assertEquals("Hello", ctx.eval("left(\"HelloWorld\", 5)"))
-        assertEquals(F64Type.Instance(4.0), ExpressionParser.eval("2.0**2.0"))
+        assertEquals(4.0, ExpressionParser.eval("2.0**2.0"))
     }
 }

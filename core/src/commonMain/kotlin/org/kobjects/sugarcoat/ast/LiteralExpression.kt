@@ -1,17 +1,15 @@
 package org.kobjects.sugarcoat.ast
 
-import org.kobjects.sugarcoat.base.Scope
-import org.kobjects.sugarcoat.datatype.NativeInstance
-import org.kobjects.sugarcoat.datatype.StringType
+import org.kobjects.sugarcoat.base.Type
+import org.kobjects.sugarcoat.fn.RuntimeContext
 
-class LiteralExpression(value: Any) : Expression {
-    val value: NativeInstance = Scope.of(value)
+class LiteralExpression(val value: Any) : Expression {
 
-    override fun eval(ctx: Scope) = value
+    override fun eval(context: RuntimeContext) = value
 
-    override fun getType() = value.type
+    override fun getType() = Type.of(value)
 
     override fun toString() =
-        if (value is StringType.Instance) "\"" + value.value.replace("\"", "\"\"").replace("\n", "\\n") + "\""
+        if (value is String) "\"" + value.replace("\"", "\"\"").replace("\n", "\\n") + "\""
         else value.toString()
 }

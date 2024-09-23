@@ -5,7 +5,7 @@ import org.kobjects.sugarcoat.base.Namespace
 import org.kobjects.sugarcoat.fn.ParameterConsumer
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.Type
-import org.kobjects.sugarcoat.base.Scope
+import org.kobjects.sugarcoat.fn.RuntimeContext
 import org.kobjects.sugarcoat.model.Instance
 
 class NativeFunction(
@@ -14,24 +14,24 @@ class NativeFunction(
     val returnType: Type,
     override val name: String,
     val args: Array<out Pair<String, Type>>,
-    val op: (List<Scope>) -> Scope
+    val op: (NativeArgList) -> Any
 ) : Namespace, Callable {
 
 
     override fun call(
-        receiver: Instance?,
+        receiver: Any?,
         children: List<ParameterReference>,
-        parameterScope: Scope
-    ): Scope {
+        parameterScope: RuntimeContext
+    ): Any {
         require(static == (receiver == null)) {
             if (static) "Unexpected receiver for static method." else "Receiver expected for instance method."
         }
         val parameterConsumer = ParameterConsumer(children)
-        val parameterList: MutableList<Scope> =
+        val parameterList: MutableList<Any> =
             if (static) mutableListOf() else mutableListOf(receiver!!)
         for (parameter in args) {
             parameterList.add(parameterConsumer.read(parameterScope, parameter.first, parameter.second))
         }
-        return op(parameterList)
+        return op(NativeArgList(parameterList))
     }
 }

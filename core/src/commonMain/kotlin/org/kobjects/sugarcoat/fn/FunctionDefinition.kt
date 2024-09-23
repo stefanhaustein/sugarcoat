@@ -4,7 +4,6 @@ import org.kobjects.sugarcoat.base.Namespace
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.Type
-import org.kobjects.sugarcoat.base.Scope
 import org.kobjects.sugarcoat.model.AbstractClassifierDefinition
 import org.kobjects.sugarcoat.model.Instance
 
@@ -18,10 +17,10 @@ data class FunctionDefinition(
 ) : Instance, Callable, Namespace {
 
     override fun call(
-        receiver: Instance?,
+        receiver: Any?,
         children: List<ParameterReference>,
-        parameterScope: Scope
-    ): Scope {
+        parameterScope: RuntimeContext
+    ): Any {
 
         require(static == (receiver == null)) {
             if (static) "Unexpected receiver for static method." else "Receiver expected for instance method."
@@ -29,7 +28,7 @@ data class FunctionDefinition(
 
         val parameterConsumer = ParameterConsumer(children)
 
-        val localContext = LocalContext(receiver ?: parameterScope)
+        val localContext = RuntimeContext(this, receiver)
         for (p in parameters) {
             localContext.symbols[p.name] = parameterConsumer.read(parameterScope, p)
         }
@@ -40,14 +39,6 @@ data class FunctionDefinition(
 
     override val type: AbstractClassifierDefinition
         get() = TODO("Not yet implemented")
-
-    override fun evalSymbol(
-        name: String,
-        children: List<ParameterReference>,
-        parameterContext: Scope
-    ): Instance {
-        throw UnsupportedOperationException("'$name' not supported for functions")
-    }
 
     override fun toString() =
         "(${parameters.joinToString (", ")})\n  $body"

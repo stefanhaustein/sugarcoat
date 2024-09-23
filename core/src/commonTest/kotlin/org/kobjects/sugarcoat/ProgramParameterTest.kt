@@ -21,7 +21,7 @@ fn main(x: F64)
         val program = SugarcoatParser.parseProgram(SQR)
 
         assertEquals("fn main(x: F64)\n  x * x\n", program.toString())
-        assertEquals(F64Type.Instance(4.0), program.run(2.0))
+        assertEquals(4.0, program.run(2.0))
     }
 
 }

@@ -13,6 +13,7 @@ import org.kobjects.sugarcoat.ast.ParameterListBuilder
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.model.Program
 import org.kobjects.sugarcoat.ast.SymbolExpression
+import org.kobjects.sugarcoat.fn.RuntimeContext
 
 
 object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, ParsingContext, Expression>(
@@ -168,6 +169,6 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
         val parsed = parseExpression(
             scanner, ParsingContext(Program())
         )
-        return parsed.eval(Program())
+        return parsed.eval(RuntimeContext(Program(), null))
     }
 }

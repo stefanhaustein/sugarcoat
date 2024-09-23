@@ -4,7 +4,6 @@ import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.datatype.ListType
-import org.kobjects.sugarcoat.base.Scope
 import org.kobjects.sugarcoat.model.Instance
 
 class ParameterConsumer(
@@ -13,26 +12,27 @@ class ParameterConsumer(
     var index = 0
     val consumed = mutableSetOf<Int>()
 
-    fun read(parameterContext: Scope, parameterDefinition: ParameterDefinition) = read(parameterContext, parameterDefinition.name, parameterDefinition.type, parameterDefinition.repeated)
+    fun read(parameterContext: RuntimeContext, parameterDefinition: ParameterDefinition) =
+        read(parameterContext, parameterDefinition.name, parameterDefinition.type, parameterDefinition.repeated)
 
-    fun read(parameterContext: Scope, name: String, type: Type, repeated: Boolean = false): Scope {
+    fun read(parameterContext: RuntimeContext, name: String, type: Type, repeated: Boolean = false): Any {
         if (repeated) {
-            val result = mutableListOf<Scope>()
+            val result = mutableListOf<Any>()
             while (true) {
                 val p = readSingle(parameterContext, name, type) ?: break
                 result.add(p)
             }
-            return ListType.Instance(result.toList())
+            return result.toList()
         }
         return readSingle(parameterContext, name, type) ?: throw IllegalStateException("Parameter $name not found in argument list $parameterReferences")
     }
 
 
     private fun readSingle(
-        parameterContext: Scope,
+        parameterContext: RuntimeContext,
         name: String,
         type: Type
-    ): Scope? {
+    ): Any? {
         var rawResult: Expression? = null
         if (index < parameterReferences.size
             && parameterReferences[index].name.isEmpty()) {

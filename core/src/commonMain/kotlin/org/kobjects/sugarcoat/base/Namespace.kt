@@ -8,7 +8,8 @@ interface Namespace {
 
     fun addDefinition(value: Namespace): Unit = throw UnsupportedOperationException()
 
-    fun get(name: String): Namespace = parent!!.get(name)
+    fun resolve(name: String): Namespace? = parent?.resolve(name)
 
-    fun findImpl(source: ResolvedType, target: ResolvedType): ImplDefinition = parent!!.findImpl(source, target)
+    fun findImpl(source: ResolvedType, target: ResolvedType): ImplDefinition =
+        parent!!.findImpl(source, target)
 }
