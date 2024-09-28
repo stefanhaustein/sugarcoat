@@ -4,7 +4,6 @@ import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.Namespace
 import org.kobjects.sugarcoat.base.RootContext
 import org.kobjects.sugarcoat.base.Type
-import org.kobjects.sugarcoat.datatype.NativeFunction
 import org.kobjects.sugarcoat.model.Instance
 
 class RuntimeContext(
@@ -36,7 +35,7 @@ class RuntimeContext(
                     return evalResolved(field, instance, children)
                 }
             }
-            val resolved = namespace.resolve(name)
+            val resolved = namespace.resolveOrNull(name)
             if (resolved != null) {
                 return evalResolved(resolved, null, children)
             }
@@ -45,9 +44,6 @@ class RuntimeContext(
 
         if (receiver is Namespace) {
             val resolved = receiver.resolve(name)
-            require(resolved != null) {
-                "Unable to resolve '$name'"
-            }
             return evalResolved(resolved, null, children)
         }
 
@@ -56,7 +52,7 @@ class RuntimeContext(
             if (field != null) {
                 return evalResolved(field, receiver, children)
             }
-            val resolved = receiver.type.resolve(name)
+            val resolved = receiver.type.resolveOrNull(name)
             require(resolved != null) {
                 "Unable to resolve '$name'"
             }
@@ -64,7 +60,7 @@ class RuntimeContext(
         }
 
         val type = Type.of(receiver)
-        val resolved = type.resolve(name)
+        val resolved = type.resolveOrNull(name)
         if (resolved != null) {
             return evalResolved(resolved, receiver, children)
         }
