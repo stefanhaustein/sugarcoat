@@ -24,6 +24,10 @@ class StructDefinition(
                 override val name: String
                     get() = constructorName
 
+                override fun serialize(sb: StringBuilder) {
+                    throw UnsupportedOperationException()
+                }
+
                 override fun call(
                     receiver: Any?,
                     children: List<ParameterReference>,
@@ -51,5 +55,10 @@ class StructDefinition(
         return super<AbstractClassifierDefinition>.resolve(name)
     }
 
+    override fun toString() = "struct $name"
 
+    override fun serialize(sb: StringBuilder) {
+        sb.append("struct $name\n")
+        serializeBody(sb)
+    }
 }

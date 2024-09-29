@@ -38,7 +38,17 @@ abstract class AbstractClassifierDefinition(
         }
         throw IllegalStateException("Unable to resolve '$name' in ${this.name} containing ${definitions.keys}")
     }
-    override fun toString() =
+
+    abstract override fun toString(): String
+
+    fun serializeBody(sb: StringBuilder) {
+        for ((name, definition) in definitions) {
+            sb.append("  ")
+            definition.serialize(sb)
+        }
+
+    }
+    /*=
         buildString {
             for ((name, definition) in definitions) {
                 when (definition) {
@@ -48,5 +58,5 @@ abstract class AbstractClassifierDefinition(
                 }
             }
         }
-
+*/
 }

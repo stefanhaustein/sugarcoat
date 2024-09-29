@@ -9,4 +9,11 @@ class ImplDefinition(
     val struct: Type
 ) : AbstractClassifierDefinition(parent, "") {
     override fun resolve() = trait.resolve()
+
+    override fun toString() = "impl $trait for $struct"
+
+    override fun serialize(sb: StringBuilder) {
+        sb.append("impl $trait for $struct\n")
+        serializeBody(sb)
+    }
 }

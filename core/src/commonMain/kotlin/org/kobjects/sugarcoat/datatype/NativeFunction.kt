@@ -38,4 +38,8 @@ data class NativeFunction(
 
     override val type: Type
         get() = FunctionType(args.map { it.second }, returnType)
+
+    override fun serialize(sb: StringBuilder) {
+        sb.append("native fn $name\n")
+    }
 }

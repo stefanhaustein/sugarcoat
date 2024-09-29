@@ -32,4 +32,6 @@ interface Namespace {
             throw RuntimeException("Unable to map '$source' to '$target' in $this")
         }
     }
+
+    fun serialize(sb: StringBuilder)
 }

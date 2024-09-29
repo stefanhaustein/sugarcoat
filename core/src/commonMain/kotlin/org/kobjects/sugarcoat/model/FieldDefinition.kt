@@ -9,4 +9,13 @@ class FieldDefinition(
     override val name: String,
     val type: Type,
     val defaultExpression: Expression?
-) : Namespace
+) : Namespace {
+    override fun serialize(sb: StringBuilder) {
+        sb.append("$name: $type")
+        if (defaultExpression != null) {
+            sb.append(" = ")
+            defaultExpression.stringify(sb, 0)
+        }
+        sb.append("\n")
+    }
+}

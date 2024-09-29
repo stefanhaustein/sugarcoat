@@ -28,5 +28,10 @@ abstract class NativeType(
         addDefinition(NativeFunction(this, true, returnType, name, args, op))
     }
 
+    override fun toString(): String = "native $name"
 
+    override fun serialize(sb: StringBuilder) {
+        sb.append("native type $name\n")
+        serializeBody(sb)
+    }
 }

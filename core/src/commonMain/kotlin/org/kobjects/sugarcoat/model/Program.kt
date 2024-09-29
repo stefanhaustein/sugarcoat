@@ -28,7 +28,13 @@ class Program(
     }
 */
     override fun resolve(): ResolvedType = this
+    override fun toString() = "program $name"
 
+    fun serialize(): String {
+        val sb = StringBuilder()
+        serialize(sb)
+        return sb.toString()
+    }
 
     fun run(vararg parameters: Any): Any {
 
@@ -49,6 +55,13 @@ class Program(
             }
         }
         throw IllegalStateException("Unable to find map from '$source' to '$target'; available: $impls")
+    }
+
+    override fun serialize(sb: StringBuilder) {
+        for (definition in definitions.values) {
+            definition.serialize(sb)
+            sb.append("\n")
+        }
     }
 
 }
