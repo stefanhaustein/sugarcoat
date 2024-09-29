@@ -5,8 +5,9 @@ import org.kobjects.sugarcoat.base.Namespace
 import org.kobjects.sugarcoat.fn.ParameterConsumer
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.Type
-import org.kobjects.sugarcoat.fn.RuntimeContext
-import org.kobjects.sugarcoat.model.Instance
+import org.kobjects.sugarcoat.base.Typed
+import org.kobjects.sugarcoat.fn.FunctionType
+import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 
 class NativeFunction(
     override val parent: NativeType,
@@ -15,13 +16,13 @@ class NativeFunction(
     override val name: String,
     val args: Array<out Pair<String, Type>>,
     val op: (NativeArgList) -> Any
-) : Namespace, Callable {
+) : Namespace, Callable, Typed {
 
 
     override fun call(
         receiver: Any?,
         children: List<ParameterReference>,
-        parameterScope: RuntimeContext
+        parameterScope: LocalRuntimeContext
     ): Any {
         require(static == (receiver == null)) {
             if (static) "Unexpected receiver for static method." else "Receiver expected for instance method."
@@ -34,4 +35,7 @@ class NativeFunction(
         }
         return op(NativeArgList(parameterList))
     }
+
+    override val type: Type
+        get() = FunctionType(args.map { it.second }, returnType)
 }

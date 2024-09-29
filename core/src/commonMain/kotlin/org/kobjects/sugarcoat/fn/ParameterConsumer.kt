@@ -3,8 +3,6 @@ package org.kobjects.sugarcoat.fn
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.Type
-import org.kobjects.sugarcoat.datatype.ListType
-import org.kobjects.sugarcoat.model.Instance
 
 class ParameterConsumer(
     val parameterReferences: List<ParameterReference>
@@ -12,10 +10,10 @@ class ParameterConsumer(
     var index = 0
     val consumed = mutableSetOf<Int>()
 
-    fun read(parameterContext: RuntimeContext, parameterDefinition: ParameterDefinition) =
+    fun read(parameterContext: LocalRuntimeContext, parameterDefinition: ParameterDefinition) =
         read(parameterContext, parameterDefinition.name, parameterDefinition.type, parameterDefinition.repeated)
 
-    fun read(parameterContext: RuntimeContext, name: String, type: Type, repeated: Boolean = false): Any {
+    fun read(parameterContext: LocalRuntimeContext, name: String, type: Type, repeated: Boolean = false): Any {
         if (repeated) {
             val result = mutableListOf<Any>()
             while (true) {
@@ -29,7 +27,7 @@ class ParameterConsumer(
 
 
     private fun readSingle(
-        parameterContext: RuntimeContext,
+        parameterContext: LocalRuntimeContext,
         name: String,
         type: Type
     ): Any? {

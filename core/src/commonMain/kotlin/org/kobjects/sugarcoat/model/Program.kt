@@ -1,12 +1,12 @@
 package org.kobjects.sugarcoat.model
 
 import org.kobjects.sugarcoat.ast.LiteralExpression
-import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.FunctionDefinition
 import org.kobjects.sugarcoat.ast.ParameterReference
+import org.kobjects.sugarcoat.base.GlobalRuntimeContext
 import org.kobjects.sugarcoat.base.Namespace
 import org.kobjects.sugarcoat.base.ResolvedType
-import org.kobjects.sugarcoat.fn.RuntimeContext
+import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 
 class Program(
     val printFn: (String) -> Unit = ::print
@@ -23,10 +23,7 @@ class Program(
     }
 /*
     override fun evalSymbol(name: String, children: List<ParameterReference>, parameterContext: RuntimeContext): Any {
-        return if (name == "print") {
-                printFn(children.joinToString { it.value.eval(parameterContext).toString() })
-                Unit
-        }
+        return
         else super.evalSymbol(name, children, parameterContext)
     }
 */
@@ -35,7 +32,13 @@ class Program(
 
     fun run(vararg parameters: Any): Any {
 
-        return (definitions["main"] as FunctionDefinition).call(null, parameters.map { ParameterReference("", LiteralExpression(it)) }, RuntimeContext(this, null)) ?: throw IllegalStateException("main function not found.")
+        return (resolve("main") as FunctionDefinition).call(
+            null,
+            parameters.map { ParameterReference("", LiteralExpression(it)) },
+            LocalRuntimeContext(
+                GlobalRuntimeContext(printFn),
+                this,
+                null))
 
     }
 

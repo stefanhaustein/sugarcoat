@@ -2,11 +2,13 @@ package org.kobjects.sugarcoat.fn
 
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.Namespace
-import org.kobjects.sugarcoat.base.RootContext
+import org.kobjects.sugarcoat.base.ControlStructures
+import org.kobjects.sugarcoat.base.GlobalRuntimeContext
 import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.model.Instance
 
-class RuntimeContext(
+class LocalRuntimeContext(
+    val globalRuntimeContext: GlobalRuntimeContext,
     val namespace: Namespace,
     val instance: Any?
 ) {
@@ -39,7 +41,7 @@ class RuntimeContext(
             if (resolved != null) {
                 return evalResolved(resolved, null, children)
             }
-            return RootContext.evalSymbol(name, children, this)
+            return ControlStructures.evalSymbol(name, children, this)
         }
 
         if (receiver is Namespace) {
@@ -60,11 +62,13 @@ class RuntimeContext(
         }
 
         val type = Type.of(receiver)
-        val resolved = type.resolveOrNull(name)
-        if (resolved != null) {
-            return evalResolved(resolved, receiver, children)
+        if (type is Namespace) {
+            val resolved = type.resolveOrNull(name)
+            if (resolved != null) {
+                return evalResolved(resolved, receiver, children)
+            }
         }
-        return RootContext.evalSymbol(name, children, this)
+        return ControlStructures.evalSymbol(name, children, this)
     }
 
 }

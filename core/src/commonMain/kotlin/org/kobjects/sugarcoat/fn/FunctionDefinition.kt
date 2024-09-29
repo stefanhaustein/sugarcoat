@@ -4,6 +4,7 @@ import org.kobjects.sugarcoat.base.Namespace
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.Type
+import org.kobjects.sugarcoat.base.Typed
 import org.kobjects.sugarcoat.model.AbstractClassifierDefinition
 import org.kobjects.sugarcoat.model.Instance
 
@@ -14,12 +15,12 @@ data class FunctionDefinition(
     val parameters: List<ParameterDefinition>,
     val returnType: Type,
     val body: Expression
-) : Instance, Callable, Namespace {
+) : Callable, Namespace, Typed {
 
     override fun call(
         receiver: Any?,
         children: List<ParameterReference>,
-        parameterScope: RuntimeContext
+        parameterScope: LocalRuntimeContext
     ): Any {
 
         require(static == (receiver == null)) {
@@ -28,7 +29,7 @@ data class FunctionDefinition(
 
         val parameterConsumer = ParameterConsumer(children)
 
-        val localContext = RuntimeContext(this, receiver)
+        val localContext = LocalRuntimeContext(parameterScope.globalRuntimeContext, this, receiver)
         for (p in parameters) {
             localContext.symbols[p.name] = parameterConsumer.read(parameterScope, p)
         }
@@ -37,8 +38,8 @@ data class FunctionDefinition(
         return body.eval(localContext)
     }
 
-    override val type: AbstractClassifierDefinition
-        get() = TODO("Not yet implemented")
+    override val type: Type
+        get() = FunctionType(parameters.map { it.type }, returnType)
 
     override fun toString() =
         "(${parameters.joinToString (", ")})\n  $body"

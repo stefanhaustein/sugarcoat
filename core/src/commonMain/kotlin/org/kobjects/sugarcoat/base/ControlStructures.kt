@@ -4,21 +4,20 @@ import org.kobjects.sugarcoat.ast.LambdaExpression
 import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.ast.SymbolExpression
-import org.kobjects.sugarcoat.datatype.F64Type
-import org.kobjects.sugarcoat.datatype.I64RangeType
-import org.kobjects.sugarcoat.datatype.VoidType
-import org.kobjects.sugarcoat.fn.RuntimeContext
-import org.kobjects.sugarcoat.model.Instance
+import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import kotlin.math.sqrt
 
-object RootContext  {
+object ControlStructures  {
     fun evalSymbol(
         name: String,
         children: List<ParameterReference>,
-        parameterContext: RuntimeContext
+        parameterContext: LocalRuntimeContext
     ) = when (name) {
             "for" -> evalFor(children, parameterContext)
             "if" -> evalIf(children, parameterContext)
+
+            "print" -> parameterContext.globalRuntimeContext.printFn(children.joinToString { it.value.eval(parameterContext).toString() })
+
 
             "sqrt" -> sqrt(children[0].value.evalDouble(parameterContext))
 
@@ -49,7 +48,7 @@ object RootContext  {
             "=" -> {
                 require(children.size == 2) { "Two parameters expected for assignment" }
                 val target = (children.first() as LiteralExpression).value as String
-                (parameterContext as RuntimeContext).symbols[target] =
+                (parameterContext as LocalRuntimeContext).symbols[target] =
                     children.last().value.eval(parameterContext)
                 Unit
             }
@@ -66,7 +65,7 @@ object RootContext  {
         }
 
 
-fun evalIf(children: List<ParameterReference>, parameterContext: RuntimeContext): Any {
+fun evalIf(children: List<ParameterReference>, parameterContext: LocalRuntimeContext): Any {
     if (children[0].value.evalBoolean(parameterContext)) {
         return children[1].value.eval(parameterContext)
     }
@@ -89,7 +88,7 @@ fun evalIf(children: List<ParameterReference>, parameterContext: RuntimeContext)
     return Unit
 }
 
-fun evalFor(children: List<ParameterReference>, parameterContext: RuntimeContext): Any {
+fun evalFor(children: List<ParameterReference>, parameterContext: LocalRuntimeContext): Any {
     val range = children[0].value.eval(parameterContext) as LongRange
     for (value in range) {
         (children[1].value as LambdaExpression).lambda.call(null, listOf(

@@ -1,11 +1,11 @@
 package org.kobjects.sugarcoat.ast
 
 import org.kobjects.sugarcoat.base.Type
-import org.kobjects.sugarcoat.fn.RuntimeContext
+import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 
 class LiteralExpression(val value: Any) : Expression {
 
-    override fun eval(context: RuntimeContext) = value
+    override fun eval(context: LocalRuntimeContext) = value
 
     override fun getType() = Type.of(value)
 

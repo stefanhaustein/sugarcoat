@@ -2,7 +2,7 @@ package org.kobjects.sugarcoat.ast
 
 import org.kobjects.sugarcoat.base.Namespace
 import org.kobjects.sugarcoat.base.TypeReference
-import org.kobjects.sugarcoat.fn.RuntimeContext
+import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.model.ImplInstance
 import org.kobjects.sugarcoat.model.Instance
 
@@ -13,7 +13,7 @@ class AsExpression(
 ): Expression {
     val target = TypeReference(context, (target as SymbolExpression).name, emptyList())
 
-    override fun eval(context: RuntimeContext): Instance {
+    override fun eval(context: LocalRuntimeContext): Instance {
         val def = this.context.findImpl(source.getType().resolve(), target.resolve())
         return ImplInstance(def, source.eval(context))
     }

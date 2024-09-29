@@ -5,7 +5,7 @@ import org.kobjects.sugarcoat.base.ResolvedType
 import org.kobjects.sugarcoat.fn.ParameterConsumer
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.fn.Callable
-import org.kobjects.sugarcoat.fn.RuntimeContext
+import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 
 class StructDefinition(
     parent: Namespace,
@@ -24,7 +24,7 @@ class StructDefinition(
                 override fun call(
                     receiver: Any?,
                     children: List<ParameterReference>,
-                    parameterScope: RuntimeContext
+                    parameterScope: LocalRuntimeContext
                 ): Any {
                     val parameterConsumer = ParameterConsumer(children)
                     val instance = StructInstance(this@StructDefinition)

@@ -2,7 +2,7 @@ package org.kobjects.sugarcoat.ast
 
 import org.kobjects.sugarcoat.base.Namespace
 import org.kobjects.sugarcoat.base.Type
-import org.kobjects.sugarcoat.fn.RuntimeContext
+import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 
 
 
@@ -16,7 +16,7 @@ class SymbolExpression(
     constructor(namespace: Namespace, receiver: Expression, name: String, precedence: Int, vararg children: Expression) : this(namespace, receiver, name, children.map { ParameterReference("", it) }, precedence)
     constructor(namespace: Namespace, name: String, vararg children: Expression) : this(namespace, null, name, children.map { ParameterReference("", it) })
 
-    override fun eval(context: RuntimeContext) = context.evalSymbol(receiver?.eval(context), name, children)
+    override fun eval(context: LocalRuntimeContext) = context.evalSymbol(receiver?.eval(context), name, children)
 
     override fun toString(): String = buildString { stringify(this, 0) }
 

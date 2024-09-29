@@ -21,6 +21,7 @@ interface Type {
                 is Long -> I64Type
                 is LongRange -> I64RangeType
                 is String -> StringType
+                is Typed -> value.type
                 is Unit -> VoidType
                 else -> throw IllegalArgumentException("Type of value '$value' not supported.")
             }
