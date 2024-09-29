@@ -15,8 +15,8 @@ class TestSourceTest {
     @Test
     fun testFizzBuzz() = testSource(FIZZBUZZ_CASE)
 
-//    @Test
-//    fun testFarm() = testSource(FARM_CASE)
+    @Test
+    fun testFarm() = testSource(FARM_CASE)
 
     fun testSource(case: Array<String>) {
             val name = case[0]

@@ -25,6 +25,11 @@ interface Namespace {
         throw IllegalStateException("Unable to resolve '$name' in ${this.name}")
     }
 
-    fun findImpl(source: ResolvedType, target: ResolvedType): ImplDefinition =
-        parent!!.findImpl(source, target)
+    fun findImpl(source: ResolvedType, target: ResolvedType): ImplDefinition {
+        try {
+            return parent!!.findImpl(source, target)
+        } catch (e: Exception) {
+            throw RuntimeException("Unable to map '$source' to '$target' in $this")
+        }
+    }
 }

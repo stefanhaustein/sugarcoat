@@ -1,6 +1,7 @@
 package org.kobjects.sugarcoat.model
 
 import org.kobjects.sugarcoat.base.Namespace
+import org.kobjects.sugarcoat.base.ResolvedType
 import org.kobjects.sugarcoat.fn.FunctionDefinition
 import org.kobjects.sugarcoat.base.Type
 

@@ -4,7 +4,10 @@ import org.kobjects.sugarcoat.base.Namespace
 import org.kobjects.sugarcoat.base.ResolvedType
 import org.kobjects.sugarcoat.fn.ParameterConsumer
 import org.kobjects.sugarcoat.ast.ParameterReference
+import org.kobjects.sugarcoat.base.Type
+import org.kobjects.sugarcoat.base.Typed
 import org.kobjects.sugarcoat.fn.Callable
+import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 
 class StructDefinition(
@@ -15,7 +18,7 @@ class StructDefinition(
 
     override fun resolve(name: String): Namespace {
         if (name == constructorName) {
-            return object : Callable, Namespace {
+            return object : Callable, Namespace, Typed {
                 override val parent: Namespace
                     get() = this@StructDefinition
                 override val name: String
@@ -39,6 +42,9 @@ class StructDefinition(
 
                     return instance
                 }
+
+                override val type: Type
+                    get() = FunctionType(definitions.values.filterIsInstance<FieldDefinition>().map { it.type }, this@StructDefinition)
 
             }
         }

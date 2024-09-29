@@ -42,4 +42,13 @@ class Program(
 
     }
 
+    override fun findImpl(source: ResolvedType, target: ResolvedType): ImplDefinition {
+        for (impl in impls) {
+            if (impl.struct.resolve() == source && impl.trait.resolve() == target) {
+                return impl
+            }
+        }
+        throw IllegalStateException("Unable to find map from '$source' to '$target'; available: $impls")
+    }
+
 }

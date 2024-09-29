@@ -2,6 +2,8 @@ package org.kobjects.sugarcoat.ast
 
 import org.kobjects.sugarcoat.base.Namespace
 import org.kobjects.sugarcoat.base.Type
+import org.kobjects.sugarcoat.fn.Callable
+import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 
 
@@ -60,5 +62,10 @@ class SymbolExpression(
 
     }
 
-    override fun getType(): Type = throw UnsupportedOperationException()
+    override fun getType(): Type {
+        val receiverNamespace = if (receiver == null) namespace else receiver.getType() as Namespace
+        val rawType = receiverNamespace.resolve(name)
+        return if (rawType is Callable) (Type.of(rawType) as FunctionType).returnType else rawType as Type
+
+    }
 }

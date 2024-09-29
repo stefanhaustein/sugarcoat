@@ -7,6 +7,6 @@ class ImplDefinition(
     parent: Namespace,
     val trait: Type,
     val struct: Type
-) : AbstractClassifierDefinition(parent, "$trait for $struct") {
+) : AbstractClassifierDefinition(parent, "") {
     override fun resolve() = trait.resolve()
 }

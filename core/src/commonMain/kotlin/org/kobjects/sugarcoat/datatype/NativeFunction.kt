@@ -9,7 +9,7 @@ import org.kobjects.sugarcoat.base.Typed
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 
-class NativeFunction(
+data class NativeFunction(
     override val parent: NativeType,
     val static: Boolean,
     val returnType: Type,
@@ -25,7 +25,7 @@ class NativeFunction(
         parameterScope: LocalRuntimeContext
     ): Any {
         require(static == (receiver == null)) {
-            if (static) "Unexpected receiver for static method." else "Receiver expected for instance method."
+            if (static) "Unexpected receiver for static method $this." else "Receiver expected for instance method $this."
         }
         val parameterConsumer = ParameterConsumer(children)
         val parameterList: MutableList<Any> =
