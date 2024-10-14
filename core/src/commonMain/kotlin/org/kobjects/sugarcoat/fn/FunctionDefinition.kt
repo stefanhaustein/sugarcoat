@@ -1,21 +1,19 @@
 package org.kobjects.sugarcoat.fn
 
-import org.kobjects.sugarcoat.base.Namespace
+import org.kobjects.sugarcoat.base.Element
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.base.Typed
-import org.kobjects.sugarcoat.model.AbstractClassifierDefinition
-import org.kobjects.sugarcoat.model.Instance
 
 data class FunctionDefinition(
-    override val parent: Namespace,
+    override val parent: Element,
     val static: Boolean,
     override val name: String,
     val parameters: List<ParameterDefinition>,
     val returnType: Type,
     val body: Expression
-) : Callable, Namespace, Typed {
+) : Callable, Element, Typed {
 
     override fun call(
         receiver: Any?,

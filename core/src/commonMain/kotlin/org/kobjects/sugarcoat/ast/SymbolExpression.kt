@@ -1,6 +1,6 @@
 package org.kobjects.sugarcoat.ast
 
-import org.kobjects.sugarcoat.base.Namespace
+import org.kobjects.sugarcoat.base.Element
 import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.fn.FunctionType
@@ -9,14 +9,14 @@ import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 
 
 class SymbolExpression(
-    val namespace: Namespace,
+    val namespace: Element,
     val receiver: Expression?,
     val name: String,
     val children: List<ParameterReference>,
     val precedence: Int = 0
 ) : Expression {
-    constructor(namespace: Namespace, receiver: Expression, name: String, precedence: Int, vararg children: Expression) : this(namespace, receiver, name, children.map { ParameterReference("", it) }, precedence)
-    constructor(namespace: Namespace, name: String, vararg children: Expression) : this(namespace, null, name, children.map { ParameterReference("", it) })
+    constructor(namespace: Element, receiver: Expression, name: String, precedence: Int, vararg children: Expression) : this(namespace, receiver, name, children.map { ParameterReference("", it) }, precedence)
+    constructor(namespace: Element, name: String, vararg children: Expression) : this(namespace, null, name, children.map { ParameterReference("", it) })
 
     override fun eval(context: LocalRuntimeContext) = context.evalSymbol(receiver?.eval(context), name, children)
 
@@ -63,7 +63,7 @@ class SymbolExpression(
     }
 
     override fun getType(): Type {
-        val receiverNamespace = if (receiver == null) namespace else receiver.getType() as Namespace
+        val receiverNamespace = if (receiver == null) namespace else receiver.getType() as Element
         val rawType = receiverNamespace.resolve(name)
         return if (rawType is Callable) (Type.of(rawType) as FunctionType).returnType else rawType as Type
 

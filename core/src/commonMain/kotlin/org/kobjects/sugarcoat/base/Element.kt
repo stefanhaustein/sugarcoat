@@ -2,15 +2,15 @@ package org.kobjects.sugarcoat.base
 
 import org.kobjects.sugarcoat.model.ImplDefinition
 
-interface Namespace {
-    val parent: Namespace?
+interface Element {
+    val parent: Element?
     val name: String
 
-    fun addDefinition(value: Namespace): Unit = throw UnsupportedOperationException()
+    fun addChild(value: Element): Unit = throw UnsupportedOperationException()
 
-    fun resolveOrNull(name: String): Namespace? = parent?.resolveOrNull(name)
+    fun resolveOrNull(name: String): Element? = parent?.resolveOrNull(name)
 
-    fun resolve(name: String): Namespace {
+    fun resolve(name: String): Element {
         val result = resolveOrNull(name)
         if (result != null) {
             return result

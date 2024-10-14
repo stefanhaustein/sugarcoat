@@ -1,6 +1,6 @@
 package org.kobjects.sugarcoat.model
 
-import org.kobjects.sugarcoat.base.Namespace
+import org.kobjects.sugarcoat.base.Element
 import org.kobjects.sugarcoat.base.ResolvedType
 import org.kobjects.sugarcoat.fn.ParameterConsumer
 import org.kobjects.sugarcoat.ast.ParameterReference
@@ -11,15 +11,15 @@ import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 
 class StructDefinition(
-    parent: Namespace,
+    parent: Element,
     name: String,
     val constructorName: String = "create"
-): ResolvedType, AbstractClassifierDefinition(parent, name) {
+): ResolvedType, Classifier(parent, name) {
 
-    override fun resolve(name: String): Namespace {
+    override fun resolve(name: String): Element {
         if (name == constructorName) {
-            return object : Callable, Namespace, Typed {
-                override val parent: Namespace
+            return object : Callable, Element, Typed {
+                override val parent: Element
                     get() = this@StructDefinition
                 override val name: String
                     get() = constructorName
@@ -52,7 +52,7 @@ class StructDefinition(
 
             }
         }
-        return super<AbstractClassifierDefinition>.resolve(name)
+        return super<Classifier>.resolve(name)
     }
 
     override fun toString() = "struct $name"

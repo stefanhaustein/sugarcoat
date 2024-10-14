@@ -1,14 +1,13 @@
 package org.kobjects.sugarcoat.datatype
 
-import org.kobjects.sugarcoat.model.AbstractClassifierDefinition
+import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.base.ResolvedType
 import org.kobjects.sugarcoat.base.Type
-import org.kobjects.sugarcoat.model.Instance
 
 abstract class NativeType(
     name: String,
 
-) : AbstractClassifierDefinition(null, name), ResolvedType {
+) : Classifier(null, name), ResolvedType {
 
     fun addNativeMethod(
         returnType: Type,
@@ -16,7 +15,7 @@ abstract class NativeType(
         vararg args: Pair<String, Type>,
         op: (NativeArgList) -> Any
     ) {
-        addDefinition(NativeFunction(this, false, returnType, name, args, op))
+        addChild(NativeFunction(this, false, returnType, name, args, op))
     }
 
     fun addNativeFunction(
@@ -25,7 +24,7 @@ abstract class NativeType(
         vararg args: Pair<String, Type>,
         op: (NativeArgList) -> Any
     ) {
-        addDefinition(NativeFunction(this, true, returnType, name, args, op))
+        addChild(NativeFunction(this, true, returnType, name, args, op))
     }
 
     override fun toString(): String = "native $name"

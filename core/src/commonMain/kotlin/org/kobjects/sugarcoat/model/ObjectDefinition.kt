@@ -1,9 +1,9 @@
 package org.kobjects.sugarcoat.model
 
-import org.kobjects.sugarcoat.base.Namespace
+import org.kobjects.sugarcoat.base.Element
 import org.kobjects.sugarcoat.base.ResolvedType
 
-class ObjectDefinition(parent: Namespace, name: String) : ResolvedType, AbstractClassifierDefinition(parent, name) {
+class ObjectDefinition(parent: Element, name: String) : ResolvedType, Classifier(parent, name) {
     override fun toString() = "object $name"
 
     override fun serialize(sb: StringBuilder) {

@@ -1,13 +1,13 @@
 package org.kobjects.sugarcoat.model
 
-import org.kobjects.sugarcoat.base.Namespace
+import org.kobjects.sugarcoat.base.Element
 import org.kobjects.sugarcoat.base.Type
 
 class ImplDefinition(
-    parent: Namespace,
+    parent: Element,
     val trait: Type,
     val struct: Type
-) : AbstractClassifierDefinition(parent, "") {
+) : Classifier(parent, "") {
     override fun resolve() = trait.resolve()
 
     override fun toString() = "impl $trait for $struct"

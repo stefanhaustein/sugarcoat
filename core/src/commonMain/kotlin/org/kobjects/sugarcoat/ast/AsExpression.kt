@@ -1,13 +1,13 @@
 package org.kobjects.sugarcoat.ast
 
-import org.kobjects.sugarcoat.base.Namespace
+import org.kobjects.sugarcoat.base.Element
 import org.kobjects.sugarcoat.base.TypeReference
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.model.ImplInstance
 import org.kobjects.sugarcoat.model.Instance
 
 class AsExpression(
-    val context: Namespace,
+    val context: Element,
     val source: Expression,
     target: Expression
 ): Expression {

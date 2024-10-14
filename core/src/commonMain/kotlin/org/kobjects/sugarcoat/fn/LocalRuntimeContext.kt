@@ -1,7 +1,7 @@
 package org.kobjects.sugarcoat.fn
 
 import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.base.Namespace
+import org.kobjects.sugarcoat.base.Element
 import org.kobjects.sugarcoat.base.ControlStructures
 import org.kobjects.sugarcoat.base.GlobalRuntimeContext
 import org.kobjects.sugarcoat.base.Type
@@ -10,7 +10,7 @@ import org.kobjects.sugarcoat.model.Instance
 
 class LocalRuntimeContext(
     val globalRuntimeContext: GlobalRuntimeContext,
-    val namespace: Namespace,
+    val namespace: Element,
     val instance: Any?
 ) {
     val symbols = mutableMapOf<String, Any>()
@@ -42,7 +42,7 @@ class LocalRuntimeContext(
                 return if (resolved != null) null to resolved else null
             }
 
-            is Namespace -> return null to receiver.resolve(name)
+            is Element -> return null to receiver.resolve(name)
             is Instance -> {
                 val field = receiver.getField(name)
                 if (field != null) {
@@ -54,7 +54,7 @@ class LocalRuntimeContext(
 
             else -> {
                 val type = Type.of(receiver)
-                if (type is Namespace) {
+                if (type is Element) {
                     val resolved = type.resolveOrNull(name)
                     if (resolved != null) return receiver to resolved
                 }

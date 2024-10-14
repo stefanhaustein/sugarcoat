@@ -1,7 +1,7 @@
 package org.kobjects.sugarcoat.datatype
 
 import org.kobjects.sugarcoat.fn.Callable
-import org.kobjects.sugarcoat.base.Namespace
+import org.kobjects.sugarcoat.base.Element
 import org.kobjects.sugarcoat.fn.ParameterConsumer
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.Type
@@ -16,7 +16,7 @@ data class NativeFunction(
     override val name: String,
     val args: Array<out Pair<String, Type>>,
     val op: (NativeArgList) -> Any
-) : Namespace, Callable, Typed {
+) : Element, Callable, Typed {
 
 
     override fun call(

@@ -4,21 +4,21 @@ import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.fn.FunctionDefinition
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.GlobalRuntimeContext
-import org.kobjects.sugarcoat.base.Namespace
+import org.kobjects.sugarcoat.base.Element
 import org.kobjects.sugarcoat.base.ResolvedType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 
 class Program(
     val printFn: (String) -> Unit = ::print
-) : ResolvedType, AbstractClassifierDefinition(null, "") {
+) : ResolvedType, Classifier(null, "") {
 
     val impls = mutableListOf<ImplDefinition>()
 
-    override fun addDefinition(value: Namespace) {
+    override fun addChild(value: Element) {
         if (value.name.isEmpty()) {
             impls.add(value as ImplDefinition)
         } else {
-            super.addDefinition(value)
+            super.addChild(value)
         }
     }
 /*

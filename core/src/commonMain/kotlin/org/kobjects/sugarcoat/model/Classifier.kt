@@ -1,19 +1,17 @@
 package org.kobjects.sugarcoat.model
 
-import org.kobjects.sugarcoat.base.Namespace
-import org.kobjects.sugarcoat.base.ResolvedType
-import org.kobjects.sugarcoat.fn.FunctionDefinition
+import org.kobjects.sugarcoat.base.Element
 import org.kobjects.sugarcoat.base.Type
 
-abstract class AbstractClassifierDefinition(
-    override val parent: Namespace?,
+abstract class Classifier(
+    override val parent: Element?,
     override val name: String
-): Namespace, Type {
-    val definitions = mutableMapOf<String, Namespace>()
+): Element, Type {
+    val definitions = mutableMapOf<String, Element>()
 
-    override fun addDefinition(value: Namespace) {
+    override fun addChild(value: Element) {
         if (value.name.isEmpty()) {
-            parent!!.addDefinition(value)
+            parent!!.addChild(value)
         } else {
             require(!definitions.contains(value.name)) { "Symbol defined already: '${value.name}'" }
             definitions[value.name] = value
@@ -24,7 +22,7 @@ abstract class AbstractClassifierDefinition(
         definitions[name] ?: parent?.resolveOrNull(name)
 
 
-    override fun resolve(name: String): Namespace {
+    override fun resolve(name: String): Element {
         val result = resolveOrNull(name)
         if (result != null) {
             return result
