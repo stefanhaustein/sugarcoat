@@ -4,7 +4,6 @@ import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.fn.FunctionDefinition
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.GlobalRuntimeContext
-import org.kobjects.sugarcoat.base.Element
 import org.kobjects.sugarcoat.base.ResolvedType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 

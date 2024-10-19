@@ -1,6 +1,5 @@
 package org.kobjects.sugarcoat.model
 
-import org.kobjects.sugarcoat.base.Element
 import org.kobjects.sugarcoat.base.ResolvedType
 import org.kobjects.sugarcoat.base.Type
 

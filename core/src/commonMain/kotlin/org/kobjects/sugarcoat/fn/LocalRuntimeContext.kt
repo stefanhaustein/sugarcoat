@@ -1,7 +1,6 @@
 package org.kobjects.sugarcoat.fn
 
 import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.base.Element
 import org.kobjects.sugarcoat.base.ControlStructures
 import org.kobjects.sugarcoat.base.GlobalRuntimeContext
 import org.kobjects.sugarcoat.base.Type

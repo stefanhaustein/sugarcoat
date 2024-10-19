@@ -1,6 +1,5 @@
 package org.kobjects.sugarcoat.fn
 
-import org.kobjects.sugarcoat.base.Element
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.Type

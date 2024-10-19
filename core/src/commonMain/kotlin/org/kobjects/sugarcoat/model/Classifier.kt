@@ -1,15 +1,15 @@
 package org.kobjects.sugarcoat.model
 
-import org.kobjects.sugarcoat.base.Element
+import org.kobjects.sugarcoat.base.ResolvedType
 import org.kobjects.sugarcoat.base.Type
 
 abstract class Classifier(
-    override val parent: Classifier?,
-    override val name: String
-): Element {
+    open val parent: Classifier?,
+    open val name: String
+) {
     val definitions = mutableMapOf<String, Classifier>()
 
-    override fun addChild(value: Classifier) {
+    open fun addChild(value: Classifier) {
         if (value.name.isEmpty()) {
             parent!!.addChild(value)
         } else {
@@ -18,11 +18,21 @@ abstract class Classifier(
         }
     }
 
-    override fun resolveOrNull(name: String): Classifier? =
+    open fun findImpl(source: ResolvedType, target: ResolvedType): ImplDefinition {
+        try {
+            return parent!!.findImpl(source, target)
+        } catch (e: Exception) {
+            throw RuntimeException("Unable to map '$source' to '$target' in $this")
+        }
+    }
+
+    fun resolveOrNull(name: String): Classifier? =
         definitions[name] ?: parent?.resolveOrNull(name)
 
 
-    override fun resolve(name: String): Classifier {
+    abstract fun serialize(sb: StringBuilder)
+
+    open fun resolve(name: String): Classifier {
         val result = resolveOrNull(name)
         if (result != null) {
             return result
