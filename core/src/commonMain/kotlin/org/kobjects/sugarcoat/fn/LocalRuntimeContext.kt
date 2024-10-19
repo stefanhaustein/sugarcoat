@@ -71,50 +71,6 @@ class LocalRuntimeContext(
     }
 
     fun evalSymbol(receiver: Any?, name: String, children: List<ParameterReference>): Any {
-/*
-        if (receiver == null) {
-            val local = symbols[name]
-            if (local != null) {
-                return evalResolved(local, null, children)
-            }
-            if (instance is Instance) {
-                val field = instance.getField(name)
-                if (field != null) {
-                    return evalResolved(field, instance, children)
-                }
-            }
-            val resolved = namespace.resolveOrNull(name)
-            if (resolved != null) {
-                return evalResolved(resolved, null, children)
-            }
-            return ControlStructures.evalSymbol(name, children, this)
-        }
-
-        if (receiver is Namespace) {
-            val resolved = receiver.resolve(name)
-            return evalResolved(resolved, null, children)
-        }
-
-        if (receiver is Instance) {
-            val field = receiver.getField(name)
-            if (field != null) {
-                return evalResolved(field, receiver, children)
-            }
-            val resolved = receiver.type.resolveOrNull(name)
-            require(resolved != null) {
-                "Unable to resolve '$name'"
-            }
-            evalResolved(resolved, receiver, children)
-        }
-
-        val type = Type.of(receiver)
-        if (type is Namespace) {
-            val resolved = type.resolveOrNull(name)
-            if (resolved != null) {
-                return evalResolved(resolved, receiver, children)
-            }
-        }*/
-
         val resolved = resolve(receiver, name)
 
         return if (resolved == null) ControlStructures.evalSymbol(name, children, this)

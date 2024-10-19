@@ -170,6 +170,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
         val parsed = parseExpression(
             scanner, ParsingContext(Program())
         )
-        return parsed.eval(LocalRuntimeContext(GlobalRuntimeContext(), Program(), null))
+        val program = Program()
+        return parsed.eval(LocalRuntimeContext(GlobalRuntimeContext(program), program, null))
     }
 }

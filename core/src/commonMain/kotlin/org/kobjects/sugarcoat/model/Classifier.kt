@@ -5,26 +5,22 @@ import org.kobjects.sugarcoat.base.Type
 
 abstract class Classifier(
     open val parent: Classifier?,
-    open val name: String
+    open val name: String,
+    open val fallback: Classifier? = null
 ) {
     val definitions = mutableMapOf<String, Classifier>()
+    val unnamed = mutableListOf<Classifier>()
 
     open fun addChild(value: Classifier) {
         if (value.name.isEmpty()) {
-            parent!!.addChild(value)
+            unnamed.add(value)
         } else {
             require(!definitions.contains(value.name)) { "Symbol defined already: '${value.name}'" }
             definitions[value.name] = value
         }
     }
 
-    open fun findImpl(source: ResolvedType, target: ResolvedType): ImplDefinition {
-        try {
-            return parent!!.findImpl(source, target)
-        } catch (e: Exception) {
-            throw RuntimeException("Unable to map '$source' to '$target' in $this")
-        }
-    }
+
 
     fun resolveOrNull(name: String): Classifier? =
         definitions[name] ?: parent?.resolveOrNull(name)
@@ -56,6 +52,19 @@ abstract class Classifier(
         }
 
     }
+
+    fun collectImpls(impls: MutableList<ImplDefinition>) {
+        if (this is ImplDefinition) {
+            impls.add(this)
+        }
+        for ((_, classifier) in definitions) {
+            classifier.collectImpls(impls)
+        }
+        for (classifier in unnamed) {
+            classifier.collectImpls(impls)
+        }
+    }
+
     /*=
         buildString {
             for ((name, definition) in definitions) {

@@ -10,7 +10,7 @@ class ImplDefinition(
 ) : Classifier(parent, ""), ResolvedType {
 //    override fun resolve() = trait.resolve()
 
-    override fun toString() = "impl $trait for $struct"
+    override fun toString() = "impl ($trait) for ($struct)"
 
     override fun serialize(sb: StringBuilder) {
         sb.append("impl $trait for $struct\n")
