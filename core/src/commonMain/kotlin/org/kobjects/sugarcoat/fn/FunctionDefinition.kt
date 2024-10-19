@@ -5,15 +5,16 @@ import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.base.Typed
+import org.kobjects.sugarcoat.model.Classifier
 
 data class FunctionDefinition(
-    override val parent: Element,
+    override val parent: Classifier,
     val static: Boolean,
     override val name: String,
     val parameters: List<ParameterDefinition>,
     val returnType: Type,
     val body: Expression
-) : Callable, Element, Typed {
+) : Callable, Classifier(parent, name), Typed {
 
     override fun call(
         receiver: Any?,

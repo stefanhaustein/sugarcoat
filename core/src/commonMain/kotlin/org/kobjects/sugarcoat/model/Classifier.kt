@@ -4,12 +4,12 @@ import org.kobjects.sugarcoat.base.Element
 import org.kobjects.sugarcoat.base.Type
 
 abstract class Classifier(
-    override val parent: Element?,
+    override val parent: Classifier?,
     override val name: String
-): Element, Type {
+): Element {
     val definitions = mutableMapOf<String, Element>()
 
-    override fun addChild(value: Element) {
+    override fun addChild(value: Classifier) {
         if (value.name.isEmpty()) {
             parent!!.addChild(value)
         } else {
@@ -18,7 +18,7 @@ abstract class Classifier(
         }
     }
 
-    override fun resolveOrNull(name: String) =
+    override fun resolveOrNull(name: String): Element? =
         definitions[name] ?: parent?.resolveOrNull(name)
 
 

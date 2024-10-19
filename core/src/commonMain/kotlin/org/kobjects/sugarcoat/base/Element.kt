@@ -1,12 +1,13 @@
 package org.kobjects.sugarcoat.base
 
+import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.model.ImplDefinition
 
 interface Element {
-    val parent: Element?
+    val parent: Classifier?
     val name: String
 
-    fun addChild(value: Element): Unit = throw UnsupportedOperationException()
+    fun addChild(value: Classifier): Unit = throw UnsupportedOperationException()
 
     fun resolveOrNull(name: String): Element? = parent?.resolveOrNull(name)
 

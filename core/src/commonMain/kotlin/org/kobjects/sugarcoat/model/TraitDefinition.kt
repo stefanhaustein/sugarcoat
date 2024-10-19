@@ -4,7 +4,7 @@ import org.kobjects.sugarcoat.base.Element
 import org.kobjects.sugarcoat.base.ResolvedType
 
 class TraitDefinition(
-    parent: Element,
+    parent: Classifier,
     name: String
 ) : ResolvedType, Classifier(parent, name) {
 

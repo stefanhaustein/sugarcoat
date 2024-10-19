@@ -3,11 +3,12 @@ package org.kobjects.sugarcoat.ast
 import org.kobjects.sugarcoat.base.Element
 import org.kobjects.sugarcoat.base.TypeReference
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
+import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.model.ImplInstance
 import org.kobjects.sugarcoat.model.Instance
 
 class AsExpression(
-    val context: Element,
+    val context: Classifier,
     val source: Expression,
     target: Expression
 ): Expression {

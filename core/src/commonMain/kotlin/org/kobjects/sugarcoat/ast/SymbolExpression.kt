@@ -5,18 +5,18 @@ import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
-
+import org.kobjects.sugarcoat.model.Classifier
 
 
 class SymbolExpression(
-    val namespace: Element,
+    val namespace: Classifier,
     val receiver: Expression?,
     val name: String,
     val children: List<ParameterReference>,
     val precedence: Int = 0
 ) : Expression {
-    constructor(namespace: Element, receiver: Expression, name: String, precedence: Int, vararg children: Expression) : this(namespace, receiver, name, children.map { ParameterReference("", it) }, precedence)
-    constructor(namespace: Element, name: String, vararg children: Expression) : this(namespace, null, name, children.map { ParameterReference("", it) })
+    constructor(namespace: Classifier, receiver: Expression, name: String, precedence: Int, vararg children: Expression) : this(namespace, receiver, name, children.map { ParameterReference("", it) }, precedence)
+    constructor(namespace: Classifier, name: String, vararg children: Expression) : this(namespace, null, name, children.map { ParameterReference("", it) })
 
     override fun eval(context: LocalRuntimeContext) = context.evalSymbol(receiver?.eval(context), name, children)
 

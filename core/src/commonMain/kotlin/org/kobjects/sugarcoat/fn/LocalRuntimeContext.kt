@@ -6,11 +6,12 @@ import org.kobjects.sugarcoat.base.ControlStructures
 import org.kobjects.sugarcoat.base.GlobalRuntimeContext
 import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.base.Typed
+import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.model.Instance
 
 class LocalRuntimeContext(
     val globalRuntimeContext: GlobalRuntimeContext,
-    val namespace: Element,
+    val namespace: Classifier,
     val instance: Any?
 ) {
     val symbols = mutableMapOf<String, Any>()
@@ -48,13 +49,14 @@ class LocalRuntimeContext(
                 if (field != null) {
                     return receiver to field
                 }
-                val resolved = receiver.type.resolve(name)
+                // TODO: This needs to move to impl
+                val resolved = (receiver.type.resolve() as Classifier).resolve(name)
                 return receiver to resolved
             }
 
             else -> {
                 val type = Type.of(receiver)
-                if (type is Element) {
+                if (type is Classifier) {
                     val resolved = type.resolveOrNull(name)
                     if (resolved != null) return receiver to resolved
                 }

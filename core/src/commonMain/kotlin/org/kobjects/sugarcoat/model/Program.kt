@@ -14,7 +14,7 @@ class Program(
 
     val impls = mutableListOf<ImplDefinition>()
 
-    override fun addChild(value: Element) {
+    override fun addChild(value: Classifier) {
         if (value.name.isEmpty()) {
             impls.add(value as ImplDefinition)
         } else {

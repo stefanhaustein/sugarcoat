@@ -9,9 +9,8 @@ import org.kobjects.sugarcoat.model.Instance
 data class Closure(
     val expression: Expression,
     val context: LocalRuntimeContext
-) : Instance, Callable {
-    override val type: Classifier
-        get() = throw UnsupportedOperationException()
+) :  Callable {
+
 
     override fun call(
         receiver: Any?,
