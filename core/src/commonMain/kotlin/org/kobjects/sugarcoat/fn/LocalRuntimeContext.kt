@@ -43,7 +43,7 @@ class LocalRuntimeContext(
                 return if (resolved != null) null to resolved else null
             }
 
-            is Element -> return null to receiver.resolve(name)
+            is Classifier -> return null to receiver.resolve(name)
             is Instance -> {
                 val field = receiver.getField(name)
                 if (field != null) {

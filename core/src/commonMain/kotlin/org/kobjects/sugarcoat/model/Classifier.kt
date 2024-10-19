@@ -7,7 +7,7 @@ abstract class Classifier(
     override val parent: Classifier?,
     override val name: String
 ): Element {
-    val definitions = mutableMapOf<String, Element>()
+    val definitions = mutableMapOf<String, Classifier>()
 
     override fun addChild(value: Classifier) {
         if (value.name.isEmpty()) {
@@ -18,11 +18,11 @@ abstract class Classifier(
         }
     }
 
-    override fun resolveOrNull(name: String): Element? =
+    override fun resolveOrNull(name: String): Classifier? =
         definitions[name] ?: parent?.resolveOrNull(name)
 
 
-    override fun resolve(name: String): Element {
+    override fun resolve(name: String): Classifier {
         val result = resolveOrNull(name)
         if (result != null) {
             return result

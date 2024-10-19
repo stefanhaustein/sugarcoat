@@ -1,6 +1,5 @@
 package org.kobjects.sugarcoat.ast
 
-import org.kobjects.sugarcoat.base.Element
 import org.kobjects.sugarcoat.base.TypeReference
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.model.Classifier

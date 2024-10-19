@@ -1,6 +1,5 @@
 package org.kobjects.sugarcoat.ast
 
-import org.kobjects.sugarcoat.base.Element
 import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.fn.FunctionType
@@ -63,7 +62,7 @@ class SymbolExpression(
     }
 
     override fun getType(): Type {
-        val receiverNamespace = if (receiver == null) namespace else receiver.getType() as Element
+        val receiverNamespace = if (receiver == null) namespace else receiver.getType() as Classifier
         val rawType = receiverNamespace.resolve(name)
         return if (rawType is Callable) (Type.of(rawType) as FunctionType).returnType else rawType as Type
 

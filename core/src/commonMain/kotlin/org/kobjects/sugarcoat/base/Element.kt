@@ -9,9 +9,9 @@ interface Element {
 
     fun addChild(value: Classifier): Unit = throw UnsupportedOperationException()
 
-    fun resolveOrNull(name: String): Element? = parent?.resolveOrNull(name)
+    fun resolveOrNull(name: String): Classifier? = parent?.resolveOrNull(name)
 
-    fun resolve(name: String): Element {
+    fun resolve(name: String): Classifier {
         val result = resolveOrNull(name)
         if (result != null) {
             return result

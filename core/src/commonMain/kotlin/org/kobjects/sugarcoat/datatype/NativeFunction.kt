@@ -1,7 +1,7 @@
 package org.kobjects.sugarcoat.datatype
 
 import org.kobjects.sugarcoat.fn.Callable
-import org.kobjects.sugarcoat.base.Element
+
 import org.kobjects.sugarcoat.fn.ParameterConsumer
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.Type

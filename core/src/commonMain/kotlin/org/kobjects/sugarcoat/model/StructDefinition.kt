@@ -16,7 +16,7 @@ class StructDefinition(
     val constructorName: String = "create"
 ): ResolvedType, Classifier(parent, name) {
 
-    override fun resolve(name: String): Element {
+    override fun resolve(name: String): Classifier {
         if (name == constructorName) {
             return StructConstructor(this, constructorName)
         }
