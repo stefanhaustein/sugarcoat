@@ -3,6 +3,8 @@ package org.kobjects.sugarcoat.model
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.base.ResolvedType
 import org.kobjects.sugarcoat.base.Type
+import org.kobjects.sugarcoat.datatype.NativeArgList
+import org.kobjects.sugarcoat.datatype.NativeFunction
 
 abstract class Classifier(
     open val parent: Classifier?,
@@ -13,6 +15,7 @@ abstract class Classifier(
     val unnamed = mutableListOf<Classifier>()
 
     open fun addChild(value: Classifier) {
+        require(value.parent == this)
         if (value.name.isEmpty()) {
             unnamed.add(value)
         } else {
@@ -23,6 +26,28 @@ abstract class Classifier(
 
     open fun addField(name: String, type: Type, defaultExpression: Expression?) {
         throw UnsupportedOperationException("Fields are not supported for ${this::class}")
+    }
+
+
+    fun addNativeMethod(
+        returnType: Type,
+        name: String,
+        vararg args: Pair<String, Type>,
+        op: (NativeArgList) -> Any
+    ) {
+        require (this is Type) {
+            "Methods can only be added to types."
+        }
+        addChild(NativeFunction(this, false, returnType, name, args, op))
+    }
+
+    fun addNativeFunction(
+        returnType: Type,
+        name: String,
+        vararg args: Pair<String, Type>,
+        op: (NativeArgList) -> Any
+    ) {
+        addChild(NativeFunction(this, true, returnType, name, args, op))
     }
 
 

@@ -1,3 +1,5 @@
 package org.kobjects.sugarcoat.datatype
 
-object I64RangeType : NativeType("I64Range")
+import org.kobjects.sugarcoat.base.RootContext
+
+object I64RangeType : NativeType("I64Range", RootContext)

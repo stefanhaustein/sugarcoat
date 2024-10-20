@@ -38,7 +38,7 @@ data class FunctionDefinition(
     }
 
     override val type: Type
-        get() = FunctionType(parameters.map { it.type }, returnType)
+        get() = FunctionType(returnType, parameters.map { it.type })
 
     override fun serialize(sb: StringBuilder) {
         sb.append("fn $name(${parameters.joinToString (", ")})\n  ")

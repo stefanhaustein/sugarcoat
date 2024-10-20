@@ -1,6 +1,8 @@
 package org.kobjects.sugarcoat.datatype
 
-object I64Type : NativeType("I64") {
+import org.kobjects.sugarcoat.base.RootContext
+
+object I64Type : NativeType("I64", RootContext) {
 
     init {
         addNativeMethod(I64Type, "%", "other" to I64Type) { it.i64(0) % it.i64(1) }

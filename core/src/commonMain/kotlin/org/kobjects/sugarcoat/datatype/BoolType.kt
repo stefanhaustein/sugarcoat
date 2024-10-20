@@ -1,3 +1,5 @@
 package org.kobjects.sugarcoat.datatype
 
-object BoolType : NativeType( "Bool")
+import org.kobjects.sugarcoat.base.RootContext
+
+object BoolType : NativeType( "Bool", RootContext)

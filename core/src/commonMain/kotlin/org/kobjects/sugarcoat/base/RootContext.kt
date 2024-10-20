@@ -3,8 +3,12 @@ package org.kobjects.sugarcoat.base
 import org.kobjects.sugarcoat.ast.LambdaExpression
 import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.ast.ParameterReference
+import org.kobjects.sugarcoat.datatype.BoolType
 import org.kobjects.sugarcoat.datatype.F64Type
+import org.kobjects.sugarcoat.datatype.I64RangeType
+import org.kobjects.sugarcoat.datatype.I64Type
 import org.kobjects.sugarcoat.datatype.NativeFunction
+import org.kobjects.sugarcoat.datatype.StringType
 import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.fn.FunctionType
@@ -19,7 +23,7 @@ object RootContext : Classifier(null, "") {
 
     override fun toString(): String = "Root Context"
 
-    fun addControl(name: String, type: Type, parameters: List<Pair<String, Type>>, action: (List<ParameterReference>, LocalRuntimeContext) -> Any) {
+    fun addControl(name: String, type: Type, vararg parameters: Pair<String, Type>, action: (List<ParameterReference>, LocalRuntimeContext) -> Any) {
 
         addChild(object : Callable, Classifier(this, name, null), Typed {
             override val static: Boolean
@@ -38,7 +42,7 @@ object RootContext : Classifier(null, "") {
             }
 
             override val type: Type
-                get() = FunctionType(parameters.map { it.second }, type)
+                get() = FunctionType(type, parameters.map { it.second })
 
             override fun toString() = "control instruction '$name'"
 
@@ -46,14 +50,16 @@ object RootContext : Classifier(null, "") {
     }
 
     init {
-        addChild(NativeFunction(this, true, F64Type,  "sqrt", arrayOf("value" to F64Type)) {
-            sqrt(it.f64(0))
-        })
+        addChild(BoolType)
+        addChild(F64Type)
+        addChild(StringType)
+        addChild(I64Type)
+        addChild(I64RangeType)
+        addChild(VoidType)
 
-        addControl("for", VoidType, listOf("iterable" to FunctionType(
-            listOf<Type>(),
-            VoidType
-        ))) { params, context ->
+        addNativeFunction(F64Type,  "sqrt", "value" to F64Type) { sqrt(it.f64(0)) }
+
+        addControl("for", VoidType, "iterable" to FunctionType(VoidType)) { params, context ->
             val range = params[0].value.eval(context) as LongRange
             for (value in range) {
                 (params[1].value as LambdaExpression).lambda.call(null, listOf(
@@ -61,5 +67,6 @@ object RootContext : Classifier(null, "") {
                 ), context)
             }
         }
+
     }
 }

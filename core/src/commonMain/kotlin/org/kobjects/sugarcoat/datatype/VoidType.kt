@@ -1,3 +1,5 @@
 package org.kobjects.sugarcoat.datatype
 
-object VoidType : NativeType("Void")
+import org.kobjects.sugarcoat.base.RootContext
+
+object VoidType : NativeType("Void", RootContext)

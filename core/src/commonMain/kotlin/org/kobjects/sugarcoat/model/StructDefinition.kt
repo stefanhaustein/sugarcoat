@@ -72,8 +72,8 @@ class StructDefinition(
 
         override val type: Type
         get() = FunctionType(
-            parent.definitions.values.filterIsInstance<FieldDefinition>().map { it.type },
-            parent
+            parent,
+            parent.definitions.values.filterIsInstance<FieldDefinition>().map { it.type }
         )
 
     }

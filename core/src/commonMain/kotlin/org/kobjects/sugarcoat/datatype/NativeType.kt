@@ -6,26 +6,9 @@ import org.kobjects.sugarcoat.base.Type
 
 abstract class NativeType(
     name: String,
+    override val parent: Classifier? = null
 
-) : Classifier(null, name), ResolvedType {
-
-    fun addNativeMethod(
-        returnType: Type,
-        name: String,
-        vararg args: Pair<String, Type>,
-        op: (NativeArgList) -> Any
-    ) {
-        addChild(NativeFunction(this, false, returnType, name, args, op))
-    }
-
-    fun addNativeFunction(
-        returnType: Type,
-        name: String,
-        vararg args: Pair<String, Type>,
-        op: (NativeArgList) -> Any
-    ) {
-        addChild(NativeFunction(this, true, returnType, name, args, op))
-    }
+) : Classifier(parent, name), ResolvedType {
 
     override fun toString(): String = "native $name"
 

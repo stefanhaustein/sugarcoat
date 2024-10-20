@@ -1,5 +1,5 @@
 package org.kobjects.sugarcoat.datatype
 
-import org.kobjects.sugarcoat.ast.ParameterReference
+import org.kobjects.sugarcoat.base.RootContext
 
-object StringType : NativeType("String")
+object StringType : NativeType("String", RootContext)
