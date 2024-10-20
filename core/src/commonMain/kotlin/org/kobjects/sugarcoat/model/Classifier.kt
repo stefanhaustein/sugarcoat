@@ -38,7 +38,7 @@ abstract class Classifier(
         require (this is Type) {
             "Methods can only be added to types."
         }
-        addChild(NativeFunction(this, false, returnType, name, args, op))
+        addChild(NativeFunction(this, false, returnType, name, args.toList(), op))
     }
 
     fun addNativeFunction(
@@ -47,7 +47,7 @@ abstract class Classifier(
         vararg args: Pair<String, Type>,
         op: (NativeArgList) -> Any
     ) {
-        addChild(NativeFunction(this, true, returnType, name, args, op))
+        addChild(NativeFunction(this, true, returnType, name, args.toList(), op))
     }
 
 

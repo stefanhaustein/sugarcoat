@@ -15,7 +15,7 @@ data class NativeFunction(
     override val static: Boolean,
     val returnType: Type,
     override val name: String,
-    val args: Array<out Pair<String, Type>>,
+    val args: List<Pair<String, Type>>,
     val op: (NativeArgList) -> Any
 ) : Classifier(parent, name), Callable, Typed {
 

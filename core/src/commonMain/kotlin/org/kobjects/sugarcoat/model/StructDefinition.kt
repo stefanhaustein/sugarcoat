@@ -27,13 +27,13 @@ class StructDefinition(
 
     override fun addField(name: String, type: Type, defaultExpression: Expression?) {
         fields[name] = FieldDefinition(this, name, type, defaultExpression)
-        addChild(NativeFunction(this, false, type, name, emptyArray()) {
+        addNativeMethod(type, name) {
             (it.list[0] as StructInstance).fields[name] ?: throw IllegalStateException("Missing field value for $name")
-        })
-        addChild(NativeFunction(this, false, VoidType, "set_$name", arrayOf("value" to type)) {
+        }
+        addNativeMethod( VoidType, "set_$name", "value" to type) {
             (it.list[0] as StructInstance).fields[name] = it.list[1]
             Unit
-        })
+        }
     }
 
     override fun toString() = "struct $name"
