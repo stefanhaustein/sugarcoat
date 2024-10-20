@@ -13,6 +13,7 @@ import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
+import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.model.Classifier
 import kotlin.math.sqrt
 
@@ -57,7 +58,7 @@ object RootContext : Classifier(null, "") {
         addChild(I64RangeType)
         addChild(VoidType)
 
-        addNativeFunction(F64Type,  "sqrt", "value" to F64Type) { sqrt(it.f64(0)) }
+        addNativeFunction(F64Type,  "sqrt", ParameterDefinition("value", F64Type)) { sqrt(it.f64(0)) }
 
         addControl("for", VoidType, "iterable" to FunctionType(VoidType)) { params, context ->
             val range = params[0].value.eval(context) as LongRange

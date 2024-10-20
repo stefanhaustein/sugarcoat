@@ -5,6 +5,7 @@ import org.kobjects.sugarcoat.base.ResolvedType
 import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.datatype.NativeArgList
 import org.kobjects.sugarcoat.datatype.NativeFunction
+import org.kobjects.sugarcoat.fn.ParameterDefinition
 
 abstract class Classifier(
     open val parent: Classifier?,
@@ -32,7 +33,7 @@ abstract class Classifier(
     fun addNativeMethod(
         returnType: Type,
         name: String,
-        vararg args: Pair<String, Type>,
+        vararg args: ParameterDefinition,
         op: (NativeArgList) -> Any
     ) {
         require (this is Type) {
@@ -44,7 +45,7 @@ abstract class Classifier(
     fun addNativeFunction(
         returnType: Type,
         name: String,
-        vararg args: Pair<String, Type>,
+        vararg args: ParameterDefinition,
         op: (NativeArgList) -> Any
     ) {
         addChild(NativeFunction(this, true, returnType, name, args.toList(), op))

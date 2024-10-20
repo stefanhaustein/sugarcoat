@@ -8,6 +8,7 @@ import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.base.Typed
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
+import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.model.Classifier
 
 data class NativeFunction(
@@ -15,7 +16,7 @@ data class NativeFunction(
     override val static: Boolean,
     val returnType: Type,
     override val name: String,
-    val args: List<Pair<String, Type>>,
+    val args: List<ParameterDefinition>,
     val op: (NativeArgList) -> Any
 ) : Classifier(parent, name), Callable, Typed {
 
@@ -32,13 +33,13 @@ data class NativeFunction(
         val parameterList: MutableList<Any> =
             if (static) mutableListOf() else mutableListOf(receiver!!)
         for (parameter in args) {
-            parameterList.add(parameterConsumer.read(parameterScope, parameter.first, parameter.second))
+            parameterList.add(parameterConsumer.read(parameterScope, parameter.name, parameter.type))
         }
         return op(NativeArgList(parameterList))
     }
 
     override val type: Type
-        get() = FunctionType(returnType, args.map { it.second })
+        get() = FunctionType(returnType, args.map { it.type })
 
     override fun serialize(sb: StringBuilder) {
         sb.append("native fn $name\n")

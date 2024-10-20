@@ -11,6 +11,7 @@ import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
+import org.kobjects.sugarcoat.fn.ParameterDefinition
 
 class StructDefinition(
     parent: Classifier,
@@ -30,7 +31,7 @@ class StructDefinition(
         addNativeMethod(type, name) {
             (it.list[0] as StructInstance).fields[name] ?: throw IllegalStateException("Missing field value for $name")
         }
-        addNativeMethod( VoidType, "set_$name", "value" to type) {
+        addNativeMethod( VoidType, "set_$name", ParameterDefinition("value", type)) {
             (it.list[0] as StructInstance).fields[name] = it.list[1]
             Unit
         }
