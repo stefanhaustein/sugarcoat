@@ -74,7 +74,7 @@ object SugarcoatParser {
         }
         val returnType = if (scanner.tryConsume("->")) parseType(scanner, parentContext) else VoidType
         val body = parseBlock(scanner, parentContext)
-        val fn = FunctionDefinition(parentContext.namespace, parentContext.program, static, name, parameters, returnType, body)
+        val fn = FunctionDefinition(parentContext.namespace, parentContext.namespace, static, name, parameters, returnType, body)
         parentContext.namespace.addChild(fn)
     }
 
@@ -142,7 +142,7 @@ object SugarcoatParser {
                         parseType(scanner, parsingContext)
                     }
                     val defaultExpr = if (scanner.tryConsume("=")) parseExpression(scanner, parsingContext) else null
-                    classifier.addChild(FieldDefinition(classifier, name, type, defaultExpr))
+                    classifier.addField(name, type, defaultExpr)
                 }
             }
             if (currentIndent(scanner) != depth) {

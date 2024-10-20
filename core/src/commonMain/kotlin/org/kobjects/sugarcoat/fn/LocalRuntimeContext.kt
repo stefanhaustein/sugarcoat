@@ -26,29 +26,21 @@ class LocalRuntimeContext(
     }
 
     fun resolve(receiver: Any?, name: String): Pair<Any?, Any>? {
+        if (name == "a") {
+            println("ah!")
+        }
         when (receiver) {
             null -> {
                 val local = symbols[name]
                 if (local != null) {
                     return null to local
                 }
-                if (instance is Instance) {
-                    val field = instance.getField(name)
-                    if (field != null) {
-                        return instance to field
-                    }
-                }
                 val resolved = namespace.resolveOrNull(name)
-                return if (resolved != null) null to resolved else null
+                return if (resolved != null) (if (resolved is Callable && !resolved.static) instance else null) to resolved else null
             }
 
             is Classifier -> return null to receiver.resolve(name)
             is Instance -> {
-                val field = receiver.getField(name)
-                if (field != null) {
-                    return receiver to field
-                }
-                // TODO: This needs to move to impl
                 val resolved = (receiver.type.resolve() as Classifier).resolve(name)
                 return receiver to resolved
             }

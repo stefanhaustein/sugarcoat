@@ -9,7 +9,7 @@ import org.kobjects.sugarcoat.model.Classifier
 data class FunctionDefinition(
     override val parent: Classifier,
     override val fallback: Classifier,
-    val static: Boolean,
+    override val static: Boolean,
     override val name: String,
     val parameters: List<ParameterDefinition>,
     val returnType: Type,

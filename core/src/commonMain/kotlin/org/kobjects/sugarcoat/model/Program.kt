@@ -5,11 +5,12 @@ import org.kobjects.sugarcoat.fn.FunctionDefinition
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.GlobalRuntimeContext
 import org.kobjects.sugarcoat.base.ResolvedType
+import org.kobjects.sugarcoat.base.RootContext
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 
 class Program(
     val printFn: (String) -> Unit = ::print
-) : Classifier(null, "") {
+) : Classifier(null, "", RootContext) {
 
     override fun toString() = "program $name"
 

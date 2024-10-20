@@ -8,7 +8,7 @@ class StructInstance(
 ) : Instance {
     val fields = mutableMapOf<String, Any>()
 
-    override fun getField(name: String) = fields[name]
+   // override fun getField(name: String) = fields[name]
 
     override fun toString() = "StructInstance; def: $type; fields: $fields"
 }

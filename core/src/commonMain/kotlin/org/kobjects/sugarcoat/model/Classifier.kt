@@ -1,5 +1,6 @@
 package org.kobjects.sugarcoat.model
 
+import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.base.ResolvedType
 import org.kobjects.sugarcoat.base.Type
 
@@ -20,10 +21,22 @@ abstract class Classifier(
         }
     }
 
+    open fun addField(name: String, type: Type, defaultExpression: Expression?) {
+        throw UnsupportedOperationException("Fields are not supported for ${this::class}")
+    }
 
 
-    fun resolveOrNull(name: String): Classifier? =
-        definitions[name] ?: fallback?.resolveOrNull(name)
+    fun resolveOrNull(name: String): Classifier? {
+        val result = definitions[name]
+        if (result != null) {
+            return result
+        }
+        val fb = fallback
+        if (fb == null) {
+            return null
+        }
+        return fb.resolveOrNull(name)
+    }
 
 
     abstract fun serialize(sb: StringBuilder)

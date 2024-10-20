@@ -10,7 +10,8 @@ data class Closure(
     val expression: Expression,
     val context: LocalRuntimeContext
 ) :  Callable {
-
+    override val static
+            get() = true
 
     override fun call(
         receiver: Any?,

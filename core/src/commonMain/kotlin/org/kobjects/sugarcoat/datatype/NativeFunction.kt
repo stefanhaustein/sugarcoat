@@ -11,8 +11,8 @@ import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.model.Classifier
 
 data class NativeFunction(
-    override val parent: NativeType,
-    val static: Boolean,
+    override val parent: Classifier,
+    override val static: Boolean,
     val returnType: Type,
     override val name: String,
     val args: Array<out Pair<String, Type>>,

@@ -13,13 +13,10 @@ object ControlStructures  {
         children: List<ParameterReference>,
         parameterContext: LocalRuntimeContext
     ) = when (name) {
-            "for" -> evalFor(children, parameterContext)
+        //  "for" -> evalFor(children, parameterContext)
             "if" -> evalIf(children, parameterContext)
 
             "print" -> parameterContext.globalRuntimeContext.printFn(children.joinToString { it.value.eval(parameterContext).toString() })
-
-
-            "sqrt" -> sqrt(children[0].value.evalDouble(parameterContext))
 
             "range" -> when (children.size) {
                 1 ->
@@ -87,6 +84,7 @@ fun evalIf(children: List<ParameterReference>, parameterContext: LocalRuntimeCon
     }
     return Unit
 }
+
 
 fun evalFor(children: List<ParameterReference>, parameterContext: LocalRuntimeContext): Any {
     val range = children[0].value.eval(parameterContext) as LongRange
