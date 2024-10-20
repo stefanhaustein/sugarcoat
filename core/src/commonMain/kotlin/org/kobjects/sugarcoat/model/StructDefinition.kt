@@ -11,9 +11,10 @@ import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 
 class StructDefinition(
     parent: Classifier,
+    fallback: Classifier,
     name: String,
     val constructorName: String = "create"
-): ResolvedType, Classifier(parent, name) {
+): ResolvedType, Classifier(parent, name, fallback) {
 
     override fun resolve(name: String): Classifier {
         if (name == constructorName) {

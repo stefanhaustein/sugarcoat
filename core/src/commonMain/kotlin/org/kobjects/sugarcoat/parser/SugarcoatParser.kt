@@ -74,7 +74,7 @@ object SugarcoatParser {
         }
         val returnType = if (scanner.tryConsume("->")) parseType(scanner, parentContext) else VoidType
         val body = parseBlock(scanner, parentContext)
-        val fn = FunctionDefinition(parentContext.namespace, static, name, parameters, returnType, body)
+        val fn = FunctionDefinition(parentContext.namespace, parentContext.program, static, name, parameters, returnType, body)
         parentContext.namespace.addChild(fn)
     }
 
@@ -85,7 +85,7 @@ object SugarcoatParser {
         scanner.consume("for")
         val struct = parseType(scanner, parentContext)
 
-        val impl = ImplDefinition(parentContext.namespace, trait, struct)
+        val impl = ImplDefinition(parentContext.namespace, parentContext.program, trait, struct)
 
         parseClassifier(scanner, parentContext, impl)
         parentContext.namespace.addChild(impl)
@@ -96,7 +96,7 @@ object SugarcoatParser {
         scanner.consume("struct")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'struct'." }.text
         val constructorName = if (scanner.tryConsume("constructor")) scanner.consume(TokenType.IDENTIFIER).text else "create"
-        val struct = StructDefinition(parentContext.namespace, name, constructorName)
+        val struct = StructDefinition(parentContext.namespace, parentContext.program, name, constructorName)
         parseClassifier(scanner, parentContext, struct)
         parentContext.namespace.addChild(struct)
     }
@@ -105,7 +105,7 @@ object SugarcoatParser {
     fun parseObject(scanner: Scanner<TokenType>, parentContext: ParsingContext) {
         scanner.consume("object")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'object'." }.text
-        val o = ObjectDefinition(parentContext.namespace, name)
+        val o = ObjectDefinition(parentContext.namespace, parentContext.program, name)
         parseClassifier(scanner, parentContext, o)
         parentContext.namespace.addChild(o)
     }
@@ -113,7 +113,7 @@ object SugarcoatParser {
     fun parseTrait(scanner: Scanner<TokenType>, parentContext: ParsingContext) {
         scanner.consume("trait")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'trait'." }.text
-        val trait = TraitDefinition(parentContext.namespace, name)
+        val trait = TraitDefinition(parentContext.namespace, parentContext.program, name)
         parseClassifier(scanner, parentContext, trait)
         parentContext.namespace.addChild(trait)
     }

@@ -5,9 +5,10 @@ import org.kobjects.sugarcoat.base.Type
 
 class ImplDefinition(
     parent: Classifier,
+    fallback: Classifier,
     val trait: Type,
     val struct: Type
-) : Classifier(parent, ""), ResolvedType {
+) : Classifier(parent, "", fallback), ResolvedType {
 //    override fun resolve() = trait.resolve()
 
     override fun toString() = "impl ($trait) for ($struct)"

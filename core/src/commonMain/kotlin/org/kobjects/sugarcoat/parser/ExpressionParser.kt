@@ -161,7 +161,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
         }
 
         val parsedBody = SugarcoatParser.parseBlock(scanner, context)
-        return if (parmeters.isEmpty()) parsedBody else LambdaExpression(FunctionDefinition(context.program, true, "", parmeters.toList(), ImplicitType(), parsedBody))
+        return if (parmeters.isEmpty()) parsedBody else LambdaExpression(FunctionDefinition(context.program, context.program, true, "", parmeters.toList(), ImplicitType(), parsedBody))
     }
 
 

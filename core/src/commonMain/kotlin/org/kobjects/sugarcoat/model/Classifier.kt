@@ -23,7 +23,7 @@ abstract class Classifier(
 
 
     fun resolveOrNull(name: String): Classifier? =
-        definitions[name] ?: parent?.resolveOrNull(name)
+        definitions[name] ?: fallback?.resolveOrNull(name)
 
 
     abstract fun serialize(sb: StringBuilder)
@@ -33,9 +33,9 @@ abstract class Classifier(
         if (result != null) {
             return result
         }
-        if (parent != null) {
+        if (fallback != null) {
             try {
-                parent!!.resolve(name)
+                fallback!!.resolve(name)
             } catch (e: Exception) {
                 throw IllegalStateException("Unable to resolve '$name' in ${this.name} containing ${definitions.keys}", e)
             }

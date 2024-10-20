@@ -9,9 +9,8 @@ import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 
 class Program(
     val printFn: (String) -> Unit = ::print
-) : ResolvedType, Classifier(null, "") {
+) : Classifier(null, "") {
 
-    override fun resolve(): ResolvedType = this
     override fun toString() = "program $name"
 
     fun serialize(): String {

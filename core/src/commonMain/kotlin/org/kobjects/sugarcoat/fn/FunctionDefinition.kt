@@ -8,12 +8,13 @@ import org.kobjects.sugarcoat.model.Classifier
 
 data class FunctionDefinition(
     override val parent: Classifier,
+    override val fallback: Classifier,
     val static: Boolean,
     override val name: String,
     val parameters: List<ParameterDefinition>,
     val returnType: Type,
     val body: Expression
-) : Callable, Classifier(parent, name), Typed {
+) : Callable, Classifier(parent, name, fallback), Typed {
 
     override fun call(
         receiver: Any?,
