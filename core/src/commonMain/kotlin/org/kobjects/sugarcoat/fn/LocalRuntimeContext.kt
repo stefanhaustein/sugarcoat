@@ -1,7 +1,6 @@
 package org.kobjects.sugarcoat.fn
 
 import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.base.ControlStructures
 import org.kobjects.sugarcoat.base.GlobalRuntimeContext
 import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.base.Typed
@@ -65,7 +64,7 @@ class LocalRuntimeContext(
     fun evalSymbol(receiver: Any?, name: String, children: List<ParameterReference>): Any {
         val resolved = resolve(receiver, name)
 
-        return if (resolved == null) ControlStructures.evalSymbol(name, children, this)
+        return if (resolved == null) throw IllegalStateException("Unrecognized symbol: '$name'")
         else evalResolved(resolved.first, resolved.second, children)
     }
 
