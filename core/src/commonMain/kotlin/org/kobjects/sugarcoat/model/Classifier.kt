@@ -1,10 +1,15 @@
 package org.kobjects.sugarcoat.model
 
 import org.kobjects.sugarcoat.ast.Expression
+import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.ResolvedType
 import org.kobjects.sugarcoat.base.Type
+import org.kobjects.sugarcoat.base.Typed
 import org.kobjects.sugarcoat.datatype.NativeArgList
 import org.kobjects.sugarcoat.datatype.NativeFunction
+import org.kobjects.sugarcoat.fn.Callable
+import org.kobjects.sugarcoat.fn.FunctionType
+import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 
 abstract class Classifier(
@@ -52,6 +57,33 @@ abstract class Classifier(
     }
 
 
+    fun addControl(name: String, type: Type, vararg parameters: ParameterDefinition, action: (List<ParameterReference>, LocalRuntimeContext) -> Any) {
+
+        addChild(object : Callable, Classifier(this, name, null), Typed {
+            override val static: Boolean
+                get() = true
+
+            override fun call(
+                receiver: Any?,
+                children: List<ParameterReference>,
+                parameterScope: LocalRuntimeContext
+            ): Any {
+                return action(children, parameterScope)
+            }
+
+            override fun serialize(sb: StringBuilder) {
+                throw UnsupportedOperationException()
+            }
+
+            override val type: Type
+                get() = FunctionType(type, parameters.map { it.type })
+
+            override fun toString() = "control instruction '$name'"
+
+        })
+    }
+
+
     fun resolveOrNull(name: String): Classifier? {
         val result = definitions[name]
         if (result != null) {
@@ -76,10 +108,10 @@ abstract class Classifier(
             try {
                 fallback!!.resolve(name)
             } catch (e: Exception) {
-                throw IllegalStateException("Unable to resolve '$name' in ${this.name} containing ${definitions.keys}", e)
+                throw IllegalStateException("Unable to resolve '$name' in '${this.name}' containing ${definitions.keys}", e)
             }
         }
-        throw IllegalStateException("Unable to resolve '$name' in ${this.name} containing ${definitions.keys}")
+        throw IllegalStateException("Unable to resolve '$name' in '${this.name}' containing ${definitions.keys}")
     }
 
     abstract override fun toString(): String

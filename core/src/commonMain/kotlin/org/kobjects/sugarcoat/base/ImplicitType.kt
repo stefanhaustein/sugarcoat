@@ -1,7 +1,5 @@
 package org.kobjects.sugarcoat.base
 
-class ImplicitType : Type {
-    override fun resolve(): ResolvedType {
-        TODO("Not yet implemented")
-    }
+class ImplicitType(val resolveFn: () -> ResolvedType) : Type {
+    override fun resolve() = resolveFn()
 }

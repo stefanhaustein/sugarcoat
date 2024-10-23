@@ -1,7 +1,9 @@
 package org.kobjects.sugarcoat.fn
 
 import org.kobjects.sugarcoat.ast.Expression
+import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.ast.ParameterReference
+import org.kobjects.sugarcoat.base.ImplicitType
 import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.base.Typed
 import org.kobjects.sugarcoat.model.Classifier
@@ -12,9 +14,12 @@ data class FunctionDefinition(
     override val static: Boolean,
     override val name: String,
     val parameters: List<ParameterDefinition>,
-    val returnType: Type,
-    val body: Expression
+    val explicitReturnType: Type? = null
 ) : Callable, Classifier(parent, name, fallback), Typed {
+
+    var body: Expression = LiteralExpression(0)
+
+    val returnType: Type = explicitReturnType ?: ImplicitType { body.getType().resolve() }
 
     override fun call(
         receiver: Any?,
@@ -28,7 +33,7 @@ data class FunctionDefinition(
 
         val parameterConsumer = ParameterConsumer(children)
 
-        val localContext = LocalRuntimeContext(parameterScope.globalRuntimeContext, this, receiver)
+        val localContext = LocalRuntimeContext(parameterScope.globalRuntimeContext, receiver)
         for (p in parameters) {
             localContext.symbols[p.name] = parameterConsumer.read(parameterScope, p)
         }

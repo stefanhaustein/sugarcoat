@@ -9,7 +9,6 @@ import org.kobjects.sugarcoat.model.Instance
 
 class LocalRuntimeContext(
     val globalRuntimeContext: GlobalRuntimeContext,
-    val namespace: Classifier,
     val instance: Any?
 ) {
     val symbols = mutableMapOf<String, Any>()
@@ -24,16 +23,16 @@ class LocalRuntimeContext(
         return resolved
     }
 
-    fun resolve(receiver: Any?, name: String): Pair<Any?, Any>? {
+    fun resolve(namespace: Classifier, receiver: Any?, name: String): Pair<Any?, Any>? {
         if (name == "a") {
             println("ah!")
         }
         when (receiver) {
             null -> {
-                val local = symbols[name]
+                /*val local = symbols[name]
                 if (local != null) {
                     return null to local
-                }
+                }*/
                 val resolved = namespace.resolveOrNull(name)
                 return if (resolved != null) (if (resolved is Callable && !resolved.static) instance else null) to resolved else null
             }
@@ -55,14 +54,14 @@ class LocalRuntimeContext(
         }
     }
 
-
+/*
     fun resolveType(receiver: Any?, name: String): Type {
         val resolved = resolve(receiver, name)?.second ?: throw IllegalArgumentException("Can't resolve $receiver.$name")
         return if (resolved is Callable) ((resolved as Typed).type as FunctionType).returnType else Type.of(resolved)
     }
-
-    fun evalSymbol(receiver: Any?, name: String, children: List<ParameterReference>): Any {
-        val resolved = resolve(receiver, name)
+*/
+    fun evalSymbol(namespace: Classifier, receiver: Any?, name: String, children: List<ParameterReference>): Any {
+        val resolved = resolve(namespace, receiver, name)
 
         return if (resolved == null) throw IllegalStateException("Unrecognized symbol: '$name'")
         else evalResolved(resolved.first, resolved.second, children)

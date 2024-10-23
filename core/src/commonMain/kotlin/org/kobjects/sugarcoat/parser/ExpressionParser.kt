@@ -7,13 +7,13 @@ import org.kobjects.sugarcoat.fn.FunctionDefinition
 import org.kobjects.sugarcoat.ast.LambdaExpression
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.ast.Expression
-import org.kobjects.sugarcoat.base.ImplicitType
 import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.ast.ParameterListBuilder
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.model.Program
 import org.kobjects.sugarcoat.ast.SymbolExpression
 import org.kobjects.sugarcoat.base.GlobalRuntimeContext
+import org.kobjects.sugarcoat.base.ResolutionPassType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 
 
@@ -152,16 +152,20 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
 
 
     fun parseLambdaArgumentsAndBody(scanner: Scanner<TokenType>, context: ParsingContext): Expression {
-
-        val parmeters = mutableListOf<ParameterDefinition>()
+        val parameters = mutableListOf<ParameterDefinition>()
         if (scanner.current.type == TokenType.IDENTIFIER) {
             do {
-                parmeters.add(ParameterDefinition(scanner.consume(TokenType.IDENTIFIER).text, ImplicitType()))
+                parameters.add(ParameterDefinition(scanner.consume(TokenType.IDENTIFIER).text, ResolutionPassType()))
             } while (scanner.tryConsume(","))
         }
+        val fn = FunctionDefinition(context.namespace, context.namespace, true, "", parameters.toList())
 
-        val parsedBody = SugarcoatParser.parseBlock(scanner, context)
-        return if (parmeters.isEmpty()) parsedBody else LambdaExpression(FunctionDefinition(context.program, context.namespace, true, "", parmeters.toList(), ImplicitType(), parsedBody))
+        val parsedBody = SugarcoatParser.parseBlock(scanner, context.copy(namespace = fn))
+        if (parameters.isEmpty()) {
+            return parsedBody
+        }
+        fn.body = parsedBody
+        return LambdaExpression(fn)
     }
 
 
@@ -171,6 +175,6 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             scanner, ParsingContext(Program())
         )
         val program = Program()
-        return parsed.eval(LocalRuntimeContext(GlobalRuntimeContext(program), program, null))
+        return parsed.eval(LocalRuntimeContext(GlobalRuntimeContext(program), /*program,*/ null))
     }
 }

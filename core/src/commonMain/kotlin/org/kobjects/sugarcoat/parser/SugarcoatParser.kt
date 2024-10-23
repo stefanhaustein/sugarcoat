@@ -6,9 +6,7 @@ import org.kobjects.sugarcoat.ast.AssignmentExpression
 import org.kobjects.sugarcoat.fn.FunctionDefinition
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.ast.Expression
-import org.kobjects.sugarcoat.model.FieldDefinition
 import org.kobjects.sugarcoat.model.ImplDefinition
-import org.kobjects.sugarcoat.base.ImplicitType
 import org.kobjects.sugarcoat.model.ObjectDefinition
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.model.Program
@@ -19,6 +17,7 @@ import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.base.TypeReference
 import org.kobjects.sugarcoat.ast.VariableDeclaration
 import org.kobjects.sugarcoat.datatype.VoidType
+import org.kobjects.sugarcoat.fn.BlockScope
 
 object SugarcoatParser {
 
@@ -73,8 +72,9 @@ object SugarcoatParser {
             scanner.consume(")") { "Closing brace or comma (')' or ',') expected after parameter" }
         }
         val returnType = if (scanner.tryConsume("->")) parseType(scanner, parentContext) else VoidType
-        val body = parseBlock(scanner, parentContext)
-        val fn = FunctionDefinition(parentContext.namespace, parentContext.namespace, static, name, parameters, returnType, body)
+        val fn = FunctionDefinition(parentContext.namespace, parentContext.namespace, static, name, parameters, returnType)
+        fn.body = parseBlock(scanner, parentContext.copy(namespace = fn))
+
         parentContext.namespace.addChild(fn)
     }
 
@@ -137,12 +137,15 @@ object SugarcoatParser {
                     parseFn(scanner, parsingContext, isStatic)
                 } else {
                     val name = scanner.consume(TokenType.IDENTIFIER) { "Field name expected" }.text
-                    var type = ImplicitType()
+                    var type: Type? = null
                     if (scanner.tryConsume(":")) {
-                        parseType(scanner, parsingContext)
+                        type = parseType(scanner, parsingContext)
                     }
                     val defaultExpr = if (scanner.tryConsume("=")) parseExpression(scanner, parsingContext) else null
-                    classifier.addField(name, type, defaultExpr)
+                    require (type != null || defaultExpr != null) {
+                        "Type or default expression required."
+                    }
+                    classifier.addField(name, type ?: defaultExpr!!.getType(), defaultExpr)
                 }
             }
             if (currentIndent(scanner) != depth) {
@@ -162,7 +165,7 @@ object SugarcoatParser {
         }
         scanner.consume(TokenType.NEWLINE)
 
-        val parsingContext = parentContext.copy(depth = depth)
+        val parsingContext = parentContext.copy(depth = depth, namespace = BlockScope(parentContext.namespace))
 
         val result = mutableListOf<ParameterReference>()
         while(true) {
@@ -215,6 +218,7 @@ object SugarcoatParser {
         val name = scanner.consume(TokenType.IDENTIFIER).text
         scanner.consume("=")
         val value = parseExpression(scanner, parsingContext)
+        parsingContext.namespace.addField(name, value.getType(), value)
         return VariableDeclaration(name, mutable, value)
     }
 

@@ -26,32 +26,6 @@ object RootContext : Classifier(null, "") {
 
     override fun toString(): String = "Root Context"
 
-    fun addControl(name: String, type: Type, vararg parameters: ParameterDefinition, action: (List<ParameterReference>, LocalRuntimeContext) -> Any) {
-
-        addChild(object : Callable, Classifier(this, name, null), Typed {
-            override val static: Boolean
-                get() = true
-
-            override fun call(
-                receiver: Any?,
-                children: List<ParameterReference>,
-                parameterScope: LocalRuntimeContext
-            ): Any {
-                return action(children, parameterScope)
-            }
-
-            override fun serialize(sb: StringBuilder) {
-                throw UnsupportedOperationException()
-            }
-
-            override val type: Type
-                get() = FunctionType(type, parameters.map { it.type })
-
-            override fun toString() = "control instruction '$name'"
-
-        })
-    }
-
     init {
         addChild(BoolType)
         addChild(F64Type)

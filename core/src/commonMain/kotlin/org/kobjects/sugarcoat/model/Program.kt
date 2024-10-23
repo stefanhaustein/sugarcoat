@@ -27,7 +27,7 @@ class Program(
             parameters.map { ParameterReference("", LiteralExpression(it)) },
             LocalRuntimeContext(
                 GlobalRuntimeContext(this, printFn),
-                this,
+             //   this,
                 null))
 
     }

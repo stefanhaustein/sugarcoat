@@ -1,5 +1,6 @@
 package org.kobjects.sugarcoat.ast
 
+import org.kobjects.sugarcoat.base.ImplicitType
 import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.fn.FunctionType
@@ -17,7 +18,7 @@ class SymbolExpression(
     constructor(namespace: Classifier, receiver: Expression, name: String, precedence: Int, vararg children: Expression) : this(namespace, receiver, name, children.map { ParameterReference("", it) }, precedence)
     constructor(namespace: Classifier, name: String, vararg children: Expression) : this(namespace, null, name, children.map { ParameterReference("", it) })
 
-    override fun eval(context: LocalRuntimeContext) = context.evalSymbol(receiver?.eval(context), name, children)
+    override fun eval(context: LocalRuntimeContext) = context.evalSymbol(namespace, receiver?.eval(context), name, children)
 
     override fun toString(): String = buildString { stringify(this, 0) }
 
@@ -61,10 +62,10 @@ class SymbolExpression(
 
     }
 
-    override fun getType(): Type {
-        val receiverNamespace = if (receiver == null) namespace else receiver.getType() as Classifier
-        val rawType = receiverNamespace.resolve(name)
-        return if (rawType is Callable) (Type.of(rawType) as FunctionType).returnType else rawType as Type
-
+    override fun getType(): Type =
+        ImplicitType {
+            val receiverNamespace = if (receiver == null) namespace else receiver.getType().resolve() as Classifier
+            val rawType = receiverNamespace.resolve(name)
+            (if (rawType is Callable) (Type.of(rawType) as FunctionType).returnType else rawType as Type).resolve()
     }
 }
