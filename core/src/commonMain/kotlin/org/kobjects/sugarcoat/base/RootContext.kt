@@ -3,7 +3,7 @@ package org.kobjects.sugarcoat.base
 import org.kobjects.sugarcoat.ast.LambdaExpression
 import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.ast.SymbolExpression
+import org.kobjects.sugarcoat.ast.UnresolvedSymbolExpression
 import org.kobjects.sugarcoat.datatype.AnyType
 import org.kobjects.sugarcoat.datatype.BoolType
 import org.kobjects.sugarcoat.datatype.F64Type
@@ -12,7 +12,6 @@ import org.kobjects.sugarcoat.datatype.I64Type
 import org.kobjects.sugarcoat.datatype.ListType
 import org.kobjects.sugarcoat.datatype.StringType
 import org.kobjects.sugarcoat.datatype.VoidType
-import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
@@ -145,7 +144,7 @@ object RootContext : Classifier(null, "") {
             val value = child.value
             when (child.name) {
                 "elif" -> {
-                    require (value is SymbolExpression && value.name == "pair")
+                    require (value is UnresolvedSymbolExpression && value.name == "pair")
                     if (value.children[0].value.evalBoolean(parameterContext)) {
                         return value.children[1].value.eval(parameterContext)
                     }

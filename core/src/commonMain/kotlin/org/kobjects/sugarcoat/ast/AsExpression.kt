@@ -11,7 +11,7 @@ class AsExpression(
     val source: Expression,
     target: Expression
 ): Expression {
-    val target = TypeReference(context, (target as SymbolExpression).name, emptyList())
+    val target = TypeReference(context, (target as UnresolvedSymbolExpression).name, emptyList())
 
     override fun eval(context: LocalRuntimeContext): Instance {
         val def = context.globalRuntimeContext.findImpl(source.getType().resolve(), target.resolve())

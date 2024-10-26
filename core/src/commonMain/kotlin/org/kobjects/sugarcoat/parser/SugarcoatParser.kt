@@ -2,7 +2,6 @@ package org.kobjects.sugarcoat.parser
 
 import org.kobjects.parsek.tokenizer.Scanner
 import org.kobjects.sugarcoat.model.Classifier
-import org.kobjects.sugarcoat.ast.AssignmentExpression
 import org.kobjects.sugarcoat.fn.FunctionDefinition
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.ast.Expression
@@ -11,7 +10,7 @@ import org.kobjects.sugarcoat.model.ObjectDefinition
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.model.Program
 import org.kobjects.sugarcoat.model.StructDefinition
-import org.kobjects.sugarcoat.ast.SymbolExpression
+import org.kobjects.sugarcoat.ast.UnresolvedSymbolExpression
 import org.kobjects.sugarcoat.model.TraitDefinition
 import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.base.TypeReference
@@ -162,7 +161,7 @@ object SugarcoatParser {
         val depth = currentIndent(scanner)
         println("ParseBody; parent: $parentContext; depth: $depth")
         if (depth <= parentContext.depth) {
-            return SymbolExpression(parentContext.namespace, "seq")
+            return UnresolvedSymbolExpression(parentContext.namespace, "seq")
         }
         scanner.consume(TokenType.NEWLINE)
 
@@ -182,7 +181,7 @@ object SugarcoatParser {
             }
             scanner.consume(TokenType.NEWLINE)
         }
-        return if (result.size == 1) result.first().value else SymbolExpression(parentContext.namespace, null, "seq", result)
+        return if (result.size == 1) result.first().value else UnresolvedSymbolExpression(parentContext.namespace, null, "seq", result)
     }
 
     fun parseStatement(scanner: Scanner<TokenType>, parsingContext: ParsingContext): Expression {
@@ -191,7 +190,11 @@ object SugarcoatParser {
         } else {
             var result = parseExpression(scanner, parsingContext)
             if (scanner.tryConsume("=")) {
-                result = AssignmentExpression(result, parseExpression(scanner, parsingContext))
+                require (result is UnresolvedSymbolExpression && result.children.isEmpty()) {
+                    "Unsupported assignment target: $result"
+                }
+                val source = parseExpression(scanner, parsingContext)
+                result = UnresolvedSymbolExpression(result.namespace, result.receiver,"set_$result.name", listOf(ParameterReference("", source)))
             }
             result
         }

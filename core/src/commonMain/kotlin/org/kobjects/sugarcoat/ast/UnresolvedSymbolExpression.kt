@@ -8,7 +8,7 @@ import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.model.Classifier
 
 
-class SymbolExpression(
+class UnresolvedSymbolExpression(
     val namespace: Classifier,
     val receiver: Expression?,
     val name: String,
