@@ -7,10 +7,12 @@ import org.kobjects.sugarcoat.datatype.I64Type
 import org.kobjects.sugarcoat.datatype.ListType
 import org.kobjects.sugarcoat.datatype.StringType
 import org.kobjects.sugarcoat.datatype.VoidType
+import org.kobjects.sugarcoat.model.Classifier
 
 interface Type {
     fun resolve(): ResolvedType
 
+    fun resolve(context: Classifier): Type = this
 
     companion object {
         fun of(value: Any) =

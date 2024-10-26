@@ -6,10 +6,16 @@ import org.kobjects.sugarcoat.base.Type
 class ImplDefinition(
     parent: Classifier,
     fallback: Classifier,
-    val trait: Type,
-    val struct: Type
+    var trait: Type,
+    var struct: Type
 ) : Classifier(parent, "", fallback), ResolvedType {
 //    override fun resolve() = trait.resolve()
+
+    override fun resolveTypes() {
+        super.resolveTypes()
+        trait = trait.resolve(this)
+        struct = struct.resolve(this)
+    }
 
     override fun toString() = "impl ($trait) for ($struct)"
 

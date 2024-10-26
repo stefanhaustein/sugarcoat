@@ -54,6 +54,7 @@ object SugarcoatParser {
         require(program.definitions["main"] is FunctionDefinition) {
             "main() function not found."
         }
+        program.resolveTypes()
         return program
     }
 

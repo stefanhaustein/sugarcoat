@@ -83,6 +83,15 @@ abstract class Classifier(
         })
     }
 
+    open fun resolveTypes() {
+        for (definition in definitions.values) {
+            definition.resolveTypes()
+        }
+        for (definition in unnamed) {
+            definition.resolveTypes()
+        }
+    }
+
 
     fun resolveOrNull(name: String): Classifier? {
         val result = definitions[name]

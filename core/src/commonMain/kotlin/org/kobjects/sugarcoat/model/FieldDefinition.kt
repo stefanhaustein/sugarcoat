@@ -8,4 +8,7 @@ data class FieldDefinition(
     val name: String,
     val type: Type,
     val defaultExpression: Expression?
-)
+) {
+    fun resolve(context: Classifier) = copy(type = type.resolve(context))
+
+}

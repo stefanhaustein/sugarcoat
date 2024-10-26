@@ -22,27 +22,34 @@ class StructDefinition(
 
     val fields = mutableMapOf<String, FieldDefinition>()
 
-    init {
-        addChild(StructConstructor(this, constructorName))
-    }
-
     override fun addField(name: String, type: Type, defaultExpression: Expression?) {
         fields[name] = FieldDefinition(this, name, type, defaultExpression)
-        addNativeMethod(type, name) {
-            (it.list[0] as StructInstance).fields[name] ?: throw IllegalStateException("Missing field value for $name")
-        }
-        addNativeMethod( VoidType, "set_$name", ParameterDefinition("value", type)) {
-            (it.list[0] as StructInstance).fields[name] = it.list[1]
-            Unit
-        }
     }
 
-    override fun toString() = "struct $name"
+    override fun resolveTypes() {
+        super.resolveTypes()
+        val resolvedFields = fields.values.map { it.resolve(this) }
+        for(field in resolvedFields) {
+            fields[field.name] = field
+            addNativeMethod(field.type, field.name) {
+                (it.list[0] as StructInstance).fields[field.name]
+                    ?: throw IllegalStateException("Missing field value for ${field.name}")
+            }
+            addNativeMethod(VoidType, "set_${field.name}", ParameterDefinition("value", field.type)) {
+                (it.list[0] as StructInstance).fields[field.name] = it.list[1]
+                Unit
+            }
+        }
+        addChild(StructConstructor(this, constructorName))
+    }
 
     override fun serialize(sb: StringBuilder) {
         sb.append("struct $name\n")
         serializeBody(sb)
     }
+
+    override fun toString() = "struct $name"
+
 
     class StructConstructor(override val parent: StructDefinition, override val name: String) : Callable, Classifier(parent, name), Typed {
         override val static: Boolean

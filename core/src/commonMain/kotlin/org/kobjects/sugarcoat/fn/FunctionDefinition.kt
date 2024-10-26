@@ -13,13 +13,14 @@ data class FunctionDefinition(
     override val fallback: Classifier,
     override val static: Boolean,
     override val name: String,
-    val parameters: List<ParameterDefinition>,
-    val explicitReturnType: Type? = null
+    var parameters: List<ParameterDefinition>,
+    var explicitReturnType: Type? = null
 ) : Callable, Classifier(parent, name, fallback), Typed {
 
     var body: Expression = LiteralExpression(0)
 
-    val returnType: Type = explicitReturnType ?: ImplicitType { body.getType().resolve() }
+    val returnType: Type
+        get() = explicitReturnType ?: ImplicitType { body.getType().resolve() }
 
     override fun call(
         receiver: Any?,
@@ -49,6 +50,12 @@ data class FunctionDefinition(
         sb.append("fn $name(${parameters.joinToString (", ")})\n  ")
         body.stringify(sb, 0)
         sb.append("\n")
+    }
+
+    override fun resolveTypes() {
+        super.resolveTypes()
+        parameters = parameters.map { it.resolve(this) }
+        explicitReturnType = explicitReturnType?.resolve(this)
     }
 
     override fun toString() =
