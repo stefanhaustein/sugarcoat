@@ -4,11 +4,16 @@ import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.base.Type
 
 data class FieldDefinition(
-    val parent: StructDefinition,
     val name: String,
-    val type: Type,
-    val defaultExpression: Expression?
+    val type: Type?,
+    val expression: Expression?
 ) {
-    fun resolve(context: Classifier) = copy(type = type.resolve(context))
+    fun resolve(context: Classifier): FieldDefinition {
+        val resolvedExpression = expression?.resolve(null)
+
+        val resolvedType = type?.resolve(context) ?: resolvedExpression!!.getType()
+
+        return FieldDefinition(name, resolvedType, resolvedExpression)
+    }
 
 }

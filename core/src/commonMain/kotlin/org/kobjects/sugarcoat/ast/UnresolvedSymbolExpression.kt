@@ -1,10 +1,9 @@
 package org.kobjects.sugarcoat.ast
 
-import org.kobjects.sugarcoat.base.ImplicitType
+import org.kobjects.sugarcoat.base.MetaType
 import org.kobjects.sugarcoat.base.Type
-import org.kobjects.sugarcoat.fn.Callable
-import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
+import org.kobjects.sugarcoat.fn.TypedCallable
 import org.kobjects.sugarcoat.model.Classifier
 
 
@@ -18,7 +17,7 @@ class UnresolvedSymbolExpression(
     constructor(namespace: Classifier, receiver: Expression, name: String, precedence: Int, vararg children: Expression) : this(namespace, receiver, name, children.map { ParameterReference("", it) }, precedence)
     constructor(namespace: Classifier, name: String, vararg children: Expression) : this(namespace, null, name, children.map { ParameterReference("", it) })
 
-    override fun eval(context: LocalRuntimeContext) = context.evalSymbol(namespace, receiver?.eval(context), name, children)
+    override fun eval(context: LocalRuntimeContext) = throw UnsupportedOperationException()
 
     override fun toString(): String = buildString { stringify(this, 0) }
 
@@ -62,10 +61,55 @@ class UnresolvedSymbolExpression(
 
     }
 
-    override fun getType(): Type =
-        ImplicitType {
-            val receiverNamespace = if (receiver == null) namespace else receiver.getType().resolve() as Classifier
-            val rawType = receiverNamespace.resolve(name)
-            (if (rawType is Callable) (Type.of(rawType) as FunctionType).returnType else rawType as Type).resolve()
+    override fun getType() = throw UnsupportedOperationException()
+
+    fun resolveChildren(expected: List<Type>): List<ParameterReference> {
+        return children.map { it.copy(value = it.value.resolve(null)) }
     }
+
+    override fun resolve(expectedType: Type?): Expression {
+        if (receiver == null) {
+            val self = namespace.resolveOrNull("self")
+            val resolvedDynamically = if (self == null) null else
+                ((self as TypedCallable).type.returnType as Classifier).resolveOrNull(name)
+
+            if (resolvedDynamically is TypedCallable) {
+                return CallExpression(
+                    if (resolvedDynamically.static) null else CallExpression(null, self as TypedCallable, emptyList()),
+                    resolvedDynamically,
+                    resolveChildren(resolvedDynamically.type.parameterTypes))
+            }
+
+            return resolveStatically(null, namespace.resolve(name))
+        }
+
+        val resolvedReceiver = receiver.resolve(null)
+        val type = resolvedReceiver.getType()
+        return when (type) {
+            is MetaType -> {
+                val resolved = type.type.resolve(name)
+                resolveStatically(null, resolved)
+            }
+            is Classifier -> {
+                val resolved = type.resolve(name)
+                resolveStatically(resolvedReceiver, resolved)
+            }
+            else -> throw IllegalStateException(
+                "Type '$type' (${type::class}) of resolved receiver '$resolvedReceiver' must be classifier for resolving '$name'")
+        }
+    }
+
+    fun resolveStatically(resolvedReceiver: Expression?, resolved: Classifier): Expression {
+        if (resolved is TypedCallable) {
+            return CallExpression(resolvedReceiver, resolved, resolveChildren(resolved.type.parameterTypes))
+        }
+        if (resolved is Type) {
+            require(children.isEmpty()) {
+                "Types can't have function parameters."
+            }
+            return LiteralExpression(resolved)
+        }
+        throw IllegalStateException("Unrecognized resolved name: '$resolved'")
+    }
+
 }

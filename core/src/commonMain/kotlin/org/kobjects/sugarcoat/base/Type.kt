@@ -8,6 +8,8 @@ import org.kobjects.sugarcoat.datatype.ListType
 import org.kobjects.sugarcoat.datatype.StringType
 import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.model.Classifier
+import org.kobjects.sugarcoat.model.StructDefinition
+import org.kobjects.sugarcoat.model.TraitDefinition
 
 interface Type {
     fun resolve(): ResolvedType
@@ -25,6 +27,8 @@ interface Type {
                 is String -> StringType
                 is Typed -> value.type
                 is Unit -> VoidType
+                is StructDefinition -> MetaType(value)
+                is TraitDefinition -> MetaType(value)
                 else -> throw IllegalArgumentException("Type of value '$value' not supported.")
             }
 

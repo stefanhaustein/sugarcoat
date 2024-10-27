@@ -1,21 +1,18 @@
 package org.kobjects.sugarcoat.ast
 
-import org.kobjects.sugarcoat.base.TypeReference
+import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
-import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.model.ImplInstance
-import org.kobjects.sugarcoat.model.Instance
+import org.kobjects.sugarcoat.model.TraitDefinition
 
 class AsExpression(
-    val context: Classifier,
     val source: Expression,
-    target: Expression
-): Expression {
-    val target = TypeReference(context, (target as UnresolvedSymbolExpression).name, emptyList())
-
-    override fun eval(context: LocalRuntimeContext): Instance {
-        val def = context.globalRuntimeContext.findImpl(source.getType().resolve(), target.resolve())
-        return ImplInstance(def, source.eval(context))
+    val target: TraitDefinition
+) : ResolvedExpression() {
+    override fun eval(context: LocalRuntimeContext): Any {
+        // This should be resolved at resolution time.
+        val implDefinition = context.globalRuntimeContext.findImpl(source.getType().resolve(), target)
+        return ImplInstance(implDefinition, source.eval(context))
     }
 
     override fun getType() = target

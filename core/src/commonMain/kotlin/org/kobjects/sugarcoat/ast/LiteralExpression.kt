@@ -3,7 +3,7 @@ package org.kobjects.sugarcoat.ast
 import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 
-class LiteralExpression(val value: Any) : Expression {
+class LiteralExpression(val value: Any) : ResolvedExpression() {
 
     override fun eval(context: LocalRuntimeContext) = value
 

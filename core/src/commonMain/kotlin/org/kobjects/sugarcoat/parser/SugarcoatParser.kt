@@ -17,6 +17,7 @@ import org.kobjects.sugarcoat.base.TypeReference
 import org.kobjects.sugarcoat.ast.VariableDeclaration
 import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.BlockScope
+import org.kobjects.sugarcoat.fn.DelegateToImpl
 
 object SugarcoatParser {
 
@@ -54,6 +55,7 @@ object SugarcoatParser {
             "main() function not found."
         }
         program.resolveTypes()
+        program.resolveExpressions()
         return program
     }
 
@@ -72,9 +74,27 @@ object SugarcoatParser {
             scanner.consume(")") { "Closing brace or comma (')' or ',') expected after parameter" }
         }
         val returnType = if (scanner.tryConsume("->")) parseType(scanner, parentContext) else VoidType
-        val fn = FunctionDefinition(parentContext.namespace, parentContext.namespace, static, name, parameters, returnType)
-        fn.body = parseBlock(scanner, parentContext.copy(namespace = fn))
 
+        val fn: Classifier = if (!static && parentContext.namespace is TraitDefinition) {
+            DelegateToImpl(
+                parentContext.namespace,
+                parentContext.namespace,
+                name,
+                parameters,
+                returnType
+            )
+        } else {
+            val fd = FunctionDefinition(
+                parentContext.namespace,
+                parentContext.namespace,
+                static,
+                name,
+                parameters,
+                returnType
+            )
+            fd.body = parseBlock(scanner, parentContext.copy(namespace = fd))
+            fd
+        }
         parentContext.namespace.addChild(fn)
     }
 
@@ -145,7 +165,7 @@ object SugarcoatParser {
                     require (type != null || defaultExpr != null) {
                         "Type or default expression required."
                     }
-                    classifier.addField(name, type ?: defaultExpr!!.getType(), defaultExpr)
+                    classifier.addField(name, type, defaultExpr)
                 }
             }
             if (currentIndent(scanner) != depth) {
@@ -222,7 +242,7 @@ object SugarcoatParser {
         val name = scanner.consume(TokenType.IDENTIFIER).text
         scanner.consume("=")
         val value = parseExpression(scanner, parsingContext)
-        parsingContext.namespace.addField(name, value.getType(), value)
+        parsingContext.namespace.addField(name, null, value)
         return VariableDeclaration(name, mutable, value)
     }
 

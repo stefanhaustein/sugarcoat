@@ -3,8 +3,6 @@ package org.kobjects.sugarcoat.fn
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.LambdaExpression
 import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.model.Classifier
-import org.kobjects.sugarcoat.model.Instance
 
 data class Closure(
     val expression: Expression,

@@ -19,17 +19,17 @@ class TestSourceTest {
     fun testFarm() = testSource(FARM_CASE)
 
     fun testSource(case: Array<String>) {
-            val name = case[0]
-            val source = case[1]
-            val expected = trim(case[2])
+        val name = case[0]
+        val source = case[1]
+        val expected = trim(case[2])
 
-            val result = StringBuilder()
-            val program = SugarcoatParser.parseProgram(source) { result.append(it) }
+        val result = StringBuilder()
+        val program = SugarcoatParser.parseProgram(source) { result.append(it) }
 
-            program.run()
-            val actual = trim(result.toString())
+        program.run()
+        val actual = trim(result.toString())
 
-            assertEquals(expected, actual, "Unexpected result for $name.")
+        assertEquals(expected, actual, "Unexpected result for $name.")
     }
 
     companion object {
@@ -43,7 +43,6 @@ class TestSourceTest {
                 end--
             }
             return s.substring(start, end)
-
         }
     }
 }

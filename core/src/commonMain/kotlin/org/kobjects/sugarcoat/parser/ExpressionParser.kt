@@ -2,18 +2,19 @@ package org.kobjects.sugarcoat.parser
 
 import org.kobjects.parsek.expressionparser.ConfigurableExpressionParser
 import org.kobjects.parsek.tokenizer.Scanner
-import org.kobjects.sugarcoat.ast.AsExpression
 import org.kobjects.sugarcoat.fn.FunctionDefinition
-import org.kobjects.sugarcoat.ast.LambdaExpression
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.ast.Expression
+import org.kobjects.sugarcoat.ast.LambdaExpression
 import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.ast.ParameterListBuilder
 import org.kobjects.sugarcoat.ast.ParameterReference
+import org.kobjects.sugarcoat.ast.UnresolvedAsExpression
 import org.kobjects.sugarcoat.model.Program
 import org.kobjects.sugarcoat.ast.UnresolvedSymbolExpression
 import org.kobjects.sugarcoat.base.GlobalRuntimeContext
-import org.kobjects.sugarcoat.base.ResolutionPassType
+import org.kobjects.sugarcoat.base.UnresolvedType
+import org.kobjects.sugarcoat.fn.BlockScope
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 
 
@@ -21,7 +22,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
     { scanner, context -> ExpressionParser.parsePrimary(scanner, context) },
     prefix(10, "+", "-") { _, context, name, operand -> UnresolvedSymbolExpression(context.namespace, operand, name, 10) },
     infix(9, "**") { _, context, _, left, right -> UnresolvedSymbolExpression(context.namespace, left, "**", 9, right) },
-    infix(8, "as") { _, context, _, left, right -> AsExpression(context.namespace, left, right) },
+    infix(8, "as") { _, context, _, left, right -> UnresolvedAsExpression(context.namespace, left, right) },
     infix(7, "*", "/", "%", "//") { _, context, name, left, right -> UnresolvedSymbolExpression(context.namespace, left, name, 7, right) },
     infix(6, "+", "-") { _, context, name, left, right -> UnresolvedSymbolExpression(context.namespace, left, name, 6, right) },
     infix(5, "<", "<=", ">", ">=") { _, context, name, left, right -> UnresolvedSymbolExpression(context.namespace, left, name, 5, right) },
@@ -152,20 +153,29 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
 
 
     fun parseLambdaArgumentsAndBody(scanner: Scanner<TokenType>, context: ParsingContext): Expression {
-        val parameters = mutableListOf<ParameterDefinition>()
+        val parameters = mutableListOf<String>()
         if (scanner.current.type == TokenType.IDENTIFIER) {
             do {
-                parameters.add(ParameterDefinition(scanner.consume(TokenType.IDENTIFIER).text, ResolutionPassType()))
+                val parameterName = scanner.consume(TokenType.IDENTIFIER).text
+                parameters.add(parameterName)
             } while (scanner.tryConsume(","))
         }
-        val fn = FunctionDefinition(context.namespace, context.namespace, true, "", parameters.toList())
 
-        val parsedBody = SugarcoatParser.parseBlock(scanner, context.copy(namespace = fn))
-        if (parameters.isEmpty()) {
-            return parsedBody
-        }
-        fn.body = parsedBody
-        return LambdaExpression(fn)
+        val parentFn = (context.namespace as BlockScope).parent
+
+        val lambda = FunctionDefinition(
+            parentFn,
+            context.namespace,
+            parentFn.static,
+            "",
+            parameters.map { ParameterDefinition(it, UnresolvedType) },
+            UnresolvedType)
+
+        parentFn.addChild(lambda)
+
+        lambda.body = SugarcoatParser.parseBlock(scanner, context.copy(namespace = lambda))
+
+        return LambdaExpression(lambda)
     }
 
 
@@ -175,6 +185,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             scanner, ParsingContext(Program())
         )
         val program = Program()
-        return parsed.eval(LocalRuntimeContext(GlobalRuntimeContext(program), /*program,*/ null))
+        return parsed.resolve(null)
+            .eval(LocalRuntimeContext(GlobalRuntimeContext(program), /*program,*/ null))
     }
 }

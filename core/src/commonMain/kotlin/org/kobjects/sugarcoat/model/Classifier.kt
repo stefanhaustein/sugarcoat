@@ -2,15 +2,13 @@ package org.kobjects.sugarcoat.model
 
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.base.ResolvedType
 import org.kobjects.sugarcoat.base.Type
-import org.kobjects.sugarcoat.base.Typed
 import org.kobjects.sugarcoat.datatype.NativeArgList
 import org.kobjects.sugarcoat.datatype.NativeFunction
-import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
+import org.kobjects.sugarcoat.fn.TypedCallable
 
 abstract class Classifier(
     open val parent: Classifier?,
@@ -19,6 +17,8 @@ abstract class Classifier(
 ) {
     val definitions = mutableMapOf<String, Classifier>()
     val unnamed = mutableListOf<Classifier>()
+
+    open fun selfType(): Type = throw UnsupportedOperationException()
 
     open fun addChild(value: Classifier) {
         require(value.parent == this)
@@ -30,7 +30,7 @@ abstract class Classifier(
         }
     }
 
-    open fun addField(name: String, type: Type, defaultExpression: Expression?) {
+    open fun addField(name: String, type: Type?, defaultExpression: Expression?) {
         throw UnsupportedOperationException("Fields are not supported for ${this::class}")
     }
 
@@ -57,9 +57,9 @@ abstract class Classifier(
     }
 
 
-    fun addControl(name: String, type: Type, vararg parameters: ParameterDefinition, action: (List<ParameterReference>, LocalRuntimeContext) -> Any) {
+    fun addControl(name: String, returnType: Type, vararg parameters: ParameterDefinition, action: (List<ParameterReference>, LocalRuntimeContext) -> Any) {
 
-        addChild(object : Callable, Classifier(this, name, null), Typed {
+        addChild(object : TypedCallable, Classifier(this, name, null) {
             override val static: Boolean
                 get() = true
 
@@ -75,8 +75,8 @@ abstract class Classifier(
                 throw UnsupportedOperationException()
             }
 
-            override val type: Type
-                get() = FunctionType(type, parameters.map { it.type })
+            override val type: FunctionType
+                get() = FunctionType(returnType, parameters.map { it.type })
 
             override fun toString() = "control instruction '$name'"
 
@@ -92,6 +92,14 @@ abstract class Classifier(
         }
     }
 
+    open fun resolveExpressions() {
+        for (definition in definitions.values) {
+            definition.resolveExpressions()
+        }
+        for (definition in unnamed) {
+            definition.resolveExpressions()
+        }
+    }
 
     fun resolveOrNull(name: String): Classifier? {
         val result = definitions[name]

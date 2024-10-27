@@ -1,9 +1,10 @@
 package org.kobjects.sugarcoat.ast
 
+import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 
-class VariableDeclaration(
+data class VariableDeclaration(
     val name: String,
     val mutable: Boolean,
     val value: Expression) : Expression {
@@ -20,4 +21,6 @@ class VariableDeclaration(
     override fun getType() = VoidType
 
     override fun toString() = "$name = $value"
+
+    override fun resolve(expectedType: Type?) = copy(value = value.resolve(null))
 }

@@ -12,6 +12,7 @@ import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
+import org.kobjects.sugarcoat.fn.TypedCallable
 
 class StructDefinition(
     parent: Classifier,
@@ -22,8 +23,8 @@ class StructDefinition(
 
     val fields = mutableMapOf<String, FieldDefinition>()
 
-    override fun addField(name: String, type: Type, defaultExpression: Expression?) {
-        fields[name] = FieldDefinition(this, name, type, defaultExpression)
+    override fun addField(name: String, type: Type?, defaultExpression: Expression?) {
+        fields[name] = FieldDefinition(name, type, defaultExpression)
     }
 
     override fun resolveTypes() {
@@ -31,7 +32,7 @@ class StructDefinition(
         val resolvedFields = fields.values.map { it.resolve(this) }
         for(field in resolvedFields) {
             fields[field.name] = field
-            addNativeMethod(field.type, field.name) {
+            addNativeMethod(field.type!!, field.name) {
                 (it.list[0] as StructInstance).fields[field.name]
                     ?: throw IllegalStateException("Missing field value for ${field.name}")
             }
@@ -48,10 +49,12 @@ class StructDefinition(
         serializeBody(sb)
     }
 
+    override fun selfType() = this
+
     override fun toString() = "struct $name"
 
 
-    class StructConstructor(override val parent: StructDefinition, override val name: String) : Callable, Classifier(parent, name), Typed {
+    class StructConstructor(override val parent: StructDefinition, override val name: String) : TypedCallable, Classifier(parent, name) {
         override val static: Boolean
             get() = true
 
@@ -70,7 +73,7 @@ class StructDefinition(
             val instance = StructInstance(parent)
 
             for (definition in parent.fields.values) {
-                instance.fields[definition.name] = parameterConsumer.read(parameterScope, definition.name, definition.type)
+                instance.fields[definition.name] = parameterConsumer.read(parameterScope, definition.name, definition.type!!)
             }
 
             println("struct instance created: $instance")
@@ -78,10 +81,10 @@ class StructDefinition(
             return instance
         }
 
-        override val type: Type
+        override val type: FunctionType
         get() = FunctionType(
             parent,
-            parent.definitions.values.filterIsInstance<FieldDefinition>().map { it.type }
+            parent.definitions.values.filterIsInstance<FieldDefinition>().map { it.type!! }
         )
 
     }

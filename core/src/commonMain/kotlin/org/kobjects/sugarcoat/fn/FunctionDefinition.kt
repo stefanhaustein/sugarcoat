@@ -3,9 +3,7 @@ package org.kobjects.sugarcoat.fn
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.base.ImplicitType
 import org.kobjects.sugarcoat.base.Type
-import org.kobjects.sugarcoat.base.Typed
 import org.kobjects.sugarcoat.model.Classifier
 
 data class FunctionDefinition(
@@ -14,20 +12,17 @@ data class FunctionDefinition(
     override val static: Boolean,
     override val name: String,
     var parameters: List<ParameterDefinition>,
-    var explicitReturnType: Type? = null
-) : Callable, Classifier(parent, name, fallback), Typed {
+    var returnType: Type,
+) : TypedCallable, Classifier(parent, name, fallback) {
 
     var body: Expression = LiteralExpression(0)
 
-    val returnType: Type
-        get() = explicitReturnType ?: ImplicitType { body.getType().resolve() }
 
     override fun call(
         receiver: Any?,
         children: List<ParameterReference>,
         parameterScope: LocalRuntimeContext
     ): Any {
-
         require(static == (receiver == null)) {
             if (static) "Unexpected receiver for static method." else "Receiver expected for instance method."
         }
@@ -43,7 +38,7 @@ data class FunctionDefinition(
         return body.eval(localContext)
     }
 
-    override val type: Type
+    override val type: FunctionType
         get() = FunctionType(returnType, parameters.map { it.type })
 
     override fun serialize(sb: StringBuilder) {
@@ -55,7 +50,12 @@ data class FunctionDefinition(
     override fun resolveTypes() {
         super.resolveTypes()
         parameters = parameters.map { it.resolve(this) }
-        explicitReturnType = explicitReturnType?.resolve(this)
+        returnType = returnType.resolve(this)
+    }
+
+    override fun resolveExpressions() {
+        super.resolveExpressions()
+        body = body.resolve(null)
     }
 
     override fun toString() =

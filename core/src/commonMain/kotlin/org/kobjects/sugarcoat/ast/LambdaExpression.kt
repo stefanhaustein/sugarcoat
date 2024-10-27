@@ -1,15 +1,23 @@
 package org.kobjects.sugarcoat.ast
 
+import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.fn.FunctionDefinition
+import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 
 class LambdaExpression(
     val lambda: FunctionDefinition
 ) : Expression {
-    override fun eval(context: LocalRuntimeContext): Any {
-        require (lambda.parameters.isEmpty()) { "Missing parameter value(s)." }
-        return lambda.body.eval(context)
+
+    override fun eval(context: LocalRuntimeContext) =
+        lambda.call(context.instance, emptyList(), context)
+
+
+    override fun resolve(expectedType: Type?): LambdaExpression {
+        require(expectedType == null || expectedType is FunctionType)
+        return this
     }
 
-    override fun getType() = lambda.returnType
+    override fun getType() = lambda.type
+
 }

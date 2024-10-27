@@ -7,20 +7,22 @@ class ImplDefinition(
     parent: Classifier,
     fallback: Classifier,
     var trait: Type,
-    var struct: Type
+    var wrapped: Type
 ) : Classifier(parent, "", fallback), ResolvedType {
 //    override fun resolve() = trait.resolve()
 
     override fun resolveTypes() {
         super.resolveTypes()
         trait = trait.resolve(this)
-        struct = struct.resolve(this)
+        wrapped = wrapped.resolve(this)
     }
 
-    override fun toString() = "impl ($trait) for ($struct)"
+    override fun toString() = "impl ($trait) for ($wrapped)"
+
+    override fun selfType() = wrapped
 
     override fun serialize(sb: StringBuilder) {
-        sb.append("impl $trait for $struct\n")
+        sb.append("impl $trait for $wrapped\n")
         serializeBody(sb)
     }
 }

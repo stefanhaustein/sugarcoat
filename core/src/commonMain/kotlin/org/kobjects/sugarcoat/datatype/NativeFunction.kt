@@ -9,6 +9,7 @@ import org.kobjects.sugarcoat.base.Typed
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
+import org.kobjects.sugarcoat.fn.TypedCallable
 import org.kobjects.sugarcoat.model.Classifier
 
 data class NativeFunction(
@@ -18,7 +19,7 @@ data class NativeFunction(
     override val name: String,
     val args: List<ParameterDefinition>,
     val op: (NativeArgList) -> Any
-) : Classifier(parent, name), Callable, Typed {
+) : Classifier(parent, name), TypedCallable {
 
 
     override fun call(
@@ -38,7 +39,7 @@ data class NativeFunction(
         return op(NativeArgList(parameterList))
     }
 
-    override val type: Type
+    override val type: FunctionType
         get() = FunctionType(returnType, args.map { it.type })
 
     override fun serialize(sb: StringBuilder) {
