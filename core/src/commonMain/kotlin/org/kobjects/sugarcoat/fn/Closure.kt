@@ -13,7 +13,7 @@ data class Closure(
 
     override fun call(
         receiver: Any?,
-        children: List<ParameterReference>,
+        children: List<Expression?>,
         parameterScope: LocalRuntimeContext
     ) = when (expression) {
         is LambdaExpression -> expression.lambda.call(receiver, children, context)

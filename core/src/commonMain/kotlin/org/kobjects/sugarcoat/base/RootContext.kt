@@ -1,6 +1,8 @@
 package org.kobjects.sugarcoat.base
 
+import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.LambdaExpression
+import org.kobjects.sugarcoat.ast.ListExpression
 import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.ast.UnresolvedSymbolExpression
@@ -42,7 +44,7 @@ object RootContext : Classifier(null, "") {
             require(children.size == 2) { "Two parameters expected for assignment" }
             val target = (children.first() as LiteralExpression).value as String
             (parameterContext as LocalRuntimeContext).symbols[target] =
-                children.last().value.eval(parameterContext)
+                children.last()!!.eval(parameterContext)
             Unit
         }
 
@@ -71,7 +73,7 @@ object RootContext : Classifier(null, "") {
             VoidType,
             ParameterDefinition("value", StringType, repeated = true)
         ) { children, context ->
-            context.globalRuntimeContext.printFn(children.joinToString { it.value.eval(context).toString() } )
+            context.globalRuntimeContext.printFn((children[0]!!.eval(context) as List<Any>).joinToString())
         }
 
         addControl(
@@ -84,14 +86,14 @@ object RootContext : Classifier(null, "") {
                 1 ->
                     LongRange(
                         0,
-                        children[0].value.evalLong(parameterContext) - 1
+                        children[0]!!.evalLong(parameterContext) - 1
 
                     )
 
                 2 ->
                     LongRange(
-                        children.first().value.evalLong(parameterContext),
-                        children.last().value.evalLong(parameterContext) - 1
+                        children.first()!!.evalLong(parameterContext),
+                        children.last()!!.evalLong(parameterContext) - 1
 
                     )
 
@@ -102,10 +104,10 @@ object RootContext : Classifier(null, "") {
         addControl(
             "seq",
             ListType,
-            ParameterDefinition("value", VoidType),
+            ParameterDefinition("value", VoidType, true),
         ) { children, parameterContext ->
-            children.fold<ParameterReference, Any>(Unit) { _, current ->
-                current.value.eval(parameterContext)
+            children.fold<Expression?, Any>(Unit) { _, current ->
+                current!!.eval(parameterContext)
             }
         }
 
@@ -116,7 +118,7 @@ object RootContext : Classifier(null, "") {
             ParameterDefinition("body", FunctionType(VoidType))
         ) { children, parameterContext ->
             require(children.size == 2) { "Two parameters expected for 'while'." }
-            while (children[0].value.evalBoolean(parameterContext)) children[1].value.eval(
+            while (children[0]!!.evalBoolean(parameterContext)) children[1]!!.eval(
                 parameterContext
             )
         }
@@ -125,35 +127,27 @@ object RootContext : Classifier(null, "") {
     }
 
 
-    fun evalFor(children: List<ParameterReference>, parameterContext: LocalRuntimeContext): Any {
-        val range = children[0].value.eval(parameterContext) as LongRange
+    fun evalFor(children: List<Expression?>, parameterContext: LocalRuntimeContext): Any {
+        val range = children[0]!!.eval(parameterContext) as LongRange
         for (value in range) {
-            (children[1].value as LambdaExpression).lambda.call(null, listOf(
-                ParameterReference("", LiteralExpression(value))
-            ), parameterContext)
+            (children[1] as LambdaExpression).lambda.call(null, listOf(
+                LiteralExpression(value)), parameterContext)
         }
         return Unit
     }
 
-    fun evalIf(children: List<ParameterReference>, parameterContext: LocalRuntimeContext): Any {
-        if (children[0].value.evalBoolean(parameterContext)) {
-            return children[1].value.eval(parameterContext)
+    fun evalIf(children: List<Expression?>, parameterContext: LocalRuntimeContext): Any {
+        if (children[0]!!.evalBoolean(parameterContext)) {
+            return children[1]!!.eval(parameterContext)
         }
-        for (i in 2 until children.size) {
-            val child = children[i]
-            val value = child.value
-            when (child.name) {
-                "elif" -> {
-                    require (value is UnresolvedSymbolExpression && value.name == "pair")
-                    if (value.children[0].value.evalBoolean(parameterContext)) {
-                        return value.children[1].value.eval(parameterContext)
-                    }
-                }
-                "else" -> {
-                    return value.eval(parameterContext)
-                }
-                else -> throw IllegalStateException("else or elif expected; got: '${child.name}'")
+        if (children.size > 1 && children[1] != null) {
+            val elif = children[1] as ListExpression
+            for (pair in elif.elements) {
+                throw UnsupportedOperationException("elif")
             }
+        }
+        if (children.size == 3 && children[2] != null) {
+            return children[2]!!.eval(parameterContext)
         }
         return Unit
     }

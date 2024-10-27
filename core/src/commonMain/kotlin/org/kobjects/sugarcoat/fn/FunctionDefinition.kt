@@ -20,26 +20,23 @@ data class FunctionDefinition(
 
     override fun call(
         receiver: Any?,
-        children: List<ParameterReference>,
+        children: List<Expression?>,
         parameterScope: LocalRuntimeContext
     ): Any {
         require(static == (receiver == null)) {
             if (static) "Unexpected receiver for static method." else "Receiver expected for instance method."
         }
 
-        val parameterConsumer = ParameterConsumer(children)
-
         val localContext = LocalRuntimeContext(parameterScope.globalRuntimeContext, receiver)
-        for (p in parameters) {
-            localContext.symbols[p.name] = parameterConsumer.read(parameterScope, p)
+        for ((i, p) in parameters.withIndex()) {
+            localContext.symbols[p.name] = children[i]!!.eval(localContext)
         }
-        parameterConsumer.done()
 
         return body.eval(localContext)
     }
 
     override val type: FunctionType
-        get() = FunctionType(returnType, parameters.map { it.type })
+        get() = FunctionType(returnType, parameters)
 
     override fun serialize(sb: StringBuilder) {
         sb.append("fn $name(${parameters.joinToString (", ")})\n  ")

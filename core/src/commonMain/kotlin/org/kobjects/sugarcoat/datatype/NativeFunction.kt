@@ -1,8 +1,8 @@
 package org.kobjects.sugarcoat.datatype
 
+import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.fn.Callable
 
-import org.kobjects.sugarcoat.fn.ParameterConsumer
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.base.Typed
@@ -24,23 +24,21 @@ data class NativeFunction(
 
     override fun call(
         receiver: Any?,
-        children: List<ParameterReference>,
+        children: List<Expression?>,
         parameterScope: LocalRuntimeContext
     ): Any {
         require(static == (receiver == null)) {
             if (static) "Unexpected receiver for static method $this." else "Receiver expected for instance method $this."
         }
-        val parameterConsumer = ParameterConsumer(children)
-        val parameterList: MutableList<Any> =
-            if (static) mutableListOf() else mutableListOf(receiver!!)
-        for (parameter in args) {
-            parameterList.add(parameterConsumer.read(parameterScope, parameter.name, parameter.type))
+        val evaluated = if (static) mutableListOf<Any>() else mutableListOf<Any>(receiver!!)
+        for (child in children) {
+            evaluated.add(child!!.eval(parameterScope))
         }
-        return op(NativeArgList(parameterList))
+        return op(NativeArgList(evaluated))
     }
 
     override val type: FunctionType
-        get() = FunctionType(returnType, args.map { it.type })
+        get() = FunctionType(returnType, args)
 
     override fun serialize(sb: StringBuilder) {
         sb.append("native fn $name\n")

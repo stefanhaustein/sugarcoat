@@ -33,9 +33,8 @@ class BlockScope(override val parent: FunctionDefinition, fallback: Classifier) 
         locals[name] = FieldDefinition(name, type, defaultExpression)
     }
 
-    override fun resolveTypes() {
-        super.resolveTypes()
-
+    override fun resolveExpressions() {
+        super.resolveExpressions()
         if (!parent.static) {
             addControl( "self", parent.parent.selfType()) {
                     param, context -> context.instance!!

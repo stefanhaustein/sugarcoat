@@ -24,7 +24,7 @@ class Program(
 
         return (resolve("main") as FunctionDefinition).call(
             null,
-            parameters.map { ParameterReference("", LiteralExpression(it)) },
+            parameters.map { LiteralExpression(it) },
             LocalRuntimeContext(
                 GlobalRuntimeContext(this, printFn),
              //   this,

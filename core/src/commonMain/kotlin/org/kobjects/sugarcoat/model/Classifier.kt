@@ -57,7 +57,7 @@ abstract class Classifier(
     }
 
 
-    fun addControl(name: String, returnType: Type, vararg parameters: ParameterDefinition, action: (List<ParameterReference>, LocalRuntimeContext) -> Any) {
+    fun addControl(name: String, returnType: Type, vararg parameters: ParameterDefinition, action: (List<Expression?>, LocalRuntimeContext) -> Any) {
 
         addChild(object : TypedCallable, Classifier(this, name, null) {
             override val static: Boolean
@@ -65,7 +65,7 @@ abstract class Classifier(
 
             override fun call(
                 receiver: Any?,
-                children: List<ParameterReference>,
+                children: List<Expression?>,
                 parameterScope: LocalRuntimeContext
             ): Any {
                 return action(children, parameterScope)
@@ -76,7 +76,7 @@ abstract class Classifier(
             }
 
             override val type: FunctionType
-                get() = FunctionType(returnType, parameters.map { it.type })
+                get() = FunctionType(returnType, parameters.toList())
 
             override fun toString() = "control instruction '$name'"
 

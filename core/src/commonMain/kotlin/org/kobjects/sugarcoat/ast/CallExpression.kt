@@ -7,7 +7,7 @@ import org.kobjects.sugarcoat.fn.TypedCallable
 data class CallExpression(
     val receiver: Expression?,
     val fn: TypedCallable,
-    val parameter: List<ParameterReference>
+    val parameter: List<Expression?>
 ): ResolvedExpression() {
     override fun eval(context: LocalRuntimeContext): Any =
         fn.call(receiver?.eval(context), parameter, context)

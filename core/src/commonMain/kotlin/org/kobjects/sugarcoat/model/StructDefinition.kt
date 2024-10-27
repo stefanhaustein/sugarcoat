@@ -2,7 +2,6 @@ package org.kobjects.sugarcoat.model
 
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.base.ResolvedType
-import org.kobjects.sugarcoat.fn.ParameterConsumer
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.base.Typed
@@ -66,14 +65,14 @@ class StructDefinition(
 
         override fun call(
             receiver: Any?,
-            children: List<ParameterReference>,
+            children: List<Expression?>,
             parameterScope: LocalRuntimeContext
         ): Any {
-            val parameterConsumer = ParameterConsumer(children)
+
             val instance = StructInstance(parent)
 
-            for (definition in parent.fields.values) {
-                instance.fields[definition.name] = parameterConsumer.read(parameterScope, definition.name, definition.type!!)
+            for ((i, definition) in parent.fields.values.withIndex()) {
+                instance.fields[definition.name] = children[i]!!.eval(parameterScope)
             }
 
             println("struct instance created: $instance")
@@ -84,7 +83,7 @@ class StructDefinition(
         override val type: FunctionType
         get() = FunctionType(
             parent,
-            parent.definitions.values.filterIsInstance<FieldDefinition>().map { it.type!! }
+            parent.fields.values.map { ParameterDefinition(it.name, it.type!!) }
         )
 
     }

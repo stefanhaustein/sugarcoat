@@ -2,7 +2,9 @@ package org.kobjects.sugarcoat.ast
 
 import org.kobjects.sugarcoat.base.MetaType
 import org.kobjects.sugarcoat.base.Type
+import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
+import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.fn.TypedCallable
 import org.kobjects.sugarcoat.model.Classifier
 
@@ -63,8 +65,16 @@ class UnresolvedSymbolExpression(
 
     override fun getType() = throw UnsupportedOperationException()
 
-    fun resolveChildren(expected: List<Type>): List<ParameterReference> {
-        return children.map { it.copy(value = it.value.resolve(null)) }
+    fun resolveChildren(callable: TypedCallable): List<Expression?> {
+        val parameterConsumer = ParameterConsumer(children)
+        val resolved = mutableListOf<Expression?>()
+        for (param in callable.type.parameterTypes) {
+            val expr = parameterConsumer.read(param)
+            resolved.add(expr?.resolve(param.type))
+        }
+        parameterConsumer.done(callable)
+
+        return resolved.toList()
     }
 
     override fun resolve(expectedType: Type?): Expression {
@@ -77,7 +87,7 @@ class UnresolvedSymbolExpression(
                 return CallExpression(
                     if (resolvedDynamically.static) null else CallExpression(null, self as TypedCallable, emptyList()),
                     resolvedDynamically,
-                    resolveChildren(resolvedDynamically.type.parameterTypes))
+                    resolveChildren(resolvedDynamically))
             }
 
             return resolveStatically(null, namespace.resolve(name))
@@ -101,7 +111,7 @@ class UnresolvedSymbolExpression(
 
     fun resolveStatically(resolvedReceiver: Expression?, resolved: Classifier): Expression {
         if (resolved is TypedCallable) {
-            return CallExpression(resolvedReceiver, resolved, resolveChildren(resolved.type.parameterTypes))
+            return CallExpression(resolvedReceiver, resolved, resolveChildren(resolved))
         }
         if (resolved is Type) {
             require(children.isEmpty()) {

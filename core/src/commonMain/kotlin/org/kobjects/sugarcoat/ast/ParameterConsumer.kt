@@ -1,8 +1,10 @@
-package org.kobjects.sugarcoat.fn
+package org.kobjects.sugarcoat.ast
 
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.Type
+import org.kobjects.sugarcoat.fn.ParameterDefinition
+import org.kobjects.sugarcoat.fn.TypedCallable
 
 class ParameterConsumer(
     val parameterReferences: List<ParameterReference>
@@ -10,27 +12,25 @@ class ParameterConsumer(
     var index = 0
     val consumed = mutableSetOf<Int>()
 
-    fun read(parameterContext: LocalRuntimeContext, parameterDefinition: ParameterDefinition) =
-        read(parameterContext, parameterDefinition.name, parameterDefinition.type, parameterDefinition.repeated)
+    fun read(parameterDefinition: ParameterDefinition) =
+        read(parameterDefinition.name, parameterDefinition.repeated)
 
-    fun read(parameterContext: LocalRuntimeContext, name: String, type: Type, repeated: Boolean = false): Any {
+    fun read(name: String, repeated: Boolean = false): Expression? {
         if (repeated) {
-            val result = mutableListOf<Any>()
+            val result = mutableListOf<Expression>()
             while (true) {
-                val p = readSingle(parameterContext, name, type) ?: break
+                val p = readSingle(name) ?: break
                 result.add(p)
             }
-            return result.toList()
+            return ListExpression(result.toList())
         }
-        return readSingle(parameterContext, name, type) ?: throw IllegalStateException("Parameter $name not found in argument list $parameterReferences")
+        return readSingle(name) ?: throw IllegalStateException("Parameter $name not found in argument list $parameterReferences")
     }
 
 
     private fun readSingle(
-        parameterContext: LocalRuntimeContext,
         name: String,
-        type: Type
-    ): Any? {
+    ): Expression? {
         var rawResult: Expression? = null
         if (index < parameterReferences.size
             && parameterReferences[index].name.isEmpty()) {
@@ -44,14 +44,12 @@ class ParameterConsumer(
                 }
             }
         }
-        return if (rawResult == null) null
-            else if (type is FunctionType) Closure(rawResult, parameterContext)
-            else rawResult.eval(parameterContext)
+        return rawResult
     }
 
-    fun done() {
+    fun done(target: TypedCallable) {
         require(consumed.size == parameterReferences.size) {
-            "Not all ${parameterReferences.size} parameters consumed: $consumed"
+            "Only ${consumed.size} $consumed of ${parameterReferences.size} parameters consumed from $parameterReferences for $target"
         }
     }
 }

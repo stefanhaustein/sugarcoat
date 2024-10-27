@@ -5,7 +5,7 @@ import org.kobjects.sugarcoat.base.Type
 
 data class FunctionType(
     val returnType: Type,
-    val parameterTypes: List<Type>
+    val parameterTypes: List<ParameterDefinition>
 ) : ResolvedType {
-    constructor(returnType: Type, vararg parameterTypes: Type) : this(returnType, parameterTypes.asList())
+    constructor(returnType: Type, vararg parameterTypes: ParameterDefinition) : this(returnType, parameterTypes.asList())
 }
