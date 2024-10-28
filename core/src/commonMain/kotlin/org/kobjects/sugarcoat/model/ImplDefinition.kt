@@ -1,6 +1,5 @@
 package org.kobjects.sugarcoat.model
 
-import org.kobjects.sugarcoat.base.ResolvedType
 import org.kobjects.sugarcoat.base.Type
 
 class ImplDefinition(
@@ -8,7 +7,7 @@ class ImplDefinition(
     fallback: Classifier,
     var trait: Type,
     var wrapped: Type
-) : Classifier(parent, "", fallback), ResolvedType {
+) : Classifier(parent, "", fallback) {
 //    override fun resolve() = trait.resolve()
 
     override fun resolveTypes() {

@@ -12,9 +12,10 @@ import org.kobjects.sugarcoat.model.StructDefinition
 import org.kobjects.sugarcoat.model.TraitDefinition
 
 interface Type {
-    fun resolve(): ResolvedType
 
     fun resolve(context: Classifier): Type = this
+
+    fun assignableFrom(other: Type) = this == other
 
     companion object {
         fun of(value: Any) =

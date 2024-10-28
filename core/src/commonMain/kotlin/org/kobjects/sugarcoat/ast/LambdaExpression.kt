@@ -9,12 +9,25 @@ class LambdaExpression(
     val lambda: FunctionDefinition
 ) : Expression {
 
-    override fun eval(context: LocalRuntimeContext) =
-        lambda.call(context.instance, emptyList(), context)
+    override fun eval(context: LocalRuntimeContext) = lambda
 
+    override fun resolve(expectedType: Type?): Expression {
+        if (expectedType == null) {
+            return this
+        }
 
-    override fun resolve(expectedType: Type?): LambdaExpression {
-        require(expectedType == null || expectedType is FunctionType)
+        // "Un-lambda"
+        if (expectedType !is FunctionType) {
+            require(lambda.type.parameterTypes.isEmpty()) {
+               "Can't inline a lambda function that requires parameters"
+            }
+            return lambda.body
+        }
+
+        // Function type required, let's resolve the lambda
+
+        lambda.resolveSignature(expectedType)
+
         return this
     }
 

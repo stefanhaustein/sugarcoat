@@ -1,7 +1,11 @@
 package org.kobjects.sugarcoat.base
 
-object UnresolvedType : Type{
-    override fun resolve(): ResolvedType {
-        TODO("Not yet implemented")
+import org.kobjects.sugarcoat.model.Classifier
+
+data class UnresolvedType(val source: Any) : Type{
+
+
+    override fun resolve(context: Classifier): Type {
+        throw IllegalStateException("Can't resolve $this")
     }
 }

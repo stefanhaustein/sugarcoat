@@ -11,7 +11,7 @@ class AsExpression(
 ) : ResolvedExpression() {
     override fun eval(context: LocalRuntimeContext): Any {
         // This should be resolved at resolution time.
-        val implDefinition = context.globalRuntimeContext.findImpl(source.getType().resolve(), target)
+        val implDefinition = context.globalRuntimeContext.findImpl(source.getType(), target)
         return ImplInstance(implDefinition, source.eval(context))
     }
 

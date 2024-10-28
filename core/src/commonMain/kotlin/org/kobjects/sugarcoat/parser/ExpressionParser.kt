@@ -168,10 +168,10 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             context.namespace,
             parentFn.static,
             "",
-            parameters.map { ParameterDefinition(it, UnresolvedType) },
-            UnresolvedType)
+            parameters.map { ParameterDefinition(it, UnresolvedType("Lambda parameter")) },
+            UnresolvedType("Lambda return type"))
 
-        parentFn.addChild(lambda)
+        // parentFn.addChild(lambda)
 
         lambda.body = SugarcoatParser.parseBlock(scanner, context.copy(namespace = lambda))
 

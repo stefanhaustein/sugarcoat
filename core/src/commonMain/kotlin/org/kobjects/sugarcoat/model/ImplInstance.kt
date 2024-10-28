@@ -7,5 +7,5 @@ class ImplInstance (
     val wrapped: Any
 ): Instance {
     override val type: Type
-        get() = implDefinition
+        get() = implDefinition.trait
 }

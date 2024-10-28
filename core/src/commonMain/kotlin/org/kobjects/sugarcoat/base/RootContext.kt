@@ -12,6 +12,7 @@ import org.kobjects.sugarcoat.datatype.F64Type
 import org.kobjects.sugarcoat.datatype.I64RangeType
 import org.kobjects.sugarcoat.datatype.I64Type
 import org.kobjects.sugarcoat.datatype.ListType
+import org.kobjects.sugarcoat.datatype.PairType
 import org.kobjects.sugarcoat.datatype.StringType
 import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.FunctionType
@@ -52,7 +53,7 @@ object RootContext : Classifier(null, "") {
             "for",
             VoidType,
             ParameterDefinition("iterable", ListType),
-            ParameterDefinition("body", FunctionType(VoidType)),
+            ParameterDefinition("body", FunctionType(VoidType, ParameterDefinition("iteratpr", I64Type))),
         ) { params, context ->
             evalFor(params, context)
         }
@@ -63,7 +64,7 @@ object RootContext : Classifier(null, "") {
             ParameterDefinition("condition", BoolType),
             ParameterDefinition("then", FunctionType(VoidType)),
             ParameterDefinition("elif", VoidType, repeated = true),
-            ParameterDefinition("else", FunctionType(VoidType)),
+            ParameterDefinition("else", FunctionType(VoidType), false, LiteralExpression(Unit)),
         ) { params, context ->
             evalIf(params, context)
         }
@@ -112,6 +113,16 @@ object RootContext : Classifier(null, "") {
         }
 
         addControl(
+            "pair",
+            PairType(AnyType, AnyType),
+            ParameterDefinition("first", AnyType),
+            ParameterDefinition("second", AnyType),
+        ) { children, parameterContext ->
+            require(children.size == 2) { "Two parameters expected for 'pair'." }
+            Pair(children[0]!! /*!!.eval(parameterContext) */, children[1]!! /*.eval(parameterContext) */)
+        }
+
+        addControl(
             "while",
             VoidType,
             ParameterDefinition("condition", FunctionType(BoolType)),
@@ -140,14 +151,21 @@ object RootContext : Classifier(null, "") {
         if (children[0]!!.evalBoolean(parameterContext)) {
             return children[1]!!.eval(parameterContext)
         }
-        if (children.size > 1 && children[1] != null) {
-            val elif = children[1] as ListExpression
-            for (pair in elif.elements) {
-                throw UnsupportedOperationException("elif")
+        if (children.size > 2 && children[2] != null) {
+            require(children[2] is ListExpression) {
+                "List expression expected for elseif but got ${children[1]}; all children: $children"
+            }
+            val elif = children[2] as ListExpression
+            for (pairFn in elif.elements) {
+                val pair = pairFn.eval(parameterContext) as Pair<Expression, Expression>
+                if (pair.first.evalBoolean(parameterContext)) {
+                    return pair.second.eval(parameterContext)
+                }
+
             }
         }
-        if (children.size == 3 && children[2] != null) {
-            return children[2]!!.eval(parameterContext)
+        if (children.size == 4 && children[3] != null) {
+            return children[3]!!.eval(parameterContext)
         }
         return Unit
     }

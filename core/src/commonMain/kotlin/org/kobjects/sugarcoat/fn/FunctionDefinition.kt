@@ -2,8 +2,8 @@ package org.kobjects.sugarcoat.fn
 
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.LiteralExpression
-import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.Type
+import org.kobjects.sugarcoat.base.UnresolvedType
 import org.kobjects.sugarcoat.model.Classifier
 
 data class FunctionDefinition(
@@ -16,7 +16,6 @@ data class FunctionDefinition(
 ) : TypedCallable, Classifier(parent, name, fallback) {
 
     var body: Expression = LiteralExpression(0)
-
 
     override fun call(
         receiver: Any?,
@@ -48,6 +47,28 @@ data class FunctionDefinition(
         super.resolveTypes()
         parameters = parameters.map { it.resolve(this) }
         returnType = returnType.resolve(this)
+    }
+
+    /** This is called for lambdas instead of resolveExpressions()/resolveTypes */
+    fun resolveSignature(expectedType: FunctionType) {
+        require (expectedType.parameterTypes.size == parameters.size) {
+            "Expected ${expectedType.parameterTypes.size} parameters ${expectedType.parameterTypes} but got ${parameters.size} $parameters"
+        }
+
+        val builder = mutableListOf<ParameterDefinition>()
+        for ((i, expectedParameter) in expectedType.parameterTypes.withIndex()) {
+            builder.add(ParameterDefinition(parameters[i].name, expectedParameter.type))
+            if (expectedParameter.type is UnresolvedType) {
+                throw IllegalStateException("Unresolved type for expected parameter $expectedParameter for $this")
+            }
+        }
+        parameters = builder.toList()
+
+        super.resolveTypes()
+        super.resolveExpressions()
+
+        returnType = expectedType.returnType
+        body = body.resolve(returnType)
     }
 
     override fun resolveExpressions() {

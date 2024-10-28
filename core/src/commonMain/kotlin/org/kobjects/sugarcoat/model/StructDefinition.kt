@@ -1,7 +1,6 @@
 package org.kobjects.sugarcoat.model
 
 import org.kobjects.sugarcoat.ast.Expression
-import org.kobjects.sugarcoat.base.ResolvedType
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.base.Typed
@@ -18,7 +17,7 @@ class StructDefinition(
     fallback: Classifier,
     name: String,
     val constructorName: String = "create"
-): ResolvedType, Classifier(parent, name, fallback) {
+): Type, Classifier(parent, name, fallback) {
 
     val fields = mutableMapOf<String, FieldDefinition>()
 

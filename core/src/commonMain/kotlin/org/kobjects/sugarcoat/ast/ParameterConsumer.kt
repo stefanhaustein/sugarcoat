@@ -1,8 +1,5 @@
 package org.kobjects.sugarcoat.ast
 
-import org.kobjects.sugarcoat.ast.Expression
-import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.fn.TypedCallable
 
@@ -13,9 +10,9 @@ class ParameterConsumer(
     val consumed = mutableSetOf<Int>()
 
     fun read(parameterDefinition: ParameterDefinition) =
-        read(parameterDefinition.name, parameterDefinition.repeated)
+        read(parameterDefinition.name, parameterDefinition.repeated, parameterDefinition.defaultValue != null)
 
-    fun read(name: String, repeated: Boolean = false): Expression? {
+    fun read(name: String, repeated: Boolean = false, optional: Boolean): Expression? {
         if (repeated) {
             val result = mutableListOf<Expression>()
             while (true) {
@@ -24,27 +21,25 @@ class ParameterConsumer(
             }
             return ListExpression(result.toList())
         }
-        return readSingle(name) ?: throw IllegalStateException("Parameter $name not found in argument list $parameterReferences")
+        return readSingle(name) ?: if (optional) null else throw IllegalStateException("Required parameter '$name' not found in argument list $parameterReferences")
     }
 
 
     private fun readSingle(
         name: String,
     ): Expression? {
-        var rawResult: Expression? = null
         if (index < parameterReferences.size
             && parameterReferences[index].name.isEmpty()) {
             consumed.add(index)
-            rawResult = parameterReferences[index++].value
-        } else {
-            for (i in parameterReferences.indices) {
-                if (!consumed.contains(i) && parameterReferences[i].name == name) {
-                    rawResult = parameterReferences[i].value
-                    break
-                }
+            return parameterReferences[index++].value
+        }
+        for (i in parameterReferences.indices) {
+            if (!consumed.contains(i) && parameterReferences[i].name == name) {
+                consumed.add(i)
+                return parameterReferences[i].value
             }
         }
-        return rawResult
+        return null
     }
 
     fun done(target: TypedCallable) {

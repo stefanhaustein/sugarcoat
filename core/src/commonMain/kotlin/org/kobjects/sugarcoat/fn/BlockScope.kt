@@ -22,11 +22,7 @@ class BlockScope(override val parent: FunctionDefinition, fallback: Classifier) 
 
     init {
         parent.addChild(this)
-        if (parent == fallback) {
-            for (parameter in parent.parameters) {
-                addField(parameter.name, parameter.type, null)
-            }
-        }
+
     }
 
     override fun addField(name: String, type: Type?, defaultExpression: Expression?) {
@@ -35,9 +31,15 @@ class BlockScope(override val parent: FunctionDefinition, fallback: Classifier) 
 
     override fun resolveExpressions() {
         super.resolveExpressions()
-        if (!parent.static) {
-            addControl( "self", parent.parent.selfType()) {
-                    param, context -> context.instance!!
+
+        if (parent == fallback) {
+            if (!parent.static) {
+                addControl( "self", parent.parent.selfType()) {
+                        param, context -> context.instance!!
+                }
+            }
+            for (parameter in parent.parameters) {
+                addField(parameter.name, parameter.type, null)
             }
         }
 

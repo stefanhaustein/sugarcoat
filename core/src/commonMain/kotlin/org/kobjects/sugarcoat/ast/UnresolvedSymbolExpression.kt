@@ -60,7 +60,6 @@ class UnresolvedSymbolExpression(
                 stringBuilder.append(children.joinToString(", ", "(", ")"))
             }
         }
-
     }
 
     override fun getType() = throw UnsupportedOperationException()
@@ -121,5 +120,4 @@ class UnresolvedSymbolExpression(
         }
         throw IllegalStateException("Unrecognized resolved name: '$resolved'")
     }
-
 }
