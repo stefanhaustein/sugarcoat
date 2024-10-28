@@ -1,7 +1,7 @@
 package org.kobjects.sugarcoat.ast
 
-import org.kobjects.sugarcoat.base.MetaType
-import org.kobjects.sugarcoat.base.Type
+import org.kobjects.sugarcoat.type.MetaType
+import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.model.TraitDefinition

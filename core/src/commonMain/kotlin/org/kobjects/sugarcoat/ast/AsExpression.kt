@@ -1,6 +1,5 @@
 package org.kobjects.sugarcoat.ast
 
-import org.kobjects.sugarcoat.base.Type
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.model.ImplInstance
 import org.kobjects.sugarcoat.model.TraitDefinition

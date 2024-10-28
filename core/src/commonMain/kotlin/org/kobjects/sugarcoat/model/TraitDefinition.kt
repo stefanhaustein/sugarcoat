@@ -1,8 +1,6 @@
 package org.kobjects.sugarcoat.model
 
-import org.kobjects.sugarcoat.ast.CallExpression
-import org.kobjects.sugarcoat.base.Type
-import org.kobjects.sugarcoat.fn.FunctionDefinition
+import org.kobjects.sugarcoat.type.Type
 
 class TraitDefinition(
     parent: Classifier,

@@ -2,8 +2,8 @@ package org.kobjects.sugarcoat.fn
 
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.LiteralExpression
-import org.kobjects.sugarcoat.base.Type
-import org.kobjects.sugarcoat.base.UnresolvedType
+import org.kobjects.sugarcoat.type.Type
+import org.kobjects.sugarcoat.type.UnresolvedType
 import org.kobjects.sugarcoat.model.Classifier
 
 data class FunctionDefinition(

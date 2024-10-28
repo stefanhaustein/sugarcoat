@@ -1,10 +1,9 @@
 package org.kobjects.sugarcoat.fn
 
 import org.kobjects.sugarcoat.ast.Expression
-import org.kobjects.sugarcoat.base.Type
+import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.model.FieldDefinition
-import org.kobjects.sugarcoat.model.StructInstance
 
 fun BlockScope(parent: Classifier): BlockScope {
     return if (parent is FunctionDefinition) BlockScope(parent, parent)

@@ -12,8 +12,8 @@ import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.ast.UnresolvedAsExpression
 import org.kobjects.sugarcoat.model.Program
 import org.kobjects.sugarcoat.ast.UnresolvedSymbolExpression
-import org.kobjects.sugarcoat.base.GlobalRuntimeContext
-import org.kobjects.sugarcoat.base.UnresolvedType
+import org.kobjects.sugarcoat.model.GlobalRuntimeContext
+import org.kobjects.sugarcoat.type.UnresolvedType
 import org.kobjects.sugarcoat.fn.BlockScope
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 
@@ -169,7 +169,8 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             parentFn.static,
             "",
             parameters.map { ParameterDefinition(it, UnresolvedType("Lambda parameter")) },
-            UnresolvedType("Lambda return type"))
+            UnresolvedType("Lambda return type")
+        )
 
         // parentFn.addChild(lambda)
 

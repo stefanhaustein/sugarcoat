@@ -1,8 +1,6 @@
-package org.kobjects.sugarcoat.base
+package org.kobjects.sugarcoat.model
 
-import org.kobjects.sugarcoat.model.ImplDefinition
-import org.kobjects.sugarcoat.model.Program
-import org.kobjects.sugarcoat.model.TraitDefinition
+import org.kobjects.sugarcoat.type.Type
 
 class GlobalRuntimeContext(
     val program: Program,

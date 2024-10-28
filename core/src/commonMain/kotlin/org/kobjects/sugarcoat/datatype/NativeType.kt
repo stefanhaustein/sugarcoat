@@ -1,7 +1,7 @@
 package org.kobjects.sugarcoat.datatype
 
 import org.kobjects.sugarcoat.model.Classifier
-import org.kobjects.sugarcoat.base.Type
+import org.kobjects.sugarcoat.type.Type
 
 abstract class NativeType(
     name: String,

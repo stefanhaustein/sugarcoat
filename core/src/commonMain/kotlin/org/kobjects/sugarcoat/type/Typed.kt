@@ -1,4 +1,4 @@
-package org.kobjects.sugarcoat.base
+package org.kobjects.sugarcoat.type
 
 interface Typed {
     val type: Type

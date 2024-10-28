@@ -1,8 +1,7 @@
 package org.kobjects.sugarcoat.fn
 
 import org.kobjects.sugarcoat.ast.Expression
-import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.base.Type
+import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.model.ImplInstance
 import org.kobjects.sugarcoat.model.TraitDefinition

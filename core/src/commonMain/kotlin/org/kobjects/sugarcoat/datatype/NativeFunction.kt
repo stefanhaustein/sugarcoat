@@ -1,11 +1,8 @@
 package org.kobjects.sugarcoat.datatype
 
 import org.kobjects.sugarcoat.ast.Expression
-import org.kobjects.sugarcoat.fn.Callable
 
-import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.base.Type
-import org.kobjects.sugarcoat.base.Typed
+import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition

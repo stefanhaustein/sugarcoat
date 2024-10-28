@@ -1,11 +1,9 @@
-package org.kobjects.sugarcoat.base
+package org.kobjects.sugarcoat.model
 
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.LambdaExpression
 import org.kobjects.sugarcoat.ast.ListExpression
 import org.kobjects.sugarcoat.ast.LiteralExpression
-import org.kobjects.sugarcoat.ast.ParameterReference
-import org.kobjects.sugarcoat.ast.UnresolvedSymbolExpression
 import org.kobjects.sugarcoat.datatype.AnyType
 import org.kobjects.sugarcoat.datatype.BoolType
 import org.kobjects.sugarcoat.datatype.F64Type
@@ -18,7 +16,6 @@ import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
-import org.kobjects.sugarcoat.model.Classifier
 import kotlin.math.sqrt
 
 object RootContext : Classifier(null, "") {

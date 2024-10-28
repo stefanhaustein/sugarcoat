@@ -1,6 +1,6 @@
 package org.kobjects.sugarcoat.model
 
-import org.kobjects.sugarcoat.base.Type
+import org.kobjects.sugarcoat.type.Type
 
 class ObjectDefinition(parent: Classifier, fallback: Classifier, name: String) : Type, Classifier(parent, name, fallback) {
     override fun toString() = "object $name"

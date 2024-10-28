@@ -1,6 +1,6 @@
 package org.kobjects.sugarcoat.ast
 
-import org.kobjects.sugarcoat.base.Type
+import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.fn.FunctionDefinition
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext

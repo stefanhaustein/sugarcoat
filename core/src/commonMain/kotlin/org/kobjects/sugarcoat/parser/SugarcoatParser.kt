@@ -12,8 +12,8 @@ import org.kobjects.sugarcoat.model.Program
 import org.kobjects.sugarcoat.model.StructDefinition
 import org.kobjects.sugarcoat.ast.UnresolvedSymbolExpression
 import org.kobjects.sugarcoat.model.TraitDefinition
-import org.kobjects.sugarcoat.base.Type
-import org.kobjects.sugarcoat.base.TypeReference
+import org.kobjects.sugarcoat.type.Type
+import org.kobjects.sugarcoat.type.TypeReference
 import org.kobjects.sugarcoat.ast.VariableDeclaration
 import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.BlockScope

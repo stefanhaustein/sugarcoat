@@ -1,4 +1,4 @@
-package org.kobjects.sugarcoat.base
+package org.kobjects.sugarcoat.type
 
 import org.kobjects.sugarcoat.datatype.BoolType
 import org.kobjects.sugarcoat.datatype.F64Type

@@ -1,6 +1,6 @@
 package org.kobjects.sugarcoat.model
 
-import org.kobjects.sugarcoat.base.Type
+import org.kobjects.sugarcoat.type.Type
 
 class ImplDefinition(
     parent: Classifier,

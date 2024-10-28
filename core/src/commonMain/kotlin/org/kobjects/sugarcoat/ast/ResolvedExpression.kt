@@ -1,6 +1,6 @@
 package org.kobjects.sugarcoat.ast
 
-import org.kobjects.sugarcoat.base.Type
+import org.kobjects.sugarcoat.type.Type
 
 abstract class ResolvedExpression : Expression {
 
