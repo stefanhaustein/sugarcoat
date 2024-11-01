@@ -2,6 +2,7 @@ package org.kobjects.sugarcoat.fn
 
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.LiteralExpression
+import org.kobjects.sugarcoat.ast.ResolutionContext
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.type.UnresolvedType
 import org.kobjects.sugarcoat.model.Classifier
@@ -49,6 +50,17 @@ data class FunctionDefinition(
         returnType = returnType.resolve(this)
     }
 
+    private fun createResolutionContext(): ResolutionContext {
+        val resolutionContext = ResolutionContext()
+        if (!static) {
+            resolutionContext.addLocal("self", parent.selfType(), false)
+        }
+        for (parameter in parameters) {
+            resolutionContext.addLocal(parameter.name, parameter.type, false)
+        }
+        return resolutionContext
+    }
+
     /** This is called for lambdas instead of resolveExpressions()/resolveTypes */
     fun resolveSignature(expectedType: FunctionType) {
         require (expectedType.parameterTypes.size == parameters.size) {
@@ -68,12 +80,13 @@ data class FunctionDefinition(
         super.resolveExpressions()
 
         returnType = expectedType.returnType
-        body = body.resolve(returnType)
+        body = body.resolve(createResolutionContext(), returnType)
     }
 
     override fun resolveExpressions() {
         super.resolveExpressions()
-        body = body.resolve(null)
+
+        body = body.resolve(createResolutionContext(), null)
     }
 
     override fun toString() =

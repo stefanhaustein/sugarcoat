@@ -62,20 +62,25 @@ class UnresolvedSymbolExpression(
 
     override fun getType() = throw UnsupportedOperationException()
 
-    fun resolveChildren(callable: TypedCallable): List<Expression?> {
+    fun resolveChildren(context: ResolutionContext, callable: TypedCallable): List<Expression?> {
         val parameterConsumer = ParameterConsumer(children)
         val resolved = mutableListOf<Expression?>()
         for (param in callable.type.parameterTypes) {
             val expr = parameterConsumer.read(param)
-            resolved.add(expr?.resolve(param.type))
+            resolved.add(expr?.resolve(context, param.type))
         }
         parameterConsumer.done(callable)
 
         return resolved.toList()
     }
 
-    override fun resolve(expectedType: Type?): Expression {
+    override fun resolve(context: ResolutionContext, expectedType: Type?): Expression {
         if (receiver == null) {
+            val local = context.resolveOrNull(name)
+            if (local != null) {
+                return CallExpression(null, local, resolveChildren(context, local))
+            }
+
             val self = namespace.resolveOrNull("self")
             val resolvedDynamically = if (self == null) null else
                 ((self as TypedCallable).type.returnType as Classifier).resolveOrNull(name)
@@ -84,31 +89,31 @@ class UnresolvedSymbolExpression(
                 return CallExpression(
                     if (resolvedDynamically.static) null else CallExpression(null, self as TypedCallable, emptyList()),
                     resolvedDynamically,
-                    resolveChildren(resolvedDynamically))
+                    resolveChildren(context, resolvedDynamically))
             }
 
-            return resolveStatically(null, namespace.resolve(name))
+            return resolveStatically(context,null, namespace.resolve(name))
         }
 
-        val resolvedReceiver = receiver.resolve(null)
+        val resolvedReceiver = receiver.resolve(context, null)
         val type = resolvedReceiver.getType()
         return when (type) {
             is MetaType -> {
                 val resolved = type.type.resolve(name)
-                resolveStatically(null, resolved)
+                resolveStatically(context, null, resolved)
             }
             is Classifier -> {
                 val resolved = type.resolve(name)
-                resolveStatically(resolvedReceiver, resolved)
+                resolveStatically(context, resolvedReceiver, resolved)
             }
             else -> throw IllegalStateException(
                 "Type '$type' (${type::class}) of resolved receiver '$resolvedReceiver' must be classifier for resolving '$name'")
         }
     }
 
-    fun resolveStatically(resolvedReceiver: Expression?, resolved: Classifier): Expression {
+    fun resolveStatically(context: ResolutionContext, resolvedReceiver: Expression?, resolved: Classifier): Expression {
         if (resolved is TypedCallable) {
-            return CallExpression(resolvedReceiver, resolved, resolveChildren(resolved))
+            return CallExpression(resolvedReceiver, resolved, resolveChildren(context, resolved))
         }
         if (resolved is Type) {
             require(children.isEmpty()) {

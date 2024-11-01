@@ -9,7 +9,10 @@ class ListExpression(val elements: List<Expression>) : Expression {
     override fun eval(context: LocalRuntimeContext) = List(elements.size) { elements[it].eval(context) }
 
 
-    override fun resolve(expectedType: Type?) = ListExpression(elements.map{ it.resolve(null) } )
+    override fun resolve(
+        context: ResolutionContext,
+        expectedType: Type?
+    ) = ListExpression(elements.map{ it.resolve(context, null) } )
 
     override fun getType() = ListType
 }

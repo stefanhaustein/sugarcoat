@@ -1,6 +1,7 @@
 package org.kobjects.sugarcoat.model
 
 import org.kobjects.sugarcoat.ast.Expression
+import org.kobjects.sugarcoat.ast.ResolutionContext
 import org.kobjects.sugarcoat.type.Type
 
 data class FieldDefinition(
@@ -9,7 +10,7 @@ data class FieldDefinition(
     val expression: Expression?
 ) {
     fun resolve(context: Classifier): FieldDefinition {
-        val resolvedExpression = expression?.resolve(null)
+        val resolvedExpression = expression?.resolve(ResolutionContext(), null)
 
         val resolvedType = type?.resolve(context) ?: resolvedExpression!!.getType()
 

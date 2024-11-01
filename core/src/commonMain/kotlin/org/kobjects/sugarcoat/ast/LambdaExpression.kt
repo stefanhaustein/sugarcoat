@@ -11,7 +11,7 @@ class LambdaExpression(
 
     override fun eval(context: LocalRuntimeContext) = lambda
 
-    override fun resolve(expectedType: Type?): Expression {
+    override fun resolve(context: ResolutionContext, expectedType: Type?): Expression {
         if (expectedType == null) {
             return this
         }

@@ -37,9 +37,9 @@ class BlockScope(override val parent: FunctionDefinition, fallback: Classifier) 
                         param, context -> context.instance!!
                 }
             }
-            for (parameter in parent.parameters) {
+          /*  for (parameter in parent.parameters) {
                 addField(parameter.name, parameter.type, null)
-            }
+            }*/
         }
 
         val resolvedLocals = locals.values.map { it.resolve(this) }

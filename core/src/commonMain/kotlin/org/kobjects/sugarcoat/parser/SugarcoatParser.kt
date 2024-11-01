@@ -240,10 +240,14 @@ object SugarcoatParser {
     fun parseVariableDeclaration(scanner: Scanner<TokenType>, parsingContext: ParsingContext): Expression {
         val mutable = scanner.tryConsume("mut")
         val name = scanner.consume(TokenType.IDENTIFIER).text
+        var explicitType: Type? = null
+        if (scanner.tryConsume(":")) {
+            explicitType = parseType(scanner, parsingContext)
+        }
         scanner.consume("=")
         val value = parseExpression(scanner, parsingContext)
-        parsingContext.namespace.addField(name, null, value)
-        return VariableDeclaration(name, mutable, value)
+        //parsingContext.namespace.addField(name, explicitType, value)
+        return VariableDeclaration(name, mutable, explicitType, value)
     }
 
         fun parseProgram(code: String, printFn: (Any) -> Unit = ::print) =

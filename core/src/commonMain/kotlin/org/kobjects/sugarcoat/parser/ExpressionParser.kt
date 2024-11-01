@@ -9,6 +9,7 @@ import org.kobjects.sugarcoat.ast.LambdaExpression
 import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.ast.ParameterListBuilder
 import org.kobjects.sugarcoat.ast.ParameterReference
+import org.kobjects.sugarcoat.ast.ResolutionContext
 import org.kobjects.sugarcoat.ast.UnresolvedAsExpression
 import org.kobjects.sugarcoat.model.Program
 import org.kobjects.sugarcoat.ast.UnresolvedSymbolExpression
@@ -186,7 +187,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             scanner, ParsingContext(Program())
         )
         val program = Program()
-        return parsed.resolve(null)
+        return parsed.resolve(ResolutionContext(), null)
             .eval(LocalRuntimeContext(GlobalRuntimeContext(program), /*program,*/ null))
     }
 }

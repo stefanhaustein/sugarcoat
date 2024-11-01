@@ -14,7 +14,7 @@ interface Expression {
         stringBuilder.append(this)
     }
 
-    fun resolve(expectedType: Type?): Expression
+    fun resolve(context: ResolutionContext, expectedType: Type?): Expression
 
     fun getType(): Type
 }
