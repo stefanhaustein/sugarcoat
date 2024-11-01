@@ -16,7 +16,6 @@ import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.type.TypeReference
 import org.kobjects.sugarcoat.ast.VariableDeclaration
 import org.kobjects.sugarcoat.datatype.VoidType
-import org.kobjects.sugarcoat.fn.BlockScope
 import org.kobjects.sugarcoat.fn.DelegateToImpl
 
 object SugarcoatParser {
@@ -185,7 +184,7 @@ object SugarcoatParser {
         }
         scanner.consume(TokenType.NEWLINE)
 
-        val parsingContext = parentContext.copy(depth = depth, namespace = BlockScope(parentContext.namespace))
+        val parsingContext = parentContext.copy(depth = depth)
 
         val result = mutableListOf<ParameterReference>()
         while(true) {

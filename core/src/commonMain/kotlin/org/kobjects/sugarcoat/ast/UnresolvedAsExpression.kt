@@ -17,12 +17,12 @@ class UnresolvedAsExpression(
     override fun getType() = throw UnsupportedOperationException("Unresolved.")
 
     override fun resolve(context: ResolutionContext, expectedType: Type?): Expression {
-        val resolvedTarget = target.resolve(ResolutionContext(), null)
+        val resolvedTarget = target.resolve(context, null)
 
         val type = resolvedTarget.getType()
         require (type is MetaType && type.type is TraitDefinition) {
             "Target must be Trait"
         }
-        return AsExpression(source.resolve(ResolutionContext(), null), type.type)
+        return AsExpression(source.resolve(context, null), type.type)
     }
 }

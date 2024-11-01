@@ -15,7 +15,6 @@ import org.kobjects.sugarcoat.model.Program
 import org.kobjects.sugarcoat.ast.UnresolvedSymbolExpression
 import org.kobjects.sugarcoat.model.GlobalRuntimeContext
 import org.kobjects.sugarcoat.type.UnresolvedType
-import org.kobjects.sugarcoat.fn.BlockScope
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 
 
@@ -162,7 +161,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             } while (scanner.tryConsume(","))
         }
 
-        val parentFn = (context.namespace as BlockScope).parent
+        val parentFn = context.namespace as FunctionDefinition
 
         val lambda = FunctionDefinition(
             parentFn,

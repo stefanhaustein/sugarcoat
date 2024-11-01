@@ -81,7 +81,7 @@ class UnresolvedSymbolExpression(
                 return CallExpression(null, local, resolveChildren(context, local))
             }
 
-            val self = namespace.resolveOrNull("self")
+            val self = context.resolveOrNull("self")
             val resolvedDynamically = if (self == null) null else
                 ((self as TypedCallable).type.returnType as Classifier).resolveOrNull(name)
 
@@ -117,7 +117,7 @@ class UnresolvedSymbolExpression(
         }
         if (resolved is Type) {
             require(children.isEmpty()) {
-                "Types can't have function parameters."
+                "Types can't have function parameters; got $children"
             }
             return LiteralExpression(resolved)
         }
