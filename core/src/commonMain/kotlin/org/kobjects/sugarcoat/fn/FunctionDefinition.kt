@@ -51,7 +51,7 @@ data class FunctionDefinition(
     }
 
     private fun createResolutionContext(): ResolutionContext {
-        val resolutionContext = ResolutionContext()
+        val resolutionContext = ResolutionContext(this)
         if (!static) {
             resolutionContext.addLocal("self", parent.selfType(), false)
         }
@@ -61,27 +61,6 @@ data class FunctionDefinition(
         return resolutionContext
     }
 
-    /** This is called for lambdas instead of resolveExpressions()/resolveTypes */
-    fun resolveSignature(expectedType: FunctionType) {
-        require (expectedType.parameterTypes.size == parameters.size) {
-            "Expected ${expectedType.parameterTypes.size} parameters ${expectedType.parameterTypes} but got ${parameters.size} $parameters"
-        }
-
-        val builder = mutableListOf<ParameterDefinition>()
-        for ((i, expectedParameter) in expectedType.parameterTypes.withIndex()) {
-            builder.add(ParameterDefinition(parameters[i].name, expectedParameter.type))
-            if (expectedParameter.type is UnresolvedType) {
-                throw IllegalStateException("Unresolved type for expected parameter $expectedParameter for $this")
-            }
-        }
-        parameters = builder.toList()
-
-        super.resolveTypes()
-        super.resolveExpressions()
-
-        returnType = expectedType.returnType
-        body = body.resolve(createResolutionContext(), returnType)
-    }
 
     override fun resolveExpressions() {
         super.resolveExpressions()

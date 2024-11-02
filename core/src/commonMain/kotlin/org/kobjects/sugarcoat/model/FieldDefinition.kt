@@ -10,7 +10,7 @@ data class FieldDefinition(
     val expression: Expression?
 ) {
     fun resolve(context: Classifier): FieldDefinition {
-        val resolvedExpression = expression?.resolve(ResolutionContext(), null)
+        val resolvedExpression = expression?.resolve(ResolutionContext(context), null)
 
         val resolvedType = type?.resolve(context) ?: resolvedExpression!!.getType()
 

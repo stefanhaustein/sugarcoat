@@ -5,9 +5,13 @@ import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.fn.TypedCallable
+import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.type.Type
 
-class ResolutionContext(parent: ResolutionContext? = null) {
+class ResolutionContext(
+    val namespace: Classifier,
+    val parent: ResolutionContext? = null,
+) {
     private val locals: MutableMap<String, Variable> = parent?.locals ?: mutableMapOf()
 
     fun addLocal(name: String, type: Type, mutable: Boolean) {

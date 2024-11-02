@@ -7,7 +7,6 @@ import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.model.TraitDefinition
 
 class UnresolvedAsExpression(
-    val context: Classifier,
     val source: Expression,
     val target: Expression
 ): Expression {

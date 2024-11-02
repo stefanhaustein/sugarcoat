@@ -180,7 +180,7 @@ object SugarcoatParser {
         val depth = currentIndent(scanner)
         println("ParseBody; parent: $parentContext; depth: $depth")
         if (depth <= parentContext.depth) {
-            return UnresolvedSymbolExpression(parentContext.namespace, "seq")
+            return UnresolvedSymbolExpression("seq")
         }
         scanner.consume(TokenType.NEWLINE)
 
@@ -200,7 +200,7 @@ object SugarcoatParser {
             }
             scanner.consume(TokenType.NEWLINE)
         }
-        return if (result.size == 1) result.first().value else UnresolvedSymbolExpression(parentContext.namespace, null, "seq", result)
+        return if (result.size == 1) result.first().value else UnresolvedSymbolExpression(null, "seq", result)
     }
 
     fun parseStatement(scanner: Scanner<TokenType>, parsingContext: ParsingContext): Expression {
@@ -213,7 +213,7 @@ object SugarcoatParser {
                     "Unsupported assignment target: $result"
                 }
                 val source = parseExpression(scanner, parsingContext)
-                result = UnresolvedSymbolExpression(result.namespace, result.receiver,"set_$result.name", listOf(ParameterReference("", source)))
+                result = UnresolvedSymbolExpression(result.receiver,"set_$result.name", listOf(ParameterReference("", source)))
             }
             result
         }

@@ -1,7 +1,6 @@
 package org.kobjects.sugarcoat.model
 
 import org.kobjects.sugarcoat.ast.Expression
-import org.kobjects.sugarcoat.ast.LambdaExpression
 import org.kobjects.sugarcoat.ast.ListExpression
 import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.datatype.AnyType
@@ -16,6 +15,7 @@ import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
+import org.kobjects.sugarcoat.fn.TypedCallable
 import kotlin.math.sqrt
 
 object RootContext : Classifier(null, "") {
@@ -138,7 +138,7 @@ object RootContext : Classifier(null, "") {
     fun evalFor(children: List<Expression?>, parameterContext: LocalRuntimeContext): Any {
         val range = children[0]!!.eval(parameterContext) as LongRange
         for (value in range) {
-            (children[1] as LambdaExpression).lambda.call(null, listOf(
+            (children[1]!!.eval(parameterContext) as TypedCallable).call(null, listOf(
                 LiteralExpression(value)), parameterContext)
         }
         return Unit

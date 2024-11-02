@@ -8,14 +8,13 @@ import org.kobjects.sugarcoat.model.Classifier
 
 
 class UnresolvedSymbolExpression(
-    val namespace: Classifier,
     val receiver: Expression?,
     val name: String,
     val children: List<ParameterReference>,
     val precedence: Int = 0
 ) : Expression {
-    constructor(namespace: Classifier, receiver: Expression, name: String, precedence: Int, vararg children: Expression) : this(namespace, receiver, name, children.map { ParameterReference("", it) }, precedence)
-    constructor(namespace: Classifier, name: String, vararg children: Expression) : this(namespace, null, name, children.map { ParameterReference("", it) })
+    constructor(receiver: Expression, name: String, precedence: Int, vararg children: Expression) : this( receiver, name, children.map { ParameterReference("", it) }, precedence)
+    constructor(name: String, vararg children: Expression) : this(null, name, children.map { ParameterReference("", it) })
 
     override fun eval(context: LocalRuntimeContext) = throw UnsupportedOperationException()
 
@@ -92,7 +91,7 @@ class UnresolvedSymbolExpression(
                     resolveChildren(context, resolvedDynamically))
             }
 
-            return resolveStatically(context,null, namespace.resolve(name))
+            return resolveStatically(context,null, context.namespace.resolve(name))
         }
 
         val resolvedReceiver = receiver.resolve(context, null)
