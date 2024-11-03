@@ -117,17 +117,16 @@ abstract class Classifier(
 
     open fun resolve(name: String): Classifier {
         val result = resolveOrNull(name)
-        if (result != null) {
-            return result
+        require (result != null) {
+            "Unable to resolve '$name' in\n${dump()}"
         }
-        if (fallback != null) {
-            try {
-                fallback!!.resolve(name)
-            } catch (e: Exception) {
-                throw IllegalStateException("Unable to resolve '$name' in '${this.name}' containing ${definitions.keys}", e)
-            }
-        }
-        throw IllegalStateException("Unable to resolve '$name' in '${this.name}' containing ${definitions.keys}")
+        return result
+    }
+
+    fun dump(): String {
+        val result = "${if (name.isEmpty()) "(${this::class.simpleName})" else name}: ${definitions.keys}"
+        val fallback = fallback
+        return if (fallback == null) result else result + "\n" + fallback.dump()
     }
 
     abstract override fun toString(): String
