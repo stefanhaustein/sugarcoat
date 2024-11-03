@@ -2,7 +2,7 @@ package org.kobjects.sugarcoat.ast
 
 import org.kobjects.sugarcoat.type.Type
 
-abstract class ResolvedExpression : Expression {
+abstract class ResolvedExpression : Expression() {
 
     override fun resolve(context: ResolutionContext, expectedType: Type?): Expression {
         require(expectedType == null || expectedType == getType()) {

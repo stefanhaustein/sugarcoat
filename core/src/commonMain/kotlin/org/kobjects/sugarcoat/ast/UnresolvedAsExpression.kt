@@ -9,7 +9,7 @@ import org.kobjects.sugarcoat.model.TraitDefinition
 class UnresolvedAsExpression(
     val source: Expression,
     val target: Expression
-): Expression {
+): Expression() {
 
     override fun eval(context: LocalRuntimeContext) = throw UnsupportedOperationException("Unresolved.")
 

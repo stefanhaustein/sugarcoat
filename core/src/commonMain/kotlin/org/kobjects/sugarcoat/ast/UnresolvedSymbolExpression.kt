@@ -12,7 +12,7 @@ class UnresolvedSymbolExpression(
     val name: String,
     val children: List<ParameterReference>,
     val precedence: Int = 0
-) : Expression {
+) : Expression() {
     constructor(receiver: Expression, name: String, precedence: Int, vararg children: Expression) : this( receiver, name, children.map { ParameterReference("", it) }, precedence)
     constructor(name: String, vararg children: Expression) : this(null, name, children.map { ParameterReference("", it) })
 

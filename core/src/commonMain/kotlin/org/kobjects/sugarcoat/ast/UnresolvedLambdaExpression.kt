@@ -11,7 +11,7 @@ import org.kobjects.sugarcoat.type.UnresolvedType
 class UnresolvedLambdaExpression(
     val parameters: List<Pair<String, Type?>>,
     val body: Expression
-) : Expression {
+) : Expression() {
     override fun eval(context: LocalRuntimeContext) = throw UnsupportedOperationException()
 
     override fun getType(): Type = throw UnsupportedOperationException()

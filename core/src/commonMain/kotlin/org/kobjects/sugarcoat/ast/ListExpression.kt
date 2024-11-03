@@ -4,7 +4,7 @@ import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.datatype.ListType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 
-class ListExpression(val elements: List<Expression>) : Expression {
+class ListExpression(val elements: List<Expression>) : Expression() {
 
     override fun eval(context: LocalRuntimeContext) = List(elements.size) { elements[it].eval(context) }
 

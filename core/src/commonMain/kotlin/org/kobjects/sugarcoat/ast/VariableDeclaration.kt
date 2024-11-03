@@ -8,7 +8,7 @@ data class VariableDeclaration(
     val name: String,
     val mutable: Boolean,
     val explicitType: Type?,
-    val initialValue: Expression) : Expression {
+    val initialValue: Expression) : Expression() {
 
     override fun eval(context: LocalRuntimeContext): Any {
 
