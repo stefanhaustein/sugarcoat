@@ -22,8 +22,8 @@ class UnresolvedAsExpression(
 
         val type = resolvedTarget.getType()
         require (type is MetaType && type.type is TraitDefinition) {
-            "Target must be Trait"
+            "$position: Target must be Trait"
         }
-        return AsExpression(source.resolve(context, null), type.type)
+        return AsExpression(position, source.resolve(context, null), type.type)
     }
 }

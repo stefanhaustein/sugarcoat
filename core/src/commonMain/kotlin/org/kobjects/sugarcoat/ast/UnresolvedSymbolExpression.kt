@@ -1,13 +1,11 @@
 package org.kobjects.sugarcoat.ast
 
-import org.kobjects.parsek.tokenizer.Token
 import org.kobjects.sugarcoat.type.MetaType
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.TypedCallable
 import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.parser.Position
-import org.kobjects.sugarcoat.parser.TokenType
 
 
 class UnresolvedSymbolExpression(

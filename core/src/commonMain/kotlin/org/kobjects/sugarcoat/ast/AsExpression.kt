@@ -3,11 +3,13 @@ package org.kobjects.sugarcoat.ast
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.model.ImplInstance
 import org.kobjects.sugarcoat.model.TraitDefinition
+import org.kobjects.sugarcoat.parser.Position
 
 class AsExpression(
+    position: Position,
     val source: Expression,
     val target: TraitDefinition
-) : ResolvedExpression() {
+) : ResolvedExpression(position) {
     override fun eval(context: LocalRuntimeContext): Any {
         // This should be resolved at resolution time.
         val implDefinition = context.globalRuntimeContext.findImpl(source.getType(), target)
