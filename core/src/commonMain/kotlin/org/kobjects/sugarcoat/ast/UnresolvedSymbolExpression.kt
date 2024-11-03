@@ -1,20 +1,24 @@
 package org.kobjects.sugarcoat.ast
 
+import org.kobjects.parsek.tokenizer.Token
 import org.kobjects.sugarcoat.type.MetaType
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.TypedCallable
 import org.kobjects.sugarcoat.model.Classifier
+import org.kobjects.sugarcoat.parser.Position
+import org.kobjects.sugarcoat.parser.TokenType
 
 
 class UnresolvedSymbolExpression(
+    position: Position,
     val receiver: Expression?,
     val name: String,
     val children: List<ParameterReference>,
     val precedence: Int = 0
-) : Expression() {
-    constructor(receiver: Expression, name: String, precedence: Int, vararg children: Expression) : this( receiver, name, children.map { ParameterReference("", it) }, precedence)
-    constructor(name: String, vararg children: Expression) : this(null, name, children.map { ParameterReference("", it) })
+) : Expression(position) {
+    constructor(position: Position, receiver: Expression, name: String, precedence: Int, vararg children: Expression) : this(position, receiver, name, children.map { ParameterReference("", it) }, precedence)
+    constructor(position: Position, name: String, vararg children: Expression) : this(position, null, name, children.map { ParameterReference("", it) })
 
     override fun eval(context: LocalRuntimeContext) = throw UnsupportedOperationException()
 
@@ -77,16 +81,16 @@ class UnresolvedSymbolExpression(
         if (receiver == null) {
             val local = context.resolveOrNull(name)
             if (local != null) {
-                return CallExpression(null, local, resolveChildren(context, local))
+                return CallExpression(position, null, local, resolveChildren(context, local))
             }
 
             val self = context.resolveOrNull("self")
             val resolvedDynamically = if (self == null) null else
-                ((self as TypedCallable).type.returnType as Classifier).resolveOrNull(name)
+                (self.type.returnType as Classifier).resolveOrNull(name)
 
             if (resolvedDynamically is TypedCallable) {
-                return CallExpression(
-                    if (resolvedDynamically.static) null else CallExpression(null, self as TypedCallable, emptyList()),
+                return CallExpression(position,
+                    if (resolvedDynamically.static) null else CallExpression(position, null, self as TypedCallable, emptyList()),
                     resolvedDynamically,
                     resolveChildren(context, resolvedDynamically))
             }
@@ -106,17 +110,17 @@ class UnresolvedSymbolExpression(
                 resolveStatically(context, resolvedReceiver, resolved)
             }
             else -> throw IllegalStateException(
-                "Type '$type' (${type::class}) of resolved receiver '$resolvedReceiver' must be classifier for resolving '$name'")
+                "$position: Type '$type' (${type::class}) of resolved receiver '$resolvedReceiver' must be classifier for resolving '$name'")
         }
     }
 
     fun resolveStatically(context: ResolutionContext, resolvedReceiver: Expression?, resolved: Classifier): Expression {
         if (resolved is TypedCallable) {
-            return CallExpression(resolvedReceiver, resolved, resolveChildren(context, resolved))
+            return CallExpression(position, resolvedReceiver, resolved, resolveChildren(context, resolved))
         }
         if (resolved is Type) {
             require(children.isEmpty()) {
-                "Types can't have function parameters; got $children"
+                "$position: Types can't have function parameters; got $children"
             }
             return LiteralExpression(resolved)
         }

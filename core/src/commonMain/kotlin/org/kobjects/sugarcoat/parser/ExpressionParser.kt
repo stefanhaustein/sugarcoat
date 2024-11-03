@@ -20,18 +20,20 @@ import org.kobjects.sugarcoat.parser.SugarcoatParser.parseType
 import org.kobjects.sugarcoat.type.Type
 
 
+fun Scanner<TokenType>.position() = Position(current.line, current.col)
+
 object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, ParsingContext, Expression>(
     { scanner, context -> ExpressionParser.parsePrimary(scanner, context) },
-    prefix(10, "+", "-") { _, context, name, operand -> UnresolvedSymbolExpression(operand, name, 10) },
-    infix(9, "**") { _, context, _, left, right -> UnresolvedSymbolExpression(left, "**", 9, right) },
-    infix(8, "as") { _, context, _, left, right -> UnresolvedAsExpression(left, right) },
-    infix(7, "*", "/", "%", "//") { _, context, name, left, right -> UnresolvedSymbolExpression(left, name, 7, right) },
-    infix(6, "+", "-") { _, context, name, left, right -> UnresolvedSymbolExpression(left, name, 6, right) },
-    infix(5, "<", "<=", ">", ">=") { _, context, name, left, right -> UnresolvedSymbolExpression(left, name, 5, right) },
-    infix(4, "==", "!=") { _, context, name, left, right -> UnresolvedSymbolExpression(left, name, 4, right) },
-    infix(3, "&&") { _, context, _, left, right -> UnresolvedSymbolExpression(left, "&&", 3, right) },
-    infix(2, "||") { _, context, _, left, right -> UnresolvedSymbolExpression(left, "||", 2, right) },
-    prefix(1, "!") { _, context, _, operand -> UnresolvedSymbolExpression(operand, "!", 1) }
+    prefix(10, "+", "-") { scanner, context, name, operand -> UnresolvedSymbolExpression(scanner.position(), operand, name, 10) },
+    infix(9, "**") { scanner, context, _, left, right -> UnresolvedSymbolExpression(scanner.position(), left, "**", 9, right) },
+    infix(8, "as") { scanner, context, _, left, right -> UnresolvedAsExpression(scanner.position(), left, right) },
+    infix(7, "*", "/", "%", "//") { scanner, context, name, left, right -> UnresolvedSymbolExpression(scanner.position(), left, name, 7, right) },
+    infix(6, "+", "-") { scanner, context, name, left, right -> UnresolvedSymbolExpression(scanner.position(), left, name, 6, right) },
+    infix(5, "<", "<=", ">", ">=") { scanner, context, name, left, right -> UnresolvedSymbolExpression(scanner.position(), left, name, 5, right) },
+    infix(4, "==", "!=") { scanner, context, name, left, right -> UnresolvedSymbolExpression(scanner.position(), left, name, 4, right) },
+    infix(3, "&&") { scanner, context, _, left, right -> UnresolvedSymbolExpression(scanner.position(), left, "&&", 3, right) },
+    infix(2, "||") { scanner, context, _, left, right -> UnresolvedSymbolExpression(scanner.position(), left, "||", 2, right) },
+    prefix(1, "!") { scanner, context, _, operand -> UnresolvedSymbolExpression(scanner.position(), operand, "!", 1) }
 ) {
     private fun parsePrimary(tokenizer: Scanner<TokenType>, context: ParsingContext): Expression {
         var expr = when (tokenizer.current.type) {
@@ -51,7 +53,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             TokenType.IDENTIFIER -> {
                 var name = tokenizer.consume().text
                 val children = parseParameterList(tokenizer, context)
-                UnresolvedSymbolExpression(null, name, children)
+                UnresolvedSymbolExpression(tokenizer.position(), null, name, children)
             }
 
             TokenType.SYMBOL -> {
@@ -67,7 +69,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
                         } while (tokenizer.tryConsume(","))
                     }
                     tokenizer.consume("]") { "',' or ']' expected" }
-                    UnresolvedSymbolExpression(null, "listOf", builder.build())
+                    UnresolvedSymbolExpression(tokenizer.position(), null, "listOf", builder.build())
                 } else {
                     throw tokenizer.exception("'(' or '[' expected.")
                 }
@@ -85,11 +87,11 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
                     } while (tokenizer.tryConsume(","))
                 }
                 tokenizer.consume("]") { "',' or ']' expected" }
-                expr = UnresolvedSymbolExpression(expr, "[]", builder.build())
+                expr = UnresolvedSymbolExpression(tokenizer.position(), expr, "[]", builder.build())
             } else {
                 val name = tokenizer.consume().text.substring(1)
                 val parameterList = parseParameterList(tokenizer, context)
-                expr = UnresolvedSymbolExpression(expr, name, parameterList)
+                expr = UnresolvedSymbolExpression(tokenizer.position(), expr, name, parameterList)
             }
         }
         return expr
@@ -127,7 +129,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             val optionalLambda = parseOptionalLambda(scanner, context)
             if (expr != null) {
                 if (optionalLambda != null) {
-                    builder.add(property, UnresolvedSymbolExpression("pair", expr, optionalLambda))
+                    builder.add(property, UnresolvedSymbolExpression(scanner.position(), "pair", expr, optionalLambda))
                 } else {
                     builder.add(property, expr)
                 }

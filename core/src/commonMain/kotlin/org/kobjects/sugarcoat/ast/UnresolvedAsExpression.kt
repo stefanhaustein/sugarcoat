@@ -5,11 +5,13 @@ import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.model.TraitDefinition
+import org.kobjects.sugarcoat.parser.Position
 
 class UnresolvedAsExpression(
+    position: Position,
     val source: Expression,
     val target: Expression
-): Expression() {
+): Expression(position) {
 
     override fun eval(context: LocalRuntimeContext) = throw UnsupportedOperationException("Unresolved.")
 

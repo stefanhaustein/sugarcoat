@@ -1,9 +1,13 @@
 package org.kobjects.sugarcoat.ast
 
+import org.kobjects.parsek.tokenizer.Token
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
+import org.kobjects.sugarcoat.parser.Position
+import org.kobjects.sugarcoat.parser.TokenType
 
-abstract class Expression {
+abstract class Expression(val position: Position = Position.INVALID) {
+
     abstract fun eval(context: LocalRuntimeContext): Any
 
     open fun evalDouble(context: LocalRuntimeContext) = eval(context) as Double
