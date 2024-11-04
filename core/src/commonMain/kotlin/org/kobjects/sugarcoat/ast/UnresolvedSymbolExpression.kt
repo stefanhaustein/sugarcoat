@@ -6,6 +6,7 @@ import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.TypedCallable
 import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.parser.Position
+import org.kobjects.sugarcoat.type.GenericTypeResolverState
 
 
 class UnresolvedSymbolExpression(
@@ -63,23 +64,22 @@ class UnresolvedSymbolExpression(
 
     override fun getType() = throw UnsupportedOperationException()
 
-    fun resolveChildren(context: ResolutionContext, callable: TypedCallable): List<Expression?> {
+    fun arrangeChildren(callable: TypedCallable): List<Expression?> {
         val parameterConsumer = ParameterConsumer(children)
-        val resolved = mutableListOf<Expression?>()
+        val builder = mutableListOf<Expression?>()
         for (param in callable.type.parameterTypes) {
-            val expr = parameterConsumer.read(param)
-            resolved.add(expr?.resolve(context, param.type))
+            builder.add(parameterConsumer.read(param))
         }
         parameterConsumer.done(callable)
 
-        return resolved.toList()
+        return builder.toList()
     }
 
     override fun resolve(context: ResolutionContext, expectedType: Type?): Expression {
         if (receiver == null) {
             val local = context.resolveOrNull(name)
             if (local != null) {
-                return CallExpression(position, null, local, resolveChildren(context, local))
+                return buildCallExpression(context,null, local, expectedType)
             }
 
             val self = context.resolveOrNull("self")
@@ -87,13 +87,14 @@ class UnresolvedSymbolExpression(
                 (self.type.returnType as Classifier).resolveOrNull(name)
 
             if (resolvedDynamically is TypedCallable) {
-                return CallExpression(position,
+                return buildCallExpression(
+                    context,
                     if (resolvedDynamically.static) null else CallExpression(position, null, self as TypedCallable, emptyList()),
                     resolvedDynamically,
-                    resolveChildren(context, resolvedDynamically))
+                    expectedType)
             }
 
-            return resolveStatically(context,null, context.namespace.resolve(name))
+            return resolveStatically(context,null, context.namespace.resolve(name), expectedType)
         }
 
         val resolvedReceiver = receiver.resolve(context, null)
@@ -101,27 +102,55 @@ class UnresolvedSymbolExpression(
         return when (type) {
             is MetaType -> {
                 val resolved = type.type.resolve(name)
-                resolveStatically(context, null, resolved)
+                resolveStatically(context, null, resolved, expectedType)
             }
             is Classifier -> {
                 val resolved = type.resolve(name)
-                resolveStatically(context, resolvedReceiver, resolved)
+                resolveStatically(context, resolvedReceiver, resolved, expectedType)
             }
             else -> throw IllegalStateException(
                 "$position: Type '$type' (${type::class}) of resolved receiver '$resolvedReceiver' must be classifier for resolving '$name'")
         }
     }
 
-    fun resolveStatically(context: ResolutionContext, resolvedReceiver: Expression?, resolved: Classifier): Expression {
-        if (resolved is TypedCallable) {
-            return CallExpression(position, resolvedReceiver, resolved, resolveChildren(context, resolved))
+    fun resolveStatically(context: ResolutionContext, resolvedReceiver: Expression?, resolvedMethod: Classifier, expectedType: Type?): Expression {
+        if (resolvedMethod is TypedCallable) {
+            return buildCallExpression(context, resolvedReceiver, resolvedMethod, expectedType)
         }
-        if (resolved is Type) {
+        if (resolvedMethod is Type) {
             require(children.isEmpty()) {
                 "$position: Types can't have function parameters; got $children"
             }
-            return LiteralExpression(resolved)
+            return LiteralExpression(resolvedMethod)
         }
-        throw IllegalStateException("Unrecognized resolved name: '$resolved'")
+        throw IllegalStateException("Unrecognized resolved name: '$resolvedMethod'")
     }
+
+    fun buildCallExpression(context: ResolutionContext, resolvedReceiver: Expression?, resolvedMethod: TypedCallable, expectedType: Type?): CallExpression {
+        val arrangedChildren = arrangeChildren(resolvedMethod)
+        val resolvedChildren = mutableListOf<Expression?>()
+
+        val genericTypeResolverState = GenericTypeResolverState {
+            "$position: Resolving $name"
+        }
+        resolvedMethod.type.returnType.resolveGenerics(genericTypeResolverState, expectedType)
+
+        for ((i, parameter) in resolvedMethod.type.parameterTypes.withIndex()) {
+            println("state: $genericTypeResolverState")
+            if (genericTypeResolverState.map.isNotEmpty()) {
+                println("boo")
+            }
+            val parameterRestType = parameter.restType()
+            val expectedParameterType = parameterRestType.resolveGenerics(genericTypeResolverState)
+            val resolvedChild = arrangedChildren[i]?.resolve(context, expectedParameterType)
+            if (resolvedChild != null) {
+                parameter.restType().resolveGenerics(genericTypeResolverState, resolvedChild.getType())
+            }
+            resolvedChildren.add(resolvedChild)
+        }
+
+        val resolvedReturnType = resolvedMethod.type.returnType.resolveGenerics(genericTypeResolverState, expectedType)
+        return CallExpression(position, resolvedReceiver, resolvedMethod, resolvedChildren)
+    }
+
 }

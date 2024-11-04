@@ -16,6 +16,7 @@ import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.fn.TypedCallable
+import org.kobjects.sugarcoat.type.GenericType
 import kotlin.math.sqrt
 
 object RootContext : Classifier(null, "") {
@@ -46,22 +47,24 @@ object RootContext : Classifier(null, "") {
             Unit
         }
 
+        val forGenericType = GenericType("T")
         addControl(
             "for",
             VoidType,
-            ParameterDefinition("iterable", ListType),
-            ParameterDefinition("body", FunctionType(VoidType, ParameterDefinition("iteratpr", I64Type))),
+            ParameterDefinition("iterable", ListType(forGenericType)),
+            ParameterDefinition("body", FunctionType(VoidType, ParameterDefinition("iteratpr", forGenericType))),
         ) { params, context ->
             evalFor(params, context)
         }
 
+        val ifGenericType = GenericType("T")
         addControl(
             "if",
             VoidType,
             ParameterDefinition("condition", BoolType),
-            ParameterDefinition("then", FunctionType(VoidType)),
-            ParameterDefinition("elif", VoidType, repeated = true),
-            ParameterDefinition("else", FunctionType(VoidType), false, LiteralExpression(Unit)),
+            ParameterDefinition("then", FunctionType(ifGenericType)),
+            ParameterDefinition("elif", PairType(FunctionType(BoolType), FunctionType(ifGenericType)), repeated = true),
+            ParameterDefinition("else", FunctionType(ifGenericType), false, LiteralExpression(Unit)),
         ) { params, context ->
             evalIf(params, context)
         }
@@ -76,7 +79,7 @@ object RootContext : Classifier(null, "") {
 
         addControl(
             "range",
-            I64RangeType,
+            ListType(I64Type),
             ParameterDefinition("a", I64Type),
             ParameterDefinition("b", I64Type),
         ) { children, parameterContext ->
@@ -101,8 +104,8 @@ object RootContext : Classifier(null, "") {
 
         addControl(
             "seq",
-            ListType,
-            ParameterDefinition("value", VoidType, true),
+            VoidType,
+            ParameterDefinition("value", AnyType, true),
         ) { children, parameterContext ->
             children.fold<Expression?, Any>(Unit) { _, current ->
                 current!!.eval(parameterContext)
@@ -158,7 +161,6 @@ object RootContext : Classifier(null, "") {
                 if (pair.first.evalBoolean(parameterContext)) {
                     return pair.second.eval(parameterContext)
                 }
-
             }
         }
         if (children.size == 4 && children[3] != null) {

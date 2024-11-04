@@ -5,13 +5,15 @@ import org.kobjects.sugarcoat.fn.Lambda
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.model.Classifier
+import org.kobjects.sugarcoat.parser.Position
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.type.UnresolvedType
 
 class UnresolvedLambdaExpression(
+    position: Position,
     val parameters: List<Pair<String, Type?>>,
     val body: Expression
-) : Expression() {
+) : Expression(position) {
     override fun eval(context: LocalRuntimeContext) = throw UnsupportedOperationException()
 
     override fun getType(): Type = throw UnsupportedOperationException()
@@ -19,7 +21,7 @@ class UnresolvedLambdaExpression(
     override fun resolve(context: ResolutionContext, expectedType: Type?): Expression {
         if (expectedType !is FunctionType) {
             require(parameters.isEmpty()) {
-                "No lambda parameters supported for expected type $expectedType"
+                "${position}: No lambda parameters supported for expected type $expectedType"
             }
             return body.resolve(context, expectedType)
         }

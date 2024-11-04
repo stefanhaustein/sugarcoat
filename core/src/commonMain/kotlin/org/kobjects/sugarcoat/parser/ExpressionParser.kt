@@ -157,6 +157,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
 
 
     fun parseLambdaArgumentsAndBody(scanner: Scanner<TokenType>, context: ParsingContext): Expression {
+        val position = scanner.position()
         val parameters = mutableListOf<Pair<String, Type?>>()
         if (scanner.current.type == TokenType.IDENTIFIER) {
             do {
@@ -182,7 +183,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
 */
         val lambdaBody = SugarcoatParser.parseBlock(scanner, context)
 
-        return UnresolvedLambdaExpression(parameters.toList(), lambdaBody)
+        return UnresolvedLambdaExpression(position, parameters.toList(), lambdaBody)
     }
 
 
