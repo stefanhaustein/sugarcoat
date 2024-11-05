@@ -13,7 +13,10 @@ data class FunctionType(
 
     override fun resolveGenerics(state: GenericTypeResolverState, expected: Type?): Type? {
         if (expected != null && expected !is FunctionType) {
-            if (parameterTypes.isEmpty()) return returnType.resolveGenerics(state, expected)
+            if (parameterTypes.isEmpty()) {
+                val resolvedType = returnType.resolveGenerics(state, expected)
+                return if (resolvedType == null) null else FunctionType(resolvedType)
+            }
         }
 
         require (expected == null || expected is FunctionType) {

@@ -47,7 +47,7 @@ object RootContext : Classifier(null, "") {
             Unit
         }
 
-        val forGenericType = GenericType("T")
+        val forGenericType = GenericType("I")
         addControl(
             "for",
             VoidType,
@@ -57,10 +57,10 @@ object RootContext : Classifier(null, "") {
             evalFor(params, context)
         }
 
-        val ifGenericType = GenericType("T")
+        val ifGenericType = GenericType("R")
         addControl(
             "if",
-            VoidType,
+            ifGenericType,
             ParameterDefinition("condition", BoolType),
             ParameterDefinition("then", FunctionType(ifGenericType)),
             ParameterDefinition("elif", PairType(FunctionType(BoolType), FunctionType(ifGenericType)), repeated = true),
@@ -105,18 +105,20 @@ object RootContext : Classifier(null, "") {
         addControl(
             "seq",
             VoidType,
-            ParameterDefinition("value", AnyType, true),
+            ParameterDefinition("value", VoidType, true),
         ) { children, parameterContext ->
             children.fold<Expression?, Any>(Unit) { _, current ->
                 current!!.eval(parameterContext)
             }
         }
 
+        val pairFirstGenericType = GenericType("F")
+        val pairSecondGenericType = GenericType("S")
         addControl(
             "pair",
-            PairType(AnyType, AnyType),
-            ParameterDefinition("first", AnyType),
-            ParameterDefinition("second", AnyType),
+            PairType(pairFirstGenericType, pairSecondGenericType),
+            ParameterDefinition("first", pairFirstGenericType),
+            ParameterDefinition("second", pairSecondGenericType),
         ) { children, parameterContext ->
             require(children.size == 2) { "Two parameters expected for 'pair'." }
             Pair(children[0]!! /*!!.eval(parameterContext) */, children[1]!! /*.eval(parameterContext) */)
