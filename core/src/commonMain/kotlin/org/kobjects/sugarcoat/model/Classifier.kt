@@ -82,25 +82,31 @@ abstract class Classifier(
         })
     }
 
-    open fun resolveTypes() {
+    /** Resolve types on signatures and insert methods implied by fields */
+    open fun resolveSignatures() {}
+
+    /** Register all impls with the program impl registry. */
+    open fun resolveImpls(program: Program) {}
+
+    /** Resolve function bodies */
+    open fun resolveExpressions() {}
+
+    fun resolutionPass(program: Program, pass: ResolutionPass) {
+        when (pass) {
+            ResolutionPass.SIGNATURES -> resolveSignatures()
+            ResolutionPass.IMPLS -> resolveImpls(program)
+            ResolutionPass.EXPRESSIONS -> resolveExpressions()
+        }
         for (definition in definitions.values) {
-            definition.resolveTypes()
+            definition.resolutionPass(program, pass)
         }
         for (definition in unnamed) {
-            definition.resolveTypes()
+            definition.resolutionPass(program, pass)
         }
     }
 
-    open fun resolveExpressions() {
-        for (definition in definitions.values) {
-            definition.resolveExpressions()
-        }
-        for (definition in unnamed) {
-            definition.resolveExpressions()
-        }
-    }
 
-    fun resolveOrNull(name: String): Classifier? {
+    fun resolveSymbolOrNull(name: String): Classifier? {
         val result = definitions[name]
         if (result != null) {
             return result
@@ -109,14 +115,14 @@ abstract class Classifier(
         if (fb == null) {
             return null
         }
-        return fb.resolveOrNull(name)
+        return fb.resolveSymbolOrNull(name)
     }
 
 
     abstract fun serialize(sb: StringBuilder)
 
-    open fun resolve(name: String): Classifier {
-        val result = resolveOrNull(name)
+    fun resolveSymbol(name: String): Classifier {
+        val result = resolveSymbolOrNull(name)
         require (result != null) {
             "Unable to resolve '$name' in\n${dump()}"
         }
@@ -162,4 +168,15 @@ abstract class Classifier(
             }
         }
 */
+
+
+    /**
+     * For the definitions of the passes, please refer to the corresponding method documentations
+     * in Classifier.
+     */
+    enum class ResolutionPass {
+        SIGNATURES,
+        IMPLS,
+        EXPRESSIONS,
+    }
 }

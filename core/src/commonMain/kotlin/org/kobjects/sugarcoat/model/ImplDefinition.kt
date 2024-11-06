@@ -10,10 +10,13 @@ class ImplDefinition(
 ) : Classifier(parent, "", fallback) {
 //    override fun resolve() = trait.resolve()
 
-    override fun resolveTypes() {
-        super.resolveTypes()
+    override fun resolveSignatures() {
         trait = trait.resolve(this)
         wrapped = wrapped.resolve(this)
+    }
+
+    override fun resolveImpls(program: Program) {
+        program.impls[wrapped to (trait as TraitDefinition)] = this
     }
 
     override fun toString() = "impl ($trait) for ($wrapped)"

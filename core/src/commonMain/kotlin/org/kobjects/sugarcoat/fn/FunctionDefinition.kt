@@ -44,8 +44,7 @@ data class FunctionDefinition(
         sb.append("\n")
     }
 
-    override fun resolveTypes() {
-        super.resolveTypes()
+    override fun resolveSignatures() {
         parameters = parameters.map { it.resolve(this) }
         returnType = returnType.resolve(this)
     }
@@ -63,8 +62,6 @@ data class FunctionDefinition(
 
 
     override fun resolveExpressions() {
-        super.resolveExpressions()
-
         body = body.resolve(createResolutionContext(), null)
     }
 

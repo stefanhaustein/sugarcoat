@@ -84,7 +84,7 @@ class UnresolvedSymbolExpression(
 
             val self = context.resolveOrNull("self")
             val resolvedDynamically = if (self == null) null else
-                (self.type.returnType as Classifier).resolveOrNull(name)
+                (self.type.returnType as Classifier).resolveSymbolOrNull(name)
 
             if (resolvedDynamically is TypedCallable) {
                 return buildCallExpression(
@@ -94,18 +94,18 @@ class UnresolvedSymbolExpression(
                     expectedType)
             }
 
-            return resolveStatically(context,null, context.namespace.resolve(name), expectedType)
+            return resolveStatically(context,null, context.namespace.resolveSymbol(name), expectedType)
         }
 
         val resolvedReceiver = receiver.resolve(context, null)
         val type = resolvedReceiver.getType()
         return when (type) {
             is MetaType -> {
-                val resolved = type.type.resolve(name)
+                val resolved = type.type.resolveSymbol(name)
                 resolveStatically(context, null, resolved, expectedType)
             }
             is Classifier -> {
-                val resolved = type.resolve(name)
+                val resolved = type.resolveSymbol(name)
                 resolveStatically(context, resolvedReceiver, resolved, expectedType)
             }
             else -> throw IllegalStateException(

@@ -9,7 +9,7 @@ class TypeReference(
     val genericParameters: List<String>
 ) : Type {
 
-    override fun resolve(context: Classifier): Type = namespace.resolve(name) as Type
+    override fun resolve(context: Classifier): Type = namespace.resolveSymbol(name) as Type
 
     override fun toString() = name
 }
