@@ -16,6 +16,8 @@ abstract class Classifier(
 ) {
     val definitions = mutableMapOf<String, Classifier>()
     val unnamed = mutableListOf<Classifier>()
+    val program: Program
+        get() = parent?.program ?: (this as Program)
 
     open fun selfType(): Type = throw UnsupportedOperationException()
 
