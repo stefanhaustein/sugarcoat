@@ -23,7 +23,7 @@ class UnresolvedAsExpression(
 
         val type = resolvedTarget.getType()
         require (type is MetaType && type.type is TraitDefinition) {
-            "$position: Target must be Trait"
+            "$position: Target must be Trait; got $type"
         }
         val implDefinition = context.namespace.program.findImpl(resolvedSource.getType(), type.type)
 

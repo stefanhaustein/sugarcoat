@@ -84,7 +84,10 @@ abstract class Classifier(
         })
     }
 
-    /** Resolve types on signatures and insert methods implied by fields */
+    /* Insert methods implied by fields */
+    open fun resolveImpliedMethods() {}
+
+    /** Resolve types on signatures  */
     open fun resolveSignatures() {}
 
     /** Register all impls with the program impl registry. */
@@ -95,6 +98,7 @@ abstract class Classifier(
 
     fun resolutionPass(program: Program, pass: ResolutionPass) {
         when (pass) {
+            ResolutionPass.IMPLIED_METHODS -> resolveImpliedMethods()
             ResolutionPass.SIGNATURES -> resolveSignatures()
             ResolutionPass.IMPLS -> resolveImpls(program)
             ResolutionPass.EXPRESSIONS -> resolveExpressions()
@@ -177,6 +181,7 @@ abstract class Classifier(
      * in Classifier.
      */
     enum class ResolutionPass {
+        IMPLIED_METHODS,
         SIGNATURES,
         IMPLS,
         EXPRESSIONS,

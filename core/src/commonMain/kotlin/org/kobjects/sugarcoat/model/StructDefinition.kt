@@ -21,7 +21,7 @@ class StructDefinition(
         fields[name] = FieldDefinition(name, type, defaultExpression)
     }
 
-    override fun resolveSignatures() {
+    override fun resolveImpliedMethods() {
         val resolvedFields = fields.values.map { it.resolve(this) }
         for(field in resolvedFields) {
             fields[field.name] = field
