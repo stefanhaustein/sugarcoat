@@ -16,6 +16,8 @@ abstract class Classifier(
 ) {
     val definitions = mutableMapOf<String, Classifier>()
     val unnamed = mutableListOf<Classifier>()
+    val staticFields = mutableMapOf<String, StaticFieldDefinition>()
+
     val program: Program
         get() = parent?.program ?: (this as Program)
 
@@ -31,9 +33,14 @@ abstract class Classifier(
         }
     }
 
-    open fun addField(name: String, type: Type?, defaultExpression: Expression?) {
-        throw UnsupportedOperationException("Fields are not supported for ${this::class}")
+    open fun addStaticField(mutable: Boolean, name: String, type: Type?, initializer: Expression) {
+        staticFields[name] = StaticFieldDefinition(name, type, initializer)
     }
+
+    open fun addInstanceField(mutable: Boolean, name: String, type: Type, initializer: Expression?) {
+        throw UnsupportedOperationException("Instance Fields are not supported for ${this::class}")
+    }
+
 
 
     fun addNativeMethod(
@@ -127,10 +134,10 @@ abstract class Classifier(
 
     abstract fun serialize(sb: StringBuilder)
 
-    fun resolveSymbol(name: String): Classifier {
+    fun resolveSymbol(name: String, errorPrefix: (() -> String) = { "(Unknown location)" }): Classifier {
         val result = resolveSymbolOrNull(name)
         require (result != null) {
-            "Unable to resolve '$name' in\n${dump()}"
+            "${errorPrefix()}: Unable to resolve '$name' in\n${dump()}"
         }
         return result
     }
@@ -181,8 +188,8 @@ abstract class Classifier(
      * in Classifier.
      */
     enum class ResolutionPass {
-        IMPLIED_METHODS,
         SIGNATURES,
+        IMPLIED_METHODS,
         IMPLS,
         EXPRESSIONS,
     }

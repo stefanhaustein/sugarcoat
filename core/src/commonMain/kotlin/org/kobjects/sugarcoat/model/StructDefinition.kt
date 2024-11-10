@@ -15,17 +15,24 @@ class StructDefinition(
     val constructorName: String = "create"
 ): Type, Classifier(parent, name, fallback) {
 
-    val fields = mutableMapOf<String, FieldDefinition>()
+    val instanceFields = mutableMapOf<String, InstanceFieldDefinition>()
 
-    override fun addField(name: String, type: Type?, defaultExpression: Expression?) {
-        fields[name] = FieldDefinition(name, type, defaultExpression)
+    override fun addInstanceField(
+        mutable: Boolean,
+        name: String,
+        type: Type,
+        initializer: Expression?
+    ) {
+        instanceFields[name] = InstanceFieldDefinition(name, type, initializer)
     }
 
-    override fun resolveImpliedMethods() {
-        val resolvedFields = fields.values.map { it.resolve(this) }
-        for(field in resolvedFields) {
-            fields[field.name] = field
-            addNativeMethod(field.type!!, field.name) {
+    override fun resolveSignatures() {
+        for (field in instanceFields.values) {
+            field.resolveType(this)
+        }
+
+        for(field in instanceFields.values) {
+            addNativeMethod(field.type, field.name) {
                 (it.list[0] as StructInstance).fields[field.name]
                     ?: throw IllegalStateException("Missing field value for ${field.name}")
             }
@@ -34,6 +41,7 @@ class StructDefinition(
                 Unit
             }
         }
+
         addChild(StructConstructor(this, constructorName))
     }
 
@@ -65,7 +73,7 @@ class StructDefinition(
 
             val instance = StructInstance(parent)
 
-            for ((i, definition) in parent.fields.values.withIndex()) {
+            for ((i, definition) in parent.instanceFields.values.withIndex()) {
                 instance.fields[definition.name] = children[i]!!.eval(parameterScope)
             }
 
@@ -75,9 +83,10 @@ class StructDefinition(
         }
 
         override val type: FunctionType
+
         get() = FunctionType(
             parent,
-            parent.fields.values.map { ParameterDefinition(it.name, it.type!!) }
+            parent.instanceFields.values.map { ParameterDefinition(it.name, it.type, false) }
         )
 
     }

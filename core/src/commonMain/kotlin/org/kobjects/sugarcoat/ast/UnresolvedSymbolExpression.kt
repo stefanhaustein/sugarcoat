@@ -101,7 +101,9 @@ class UnresolvedSymbolExpression(
         val type = resolvedReceiver.getType()
         return when (type) {
             is MetaType -> {
-                val resolved = type.type.resolveSymbol(name)
+                val resolved = type.type.resolveSymbol(name) {
+                    "$position"
+                }
                 resolveStatically(context, null, resolved, expectedType)
             }
             is Classifier -> {

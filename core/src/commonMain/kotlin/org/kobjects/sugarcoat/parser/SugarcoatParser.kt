@@ -149,21 +149,30 @@ object SugarcoatParser {
         scanner.consume(TokenType.NEWLINE)
         while (true) {
             if (scanner.current.type != TokenType.NEWLINE) {
-                val isStatic =  scanner.tryConsume("static") || classifier is ObjectDefinition || classifier is Program
+                val static =  scanner.tryConsume("static") || classifier is ObjectDefinition || classifier is Program
 
                 if (scanner.current.text == "fn") {
-                    parseFn(scanner, parsingContext, isStatic)
+                    parseFn(scanner, parsingContext, static)
                 } else {
+                    val mutable = scanner.tryConsume("mut")
+
                     val name = scanner.consume(TokenType.IDENTIFIER) { "Field name expected" }.text
                     var type: Type? = null
                     if (scanner.tryConsume(":")) {
                         type = parseType(scanner, parsingContext)
                     }
-                    val defaultExpr = if (scanner.tryConsume("=")) parseExpression(scanner, parsingContext) else null
-                    require (type != null || defaultExpr != null) {
-                        "Type or default expression required."
+                    val valueExpr = if (scanner.tryConsume("=")) parseExpression(scanner, parsingContext) else null
+                    if (static) {
+                        require (valueExpr != null) {
+                            "${scanner.position()}: Initializer expression required for static fields."
+                        }
+                        classifier.addStaticField(mutable, name, type, valueExpr)
+                    } else {
+                        require (type != null) {
+                            "${scanner.position()}: Type required for instance fields."
+                        }
+                        classifier.addInstanceField(mutable, name, type, valueExpr)
                     }
-                    classifier.addField(name, type, defaultExpr)
                 }
             }
             if (currentIndent(scanner) != depth) {
