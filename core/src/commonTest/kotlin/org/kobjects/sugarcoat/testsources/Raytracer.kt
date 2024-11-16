@@ -10,7 +10,7 @@ struct Color
   b: F64
          
   fn toAnsi(bg: Bool) -> String
-    "\u001b[" + if(bg, "38", "48") + "2;" + s255(r) + ";" + s255(g) + s255(b)
+    "\u001b[" + if(bg, "38", else="48") + "2;" + s255(r) + ";" + s255(g) + s255(b)
 
 struct Vector
   x: F64
@@ -165,7 +165,7 @@ impl Surface for Checkerboard
       0.7
 
 struct RayTracer
-  maxDepth: Int = 5
+  maxDepth: I64 = 5
   defaultColor: Color = Color.BLACK
 
   fn intersections(r: Ray, s: Scene) -> Intersection

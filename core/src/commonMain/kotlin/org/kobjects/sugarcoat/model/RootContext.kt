@@ -33,6 +33,7 @@ object RootContext : Classifier(null, "") {
         addChild(I64Type)
         addChild(I64RangeType)
         addChild(VoidType)
+        addChild(ListType(GenericType("E")))
 
         addControl(
             "=",

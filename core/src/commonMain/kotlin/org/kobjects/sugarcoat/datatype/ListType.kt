@@ -1,9 +1,10 @@
 package org.kobjects.sugarcoat.datatype
 
+import org.kobjects.sugarcoat.model.RootContext
 import org.kobjects.sugarcoat.type.GenericTypeResolverState
 import org.kobjects.sugarcoat.type.Type
 
-data class ListType(val elementType: Type) : NativeType("List") {
+data class ListType(val elementType: Type) : NativeType("List", RootContext) {
 
     override fun resolveGenerics(state: GenericTypeResolverState, expected: Type?): Type? {
         val expectedElementType = if (expected == null) null else {
