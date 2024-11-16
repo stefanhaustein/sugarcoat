@@ -4,10 +4,12 @@ import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.type.Type
 
 data class StaticFieldDefinition(
+    val owner: Classifier,
+    val mutable: Boolean,
     val name: String,
-    var explicitType: Type?,
-    val unresolvedExpression: Expression
+    val explicitType: Type?,
+    var initializer: Expression
 ) {
-
+    fun getType(): Type = explicitType ?: initializer.getType()
 }
 

@@ -27,15 +27,12 @@ class Program(
     }
 
     fun run(vararg parameters: Any): Any {
-
+        val globalRuntimeContext = GlobalRuntimeContext(this, printFn)
+        program.initialize(globalRuntimeContext)
         return (resolveSymbol("main") as FunctionDefinition).call(
             null,
             parameters.map { LiteralExpression(it) },
-            LocalRuntimeContext(
-                GlobalRuntimeContext(this, printFn),
-             //   this,
-                null))
-
+            LocalRuntimeContext(globalRuntimeContext, null))
     }
 
     fun resolveAll() {

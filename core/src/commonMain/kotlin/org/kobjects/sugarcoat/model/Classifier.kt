@@ -1,9 +1,11 @@
 package org.kobjects.sugarcoat.model
 
 import org.kobjects.sugarcoat.ast.Expression
+import org.kobjects.sugarcoat.ast.ResolutionContext
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.datatype.NativeArgList
 import org.kobjects.sugarcoat.datatype.NativeFunction
+import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
@@ -34,13 +36,21 @@ abstract class Classifier(
     }
 
     open fun addStaticField(mutable: Boolean, name: String, type: Type?, initializer: Expression) {
-        staticFields[name] = StaticFieldDefinition(name, type, initializer)
+        staticFields[name] = StaticFieldDefinition(this, mutable, name, type, initializer)
     }
 
     open fun addInstanceField(mutable: Boolean, name: String, type: Type, initializer: Expression?) {
         throw UnsupportedOperationException("Instance Fields are not supported for ${this::class}")
     }
 
+    fun initialize(globalRuntimeContext: GlobalRuntimeContext) {
+        for (field in staticFields.values) {
+            globalRuntimeContext.symbols[field] = field.initializer.eval(LocalRuntimeContext(globalRuntimeContext, null))
+        }
+        for (child in definitions.values + unnamed) {
+            child.initialize(globalRuntimeContext)
+        }
+    }
 
 
     fun addNativeMethod(
@@ -91,29 +101,41 @@ abstract class Classifier(
         })
     }
 
-    /* Insert methods implied by fields */
-    open fun resolveImpliedMethods() {}
 
-    /** Resolve types on signatures  */
     open fun resolveSignatures() {}
 
-    /** Register all impls with the program impl registry. */
     open fun resolveImpls(program: Program) {}
 
-    /** Resolve function bodies */
     open fun resolveExpressions() {}
+
+    open fun resolveStaticFields() {
+        val resolutionContext = ResolutionContext(this)
+        for (field in staticFields.values) {
+            field.initializer = field.initializer.resolve(resolutionContext, field.explicitType)
+            addControl(field.name, field.getType()) { param, localContext ->
+                localContext.globalRuntimeContext.symbols[field]!!
+            }
+            if (field.mutable) {
+                addControl(
+                    field.name,
+                    VoidType,
+                    ParameterDefinition("value", field.getType())
+                ) { params, localRuntimeContext ->
+                    localRuntimeContext.globalRuntimeContext.symbols[field] = params[0]!!.eval(localRuntimeContext)
+                    Unit
+                }
+            }
+        }
+    }
 
     fun resolutionPass(program: Program, pass: ResolutionPass) {
         when (pass) {
-            ResolutionPass.IMPLIED_METHODS -> resolveImpliedMethods()
             ResolutionPass.SIGNATURES -> resolveSignatures()
+            ResolutionPass.STATIC_FIELDS -> resolveStaticFields()
             ResolutionPass.IMPLS -> resolveImpls(program)
             ResolutionPass.EXPRESSIONS -> resolveExpressions()
         }
-        for (definition in definitions.values) {
-            definition.resolutionPass(program, pass)
-        }
-        for (definition in unnamed) {
+        for (definition in definitions.values + unnamed) {
             definition.resolutionPass(program, pass)
         }
     }
@@ -183,14 +205,4 @@ abstract class Classifier(
 */
 
 
-    /**
-     * For the definitions of the passes, please refer to the corresponding method documentations
-     * in Classifier.
-     */
-    enum class ResolutionPass {
-        SIGNATURES,
-        IMPLIED_METHODS,
-        IMPLS,
-        EXPRESSIONS,
-    }
 }
