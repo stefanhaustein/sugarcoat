@@ -3,11 +3,13 @@ package org.kobjects.sugarcoat.fn
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.ast.ResolutionContext
+import org.kobjects.sugarcoat.ast.UnresolvedFunctionBody
 import org.kobjects.sugarcoat.type.Type
-import org.kobjects.sugarcoat.type.UnresolvedType
 import org.kobjects.sugarcoat.model.Classifier
+import org.kobjects.sugarcoat.parser.Position
 
 data class FunctionDefinition(
+    val position: Position,
     override val parent: Classifier,
     override val fallback: Classifier,
     override val static: Boolean,
@@ -16,7 +18,7 @@ data class FunctionDefinition(
     var returnType: Type,
 ) : TypedCallable, Classifier(parent, name, fallback) {
 
-    var body: Expression = LiteralExpression(0)
+    var body: Expression = UnresolvedFunctionBody(this)
 
     override fun call(
         receiver: Any?,

@@ -25,6 +25,16 @@ abstract class Classifier(
 
     open fun selfType(): Type = throw UnsupportedOperationException()
 
+    open fun resolveGenericParameters(resolvedTypes: List<Type>): Type {
+        require(resolvedTypes.isEmpty()) {
+            "$this does not support generic type parameters"
+        }
+        require(this is Type) {
+            "$this is not a type"
+        }
+        return this
+    }
+
     open fun addChild(value: Classifier) {
         require(value.parent == this)
         if (value.name.isEmpty()) {
@@ -147,10 +157,7 @@ abstract class Classifier(
             return result
         }
         val fb = fallback
-        if (fb == null) {
-            return null
-        }
-        return fb.resolveSymbolOrNull(name)
+        return fb?.resolveSymbolOrNull(name)
     }
 
 

@@ -38,4 +38,22 @@ data class FunctionType(
         return FunctionType(returnType, builder.toList())
     }
 
+    override fun assignableFrom(other: Type): Boolean {
+        if (other !is FunctionType)  {
+            return false
+        }
+        if (parameterTypes.size != other.parameterTypes.size) {
+            return false
+        }
+        if (!returnType.assignableFrom(other.returnType)) {
+            return false
+        }
+        for ((index, parameter) in parameterTypes.withIndex()) {
+            if (!parameter.type.assignableFrom(other.parameterTypes[index].type)) {
+                return false
+            }
+        }
+        return true
+    }
+
 }

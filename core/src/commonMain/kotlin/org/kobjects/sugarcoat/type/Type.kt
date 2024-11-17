@@ -10,6 +10,9 @@ import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.model.StructDefinition
 import org.kobjects.sugarcoat.model.TraitDefinition
 
+/**
+ * Note that there are types that are not classifiers such as MetaType and function types.
+ */
 interface Type {
 
     fun resolve(context: Classifier): Type = this

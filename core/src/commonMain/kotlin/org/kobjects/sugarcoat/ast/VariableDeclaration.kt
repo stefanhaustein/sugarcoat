@@ -3,12 +3,14 @@ package org.kobjects.sugarcoat.ast
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
+import org.kobjects.sugarcoat.parser.Position
 
 data class VariableDeclaration(
+    override val position: Position,
     val name: String,
     val mutable: Boolean,
     val explicitType: Type?,
-    val initialValue: Expression) : Expression() {
+    val initialValue: Expression) : Expression(position) {
 
     override fun eval(context: LocalRuntimeContext): Any {
 

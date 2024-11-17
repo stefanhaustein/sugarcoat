@@ -2,8 +2,10 @@ package org.kobjects.sugarcoat.ast
 
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.fn.TypedCallable
+import org.kobjects.sugarcoat.parser.Position
 
 class ParameterConsumer(
+    val position: Position,
     val parameterReferences: List<ParameterReference>
 ) {
     var index = 0
@@ -19,9 +21,9 @@ class ParameterConsumer(
                 val p = readSingle(name) ?: break
                 result.add(p)
             }
-            return ListExpression(result.toList())
+            return ListExpression(position, result.toList())
         }
-        return readSingle(name) ?: if (optional) null else throw IllegalStateException("Required parameter '$name' not found in argument list $parameterReferences")
+        return readSingle(name) ?: if (optional) null else throw IllegalStateException("$position: Required parameter '$name' not found in argument list $parameterReferences")
     }
 
 

@@ -1,5 +1,7 @@
 package org.kobjects.sugarcoat.ast
 
+import org.kobjects.sugarcoat.fn.FunctionType
+import org.kobjects.sugarcoat.fn.Lambda
 import org.kobjects.sugarcoat.type.MetaType
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
@@ -65,7 +67,7 @@ class UnresolvedSymbolExpression(
     override fun getType() = throw UnsupportedOperationException()
 
     fun arrangeChildren(callable: TypedCallable): List<Expression?> {
-        val parameterConsumer = ParameterConsumer(children)
+        val parameterConsumer = ParameterConsumer(position.copy(description = "$callable"), children)
         val builder = mutableListOf<Expression?>()
         for (param in callable.type.parameterTypes) {
             builder.add(parameterConsumer.read(param))
@@ -76,6 +78,15 @@ class UnresolvedSymbolExpression(
     }
 
     override fun resolve(context: ResolutionContext, expectedType: Type?): Expression {
+        if (expectedType is FunctionType && expectedType.parameterTypes.isEmpty()) {
+            val result = resolveImpl(context, expectedType.returnType)
+            return LiteralExpression(position, Lambda(FunctionType(result.getType(), emptyList()), emptyList(), result))
+        }
+        return resolveImpl(context, expectedType)
+    }
+
+
+    fun resolveImpl(context: ResolutionContext, expectedType: Type?): Expression {
         if (receiver == null) {
             val local = context.resolveOrNull(name)
             if (local != null) {
@@ -94,11 +105,11 @@ class UnresolvedSymbolExpression(
                     expectedType)
             }
 
-            return resolveStatically(context,null, context.namespace.resolveSymbol(name), expectedType)
+            return resolveStatically(context,null, context.namespace.resolveSymbol(name) { "$position" }, expectedType)
         }
 
         val resolvedReceiver = receiver.resolve(context, null)
-        val type = resolvedReceiver.getType()
+        val type = resolvedReceiver.getType().resolve(context.namespace) // TODO: resolve() should not be necessary here.
         return when (type) {
             is MetaType -> {
                 val resolved = type.type.resolveSymbol(name) {
@@ -107,7 +118,7 @@ class UnresolvedSymbolExpression(
                 resolveStatically(context, null, resolved, expectedType)
             }
             is Classifier -> {
-                val resolved = type.resolveSymbol(name)
+                val resolved = type.resolveSymbol(name) { "$position" }
                 resolveStatically(context, resolvedReceiver, resolved, expectedType)
             }
             else -> throw IllegalStateException(
@@ -123,7 +134,7 @@ class UnresolvedSymbolExpression(
             require(children.isEmpty()) {
                 "$position: Types can't have function parameters; got $children"
             }
-            return LiteralExpression(resolvedMethod)
+            return LiteralExpression(position, resolvedMethod)
         }
         throw IllegalStateException("Unrecognized resolved name: '$resolvedMethod'")
     }
@@ -133,7 +144,7 @@ class UnresolvedSymbolExpression(
         val resolvedChildren = mutableListOf<Expression?>()
 
         val genericTypeResolverState = GenericTypeResolverState {
-            "$position: Resolving $name"
+            "$position: Resolving $this"
         }
         resolvedMethod.type.returnType.resolveGenerics(genericTypeResolverState, expectedType)
 

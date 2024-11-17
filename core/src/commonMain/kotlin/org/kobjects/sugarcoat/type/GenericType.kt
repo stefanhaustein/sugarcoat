@@ -2,6 +2,7 @@ package org.kobjects.sugarcoat.type
 
 data class GenericType(val name: String) : Type {
 
+    override fun assignableFrom(other: Type) = true
 
     override fun resolveGenerics(state: GenericTypeResolverState, expected: Type?): Type? {
         val resolved = state.map[this]

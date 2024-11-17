@@ -7,7 +7,6 @@ import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.parser.Position
 import org.kobjects.sugarcoat.type.Type
-import org.kobjects.sugarcoat.type.UnresolvedType
 
 class UnresolvedLambdaExpression(
     position: Position,
@@ -42,7 +41,7 @@ class UnresolvedLambdaExpression(
         }
         val resolvedBody = body.resolve(innerContext, expectedType.returnType)
 
-        return LiteralExpression(Lambda(expectedType, parameters.map { it.first }, resolvedBody))
+        return LiteralExpression(position, Lambda(expectedType, parameters.map { it.first }, resolvedBody))
 
     }
 }

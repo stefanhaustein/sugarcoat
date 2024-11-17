@@ -1,16 +1,27 @@
-package org.kobjects.sugarcoat.testsources
-val RAYTRACER_SOURCE: String = """
+package org.kobjects.sugarcoat.testsources; val RAYTRACER_SOURCE: String = """
 struct Color
-  static BLACK = Color.create(0.0, 0.0, 0.0)
+  static BLACK = Color.create(0, 0, 0.)
   static GRAY = Color.create(0.5, 0.5, 0.5)
-  static WHITE = Color.create(1.0, 1.0, 1.0)
-  
+  static WHITE = Color.create(1, 1, 1)
+    
+  static fn s255(color: F64) -> String
+    "" + color * 255.0 
+
   r: F64
   g: F64
   b: F64
          
   fn toAnsi(bg: Bool) -> String
     "\u001b[" + if(bg, "38", else="48") + "2;" + s255(r) + ";" + s255(g) + s255(b)
+
+  fn plus(other: Color) -> Color
+    Color.create(r + other.r, g + other.g, b + other.b)
+
+  fn scale(factor: F64) -> Color
+    Color.create(r * factor, g * factor, b * factor)
+    
+  fn times(other: Color) -> Color
+    Color.create(r * other, g * other, b * other)
 
 struct Vector
   x: F64
@@ -45,7 +56,7 @@ struct Camera
   up: Vector
 
   static fn lookingAt(pos: Vector, lookAt: Vector) -> Camera
-    let down = Vector(0, -1, 0)
+    let down = Vector.create(0, -1, 0)
     let forward = lookAt.minus(pos).norm()
     let right = forward.cross(down).norm().times(1.5)
     let up = forward.cross(right).norm().times(1.5)
@@ -150,7 +161,7 @@ impl Surface for Checkerboard
     150
 
   fn diffuse(pos: Vector) -> Color
-    if ((int(1000 + pos.z) + int(1000 + pos.x)) % 2 != 0) 
+    if (((1000.0 + pos.z).toI64 + (1000.0 + pos.x).toI64) % 2 != 0) 
       Color.WHITE
     --else
       Color.BLACK
@@ -159,7 +170,7 @@ impl Surface for Checkerboard
     Color.WHITE
 
   fn reflect(pos: Vector) -> F64
-    if ((int(1000 + pos.z) + int(1000 + pos.x)) % 2 != 0) 
+    if (((1000.0 + pos.z).toI64 + (1000.0 + pos.x).toI64) % 2 != 0) 
       0.1
     --else
       0.7
@@ -170,7 +181,7 @@ struct RayTracer
 
   fn intersections(r: Ray, s: Scene) -> Intersection
     let mut closest = s.things[0].intersect(r)
-    for (range(1, len(s.things))) :: i
+    for (range(1, s.things.size)) :: i
       let inter = s.things[i].intersect(r)
       if (inter.dist < closest.dist) 
         closest = inter
@@ -200,29 +211,30 @@ struct RayTracer
     naturalColor.plus(reflectedColor)
 
   fn getReflectionColor(t: Thing, pos: Vector, normal: Vector, rd: Vector, s: Scene, depth: F64) -> Color
-    traceRay(Ray(pos, rd), s, depth + 1).scale(t.surface().reflect(pos))
+    traceRay(Ray.create(pos, rd), s, depth + 1).scale(t.surface().reflect(pos))
 
   fn addLight(t: Thing, pos: Vector, norm: Vector, rd: Vector, s: Scene, col: Color, l: Light) -> Color
     let ldis = l.pos.minus(pos)
     let livec = ldis.norm()
-    let nearIsect = testRay(Ray(pos, livec), s)
+    let nearIsect = testRay(Ray.create(pos, livec), s)
     let isInShadow = (nearIsect <= ldis.mag())
     if (isInShadow) 
-      return (col)
+      col
+      
+    --else 
+      let illum = livec.dot(norm)
+      let mut lcolor = defaultColor
+      if (illum > 0)
+        lcolor = l.color.scale(illum)
 
-    let illum = livec.dot(norm)
-    let mut lcolor = defaultColor
-    if (illum > 0)
-      lcolor = l.color.scale(illum)
+      let specular = livec.dot(rd.norm())
+      let mut scolor = defaultColor
+      if (specular > 0)
+        scolor = l.color.scale(specular ** t.surface().roughness())
 
-    let specular = livec.dot(rd.norm())
-    let mut scolor = defaultColor
-    if (specular > 0)
-      scolor = l.color.scale(specular ** t.surface().roughness())
-
-    let surf = t.surface()
-    let diff = surf.diffuse(pos)
-    col.plus(lcolor.times(diff)).plus(scolor.times(t.surface().specular(pos)))
+      let surf = t.surface()
+      let diff = surf.diffuse(pos)
+      col.plus(lcolor.times(diff)).plus(scolor.times(t.surface().specular(pos)))
 
   fn getNaturalColor(t: Thing, pos: Vector, norm: Vector, rd: Vector, s: Scene) -> Color
     let mut col = defaultColor
@@ -237,11 +249,12 @@ struct RayTracer
   fn render(s: Scene, width: I64, height: I64) 
     let cx = width // 2
     let cy = height // 2
+    let scale = 1.0
     for (range(0, height // 2)) :: yy
-      let y = y * 2    
+      let y = yy * 2    
       for (range(0, width)) :: x
-        let color1 = traceRay(Ray(s.camera.pos, getPoint((x - cx) * scale, (cy - y) * scale, s.camera)), s, 0)
-        let color2 = traceRay(Ray(s.camera.pos, getPoint((x - cx) * scale, (cy - y - 1) * scale, s.camera)), s, 0)
+        let color1 = traceRay(Ray.create(s.camera.pos, getPoint((x - cx) * scale, (cy - y) * scale, s.camera)), s, 0)
+        let color2 = traceRay(Ray.create(s.camera.pos, getPoint((x - cx) * scale, (cy - y - 1) * scale, s.camera)), s, 0)
         print(color1.toAnsi(true) + color2.toAnsi(false) + "▀")
       
       print("\n")
@@ -253,5 +266,5 @@ struct RayTracer
 
 fn main()
   let rayTracer = RayTracer()
-  rayTracer.render(defaultScene, 72, 40)
+  rayTracer.render(rayTracer.defaultScene, 72, 40)
 """

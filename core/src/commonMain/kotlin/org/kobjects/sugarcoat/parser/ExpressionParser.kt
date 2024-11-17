@@ -14,17 +14,17 @@ import org.kobjects.sugarcoat.ast.UnresolvedLambdaExpression
 import org.kobjects.sugarcoat.model.Program
 import org.kobjects.sugarcoat.ast.UnresolvedSymbolExpression
 import org.kobjects.sugarcoat.model.GlobalRuntimeContext
-import org.kobjects.sugarcoat.type.UnresolvedType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.parser.SugarcoatParser.parseType
 import org.kobjects.sugarcoat.type.Type
+import kotlin.coroutines.suspendCoroutine
 
 
 fun Scanner<TokenType>.position() = Position(current.line, current.col)
 
 object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, ParsingContext, Expression>(
     { scanner, context -> ExpressionParser.parsePrimary(scanner, context) },
-    prefix(10, "+", "-") { scanner, context, name, operand -> UnresolvedSymbolExpression(scanner.position(), operand, name, 10) },
+    prefix(10, "+", "-") { scanner, context, name, operand -> UnresolvedSymbolExpression(scanner.position(), operand, "0$name", 10) },
     infix(9, "**") { scanner, context, _, left, right -> UnresolvedSymbolExpression(scanner.position(), left, "**", 9, right) },
     infix(8, "as") { scanner, context, _, left, right -> UnresolvedAsExpression(scanner.position(), left, right) },
     infix(7, "*", "/", "%", "//") { scanner, context, name, left, right -> UnresolvedSymbolExpression(scanner.position(), left, name, 7, right) },
@@ -39,12 +39,13 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
         var expr = when (tokenizer.current.type) {
             TokenType.NUMBER -> {
                 val text = tokenizer.consume().text
-                LiteralExpression(if (text.contains(".") || text.contains("e") || text.contains("E")) text.toDouble() else text.toLong())
+                LiteralExpression(tokenizer.position(), if (text.contains(".") || text.contains("e") || text.contains("E")) text.toDouble() else text.toLong())
             }
 
             TokenType.STRING -> {
                 val text = tokenizer.consume().text
                 LiteralExpression(
+                    tokenizer.position(),
                     text.substring(1, text.length - 1)
                         .replace("\\n", "\n")
                 )
@@ -52,8 +53,14 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
 
             TokenType.IDENTIFIER -> {
                 var name = tokenizer.consume().text
-                val children = parseParameterList(tokenizer, context)
-                UnresolvedSymbolExpression(tokenizer.position(), null, name, children)
+                when (name) {
+                    "true" -> LiteralExpression(tokenizer.position(), true)
+                    "false" -> LiteralExpression(tokenizer.position(), false)
+                    else -> {
+                        val children = parseParameterList(tokenizer, context)
+                        UnresolvedSymbolExpression(tokenizer.position(), null, name, children)
+                    }
+                }
             }
 
             TokenType.SYMBOL -> {

@@ -16,6 +16,7 @@ import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.fn.TypedCallable
+import org.kobjects.sugarcoat.parser.Position
 import org.kobjects.sugarcoat.type.GenericType
 import kotlin.math.sqrt
 
@@ -65,7 +66,8 @@ object RootContext : Classifier(null, "") {
             ParameterDefinition("condition", BoolType),
             ParameterDefinition("then", FunctionType(ifGenericType)),
             ParameterDefinition("elif", PairType(FunctionType(BoolType), FunctionType(ifGenericType)), repeated = true),
-            ParameterDefinition("else", FunctionType(ifGenericType), false, LiteralExpression(Unit)),
+            ParameterDefinition("else", FunctionType(ifGenericType), false, LiteralExpression(
+                Position("Implied void else branch"), Unit)),
         ) { params, context ->
             evalIf(params, context)
         }
@@ -103,14 +105,15 @@ object RootContext : Classifier(null, "") {
             }
         }
 
+        val seqGenericType = GenericType("R")
         addControl(
             "seq",
-            VoidType,
-            ParameterDefinition("value", VoidType, true),
+            seqGenericType,
+            ParameterDefinition("prefix", VoidType, true),
+            ParameterDefinition("result", seqGenericType, false)
         ) { children, parameterContext ->
-            children.fold<Expression?, Any>(Unit) { _, current ->
-                current!!.eval(parameterContext)
-            }
+            children.first()!!.eval(parameterContext)
+            children.last()!!.eval(parameterContext)
         }
 
         val pairFirstGenericType = GenericType("F")
@@ -145,7 +148,7 @@ object RootContext : Classifier(null, "") {
         val range = children[0]!!.eval(parameterContext) as LongRange
         for (value in range) {
             (children[1]!!.eval(parameterContext) as TypedCallable).call(null, listOf(
-                LiteralExpression(value)), parameterContext)
+                LiteralExpression(children[1]!!.position, value)), parameterContext)
         }
         return Unit
     }

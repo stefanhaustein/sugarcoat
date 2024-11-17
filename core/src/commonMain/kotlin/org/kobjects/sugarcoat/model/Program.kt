@@ -3,6 +3,7 @@ package org.kobjects.sugarcoat.model
 import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.fn.FunctionDefinition
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
+import org.kobjects.sugarcoat.parser.Position
 import org.kobjects.sugarcoat.type.Type
 
 class Program(
@@ -31,7 +32,7 @@ class Program(
         program.initialize(globalRuntimeContext)
         return (resolveSymbol("main") as FunctionDefinition).call(
             null,
-            parameters.map { LiteralExpression(it) },
+            parameters.map { LiteralExpression(Position("main argument"), it) },
             LocalRuntimeContext(globalRuntimeContext, null))
     }
 

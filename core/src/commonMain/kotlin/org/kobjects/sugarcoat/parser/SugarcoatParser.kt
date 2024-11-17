@@ -5,6 +5,7 @@ import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.fn.FunctionDefinition
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.ast.Expression
+import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.model.ImplDefinition
 import org.kobjects.sugarcoat.model.ObjectDefinition
 import org.kobjects.sugarcoat.ast.ParameterReference
@@ -13,7 +14,7 @@ import org.kobjects.sugarcoat.model.StructDefinition
 import org.kobjects.sugarcoat.ast.UnresolvedSymbolExpression
 import org.kobjects.sugarcoat.model.TraitDefinition
 import org.kobjects.sugarcoat.type.Type
-import org.kobjects.sugarcoat.type.TypeReference
+import org.kobjects.sugarcoat.type.UnresolvedTypeReference
 import org.kobjects.sugarcoat.ast.VariableDeclaration
 import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.DelegateToImpl
@@ -83,6 +84,7 @@ object SugarcoatParser {
             )
         } else {
             val fd = FunctionDefinition(
+                scanner.position(),
                 parentContext.namespace,
                 parentContext.namespace,
                 static,
@@ -188,19 +190,19 @@ object SugarcoatParser {
         val depth = currentIndent(scanner)
         println("ParseBody; parent: $parentContext; depth: $depth")
         if (depth <= parentContext.depth) {
-            return UnresolvedSymbolExpression(scanner.position(), "seq")
+            return LiteralExpression(scanner.position(), Unit)
         }
         scanner.consume(TokenType.NEWLINE)
 
         val parsingContext = parentContext.copy(depth = depth)
 
-        val result = mutableListOf<ParameterReference>()
+        val result = mutableListOf<Expression>()
         while(true) {
             println("parsebody loop parsing at depth $depth")
             if (scanner.current.type != TokenType.NEWLINE) {
                 val statement = parseStatement(scanner, parsingContext)
                 println("parsed @$depth: $statement")
-                result.add(ParameterReference("", statement))
+                result.add(statement)
             }
             if (currentIndent(scanner) != depth) {
                 println("leaving b/c currentDepth = ${currentIndent(scanner)} != $depth")
@@ -208,7 +210,20 @@ object SugarcoatParser {
             }
             scanner.consume(TokenType.NEWLINE)
         }
-        return if (result.size == 1) result.first().value else UnresolvedSymbolExpression(scanner.position(), null, "seq", result)
+        return when (result.size) {
+            0 -> LiteralExpression(scanner.position(), Unit)
+            1 -> result.first()
+            else -> UnresolvedSymbolExpression(
+                scanner.position(),
+                null,
+                "seq",
+                result.mapIndexed { index, expr ->
+                    ParameterReference(if (index == result.size - 1) "result" else "", expr)
+                })
+        }
+
+//                (result.size == 1) result.first().value
+  //      else UnresolvedSymbolExpression(scanner.position(), null, "seq", result)
     }
 
     fun parseStatement(scanner: Scanner<TokenType>, parsingContext: ParsingContext): Expression {
@@ -221,7 +236,7 @@ object SugarcoatParser {
                     "Unsupported assignment target: $result"
                 }
                 val source = parseExpression(scanner, parsingContext)
-                result = UnresolvedSymbolExpression(scanner.position(), result.receiver,"set_$result.name", listOf(ParameterReference("", source)))
+                result = UnresolvedSymbolExpression(scanner.position(), result.receiver,"set_${result.name}", listOf(ParameterReference("", source)))
             }
             result
         }
@@ -233,14 +248,14 @@ object SugarcoatParser {
             name += scanner.consume().text
         }
 
-        val genericParameters = mutableListOf<String>()
+        val genericParameters = mutableListOf<Type>()
         if (scanner.tryConsume("<")) {
             do {
-                genericParameters.add(scanner.consume(TokenType.IDENTIFIER) { "Generic parameter name expected" }.text)
+                genericParameters.add(parseType(scanner, parsingContext))
             } while (scanner.tryConsume(","))
             scanner.consume(">") { "'>' expected at the end of the generic parameter name list." }
         }
-        return TypeReference(parsingContext.namespace, name, genericParameters.toList())
+        return UnresolvedTypeReference(scanner.position(), name, genericParameters.toList())
     }
 
 
@@ -254,7 +269,7 @@ object SugarcoatParser {
         scanner.consume("=")
         val value = parseExpression(scanner, parsingContext)
         //parsingContext.namespace.addField(name, explicitType, value)
-        return VariableDeclaration(name, mutable, explicitType, value)
+        return VariableDeclaration(scanner.position(), name, mutable, explicitType, value)
     }
 
         fun parseProgram(code: String, printFn: (Any) -> Unit = ::print) =

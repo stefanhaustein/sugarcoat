@@ -6,7 +6,7 @@ import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.parser.Position
 import org.kobjects.sugarcoat.parser.TokenType
 
-abstract class Expression(val position: Position = Position.INVALID) {
+abstract class Expression(open val position: Position) {
 
     abstract fun eval(context: LocalRuntimeContext): Any
 
