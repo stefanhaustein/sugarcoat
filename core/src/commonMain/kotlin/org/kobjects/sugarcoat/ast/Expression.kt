@@ -14,7 +14,7 @@ abstract class Expression(open val position: Position) {
     open fun evalBoolean(context: LocalRuntimeContext) = eval(context) as Boolean
     open fun evalLong(context: LocalRuntimeContext) = eval(context) as Long
 
-    open fun stringify(stringBuilder: StringBuilder, parentPrecedence: Int) {
+    open fun stringify(stringBuilder: StringBuilder) {
         stringBuilder.append(this)
     }
 

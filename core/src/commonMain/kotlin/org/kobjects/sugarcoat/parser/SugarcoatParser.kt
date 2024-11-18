@@ -217,6 +217,7 @@ object SugarcoatParser {
                 scanner.position(),
                 null,
                 "seq",
+                true,
                 result.mapIndexed { index, expr ->
                     ParameterReference(if (index == result.size - 1) "result" else "", expr)
                 })
@@ -236,7 +237,7 @@ object SugarcoatParser {
                     "Unsupported assignment target: $result"
                 }
                 val source = parseExpression(scanner, parsingContext)
-                result = UnresolvedSymbolExpression(scanner.position(), result.receiver,"set_${result.name}", listOf(ParameterReference("", source)))
+                result = UnresolvedSymbolExpression(scanner.position(), result.receiver,"set_${result.name}", true, listOf(ParameterReference("", source)))
             }
             result
         }

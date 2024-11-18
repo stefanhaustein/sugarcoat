@@ -265,6 +265,6 @@ struct RayTracer
   defaultScene: Scene = Scene(defaultThings, defaultLights, defaultCamera, Color.BLACK)
 
 fn main()
-  let rayTracer = RayTracer()
+  let rayTracer = RayTracer.create() 
   rayTracer.render(rayTracer.defaultScene, 72, 40)
 """

@@ -42,7 +42,7 @@ data class FunctionDefinition(
 
     override fun serialize(sb: StringBuilder) {
         sb.append("fn $name(${parameters.joinToString (", ")})\n  ")
-        body.stringify(sb, 0)
+        body.stringify(sb)
         sb.append("\n")
     }
 

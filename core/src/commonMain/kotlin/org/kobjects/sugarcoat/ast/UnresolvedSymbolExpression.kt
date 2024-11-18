@@ -15,52 +15,43 @@ class UnresolvedSymbolExpression(
     position: Position,
     val receiver: Expression?,
     val name: String,
+    val parens: Boolean,
     val children: List<ParameterReference>,
-    val precedence: Int = 0
 ) : Expression(position) {
-    constructor(position: Position, receiver: Expression, name: String, precedence: Int, vararg children: Expression) : this(position, receiver, name, children.map { ParameterReference("", it) }, precedence)
-    constructor(position: Position, name: String, vararg children: Expression) : this(position, null, name, children.map { ParameterReference("", it) })
+
+    constructor(position: Position, receiver: Expression, name: String, vararg children: Expression) : this(position, receiver, name, children.size > 0, children.map { ParameterReference("", it) })
+
+    constructor(position: Position, name: String, vararg children: Expression) : this(position, null, name, children.size > 0, children.map { ParameterReference("", it) })
 
     override fun eval(context: LocalRuntimeContext) = throw UnsupportedOperationException()
 
-    override fun toString(): String = buildString { stringify(this, 0) }
+    override fun toString(): String = buildString { stringify(this) }
 
-    override fun stringify(stringBuilder: StringBuilder, parentPrecedence: Int) {
-        if (name.firstOrNull { !it.isLetterOrDigit() } != null) {
-            if (parentPrecedence > 0 && parentPrecedence >= precedence) {
-                stringBuilder.append("(")
-                stringBuilder.append(this)
-                stringBuilder.append(")")
-            } else {
-                when (children.size) {
-                    0 -> {
-                        if (receiver == null) {
-                            stringBuilder.append("'$name'")
-                        } else {
-                            stringBuilder.append(name)
-                            if (children.isNotEmpty()) {
-                                children.first().value.stringify(stringBuilder, precedence)
-                            }
-                        }
-                    }
-                    else -> {
-                        receiver?.stringify(stringBuilder, precedence)
-                        for (child in children) {
-                            stringBuilder.append(" $name ")
-                            child.value.stringify(stringBuilder, precedence)
-                        }
-                    }
-                }
-            }
+    override fun stringify(stringBuilder: StringBuilder) {
+        if (receiver != null) {
+            receiver.stringify(stringBuilder)
+            stringBuilder.append(".")
+        }
+
+        if (name.isEmpty() || !name.first().isLetter()) {
+            stringBuilder.append("`$name`")
         } else {
-            if (receiver != null) {
-                receiver.stringify(stringBuilder, 0)
-                stringBuilder.append(".")
-            }
             stringBuilder.append(name)
-            if (children.isNotEmpty()) {
-                stringBuilder.append(children.joinToString(", ", "(", ")"))
+        }
+
+        if (parens || children.isNotEmpty()) {
+            stringBuilder.append('(')
+            for ((index, child) in children.withIndex()) {
+                if (index > 0) {
+                    stringBuilder.append(", ")
+                }
+                if (child.name.isNotEmpty()) {
+                    stringBuilder.append(name)
+                    stringBuilder.append(" = ")
+                }
+                child.value.stringify(stringBuilder)
             }
+            stringBuilder.append(')')
         }
     }
 
@@ -77,6 +68,29 @@ class UnresolvedSymbolExpression(
         return builder.toList()
     }
 
+    fun buildMethodCall(
+        context: ResolutionContext,
+        resolvedReceiver: Expression,
+        resolvedMember: Classifier,
+        expectedType: Type?
+    ): CallExpression {
+        require(resolvedMember is TypedCallable) {
+            "$position: Resolved member is not callable: $resolvedMember"
+        }
+
+        require(!resolvedMember.static) {
+            "$position: Receiver provided for static call"
+        }
+
+        return buildCallExpression(
+            context,
+            resolvedReceiver,
+            resolvedMember,
+            expectedType
+        )
+    }
+
+
     override fun resolve(context: ResolutionContext, expectedType: Type?): Expression {
         if (expectedType is FunctionType && expectedType.parameterTypes.isEmpty()) {
             val result = resolveImpl(context, expectedType.returnType)
@@ -88,56 +102,63 @@ class UnresolvedSymbolExpression(
 
     fun resolveImpl(context: ResolutionContext, expectedType: Type?): Expression {
         if (receiver == null) {
-            val local = context.resolveOrNull(name)
-            if (local != null) {
-                return buildCallExpression(context,null, local, expectedType)
+            val localVariable = context.resolveOrNull(name)
+            if (localVariable != null) {
+                return buildCallExpression(context,null, localVariable, expectedType)
             }
 
             val self = context.resolveOrNull("self")
-            val resolvedDynamically = if (self == null) null else
+            
+            val resolvedMember = if (self == null) null else
                 (self.type.returnType as Classifier).resolveSymbolOrNull(name)
 
-            if (resolvedDynamically is TypedCallable) {
-                return buildCallExpression(
-                    context,
-                    if (resolvedDynamically.static) null else CallExpression(position, null, self as TypedCallable, emptyList()),
-                    resolvedDynamically,
-                    expectedType)
+            if (resolvedMember is TypedCallable && !resolvedMember.static) {
+                val selfExpression = CallExpression(position, null, self as TypedCallable, emptyList())
+                return buildMethodCall(context, selfExpression, resolvedMember, expectedType)
             }
 
-            return resolveStatically(context,null, context.namespace.resolveSymbol(name) { "$position" }, expectedType)
+            return buildStaticCallOrTypeReference(
+                context,
+                context.namespace.resolveSymbol(name) { "$position" },
+                expectedType)
         }
 
         val resolvedReceiver = receiver.resolve(context, null)
-        val type = resolvedReceiver.getType().resolve(context.namespace) // TODO: resolve() should not be necessary here.
-        return when (type) {
+        val receiverType = resolvedReceiver.getType().resolve(context.namespace) // TODO: resolve() should not be necessary here.
+        return when (receiverType) {
             is MetaType -> {
-                val resolved = type.type.resolveSymbol(name) {
-                    "$position"
-                }
-                resolveStatically(context, null, resolved, expectedType)
+                val resolvedMember = receiverType.type.resolveSymbol(name) { "$position" }
+                buildStaticCallOrTypeReference(context, resolvedMember, expectedType)
             }
             is Classifier -> {
-                val resolved = type.resolveSymbol(name) { "$position" }
-                resolveStatically(context, resolvedReceiver, resolved, expectedType)
+                val resolvedMember = receiverType.resolveSymbol(name) { "$position" }
+                buildMethodCall(context, resolvedReceiver, resolvedMember, expectedType)
             }
             else -> throw IllegalStateException(
-                "$position: Type '$type' (${type::class}) of resolved receiver '$resolvedReceiver' must be classifier for resolving '$name'")
+                "$position: Type '$receiverType' (${receiverType::class}) of resolved receiver '$resolvedReceiver' must be classifier for resolving '$name'")
         }
     }
 
-    fun resolveStatically(context: ResolutionContext, resolvedReceiver: Expression?, resolvedMethod: Classifier, expectedType: Type?): Expression {
-        if (resolvedMethod is TypedCallable) {
-            return buildCallExpression(context, resolvedReceiver, resolvedMethod, expectedType)
-        }
-        if (resolvedMethod is Type) {
-            require(children.isEmpty()) {
-                "$position: Types can't have function parameters; got $children"
+    fun buildStaticCallOrTypeReference(context: ResolutionContext, resolvedMember: Classifier, expectedType: Type?): Expression =
+        when(resolvedMember) {
+            is TypedCallable -> {
+                require(resolvedMember.static) {
+                    "$position: Can't make static call to instance method '$resolvedMember'"
+                }
+                buildCallExpression(context, null, resolvedMember, expectedType)
             }
-            return LiteralExpression(position, resolvedMethod)
+            is Type -> {
+                require(children.isEmpty()) {
+                    "$position: Types can't have function parameters; got $children"
+                }
+                require(!parens) {
+                    "$position: Types shouldn't be followed by empty parens"
+                }
+                LiteralExpression(position, resolvedMember)
+            }
+            else ->
+                throw IllegalStateException("Unrecognized resolved member: '$resolvedMember'")
         }
-        throw IllegalStateException("Unrecognized resolved name: '$resolvedMethod'")
-    }
 
     fun buildCallExpression(context: ResolutionContext, resolvedReceiver: Expression?, resolvedMethod: TypedCallable, expectedType: Type?): CallExpression {
         val arrangedChildren = arrangeChildren(resolvedMethod)
