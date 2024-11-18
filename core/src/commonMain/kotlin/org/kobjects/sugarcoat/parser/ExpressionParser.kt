@@ -8,6 +8,7 @@ import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.ast.ParameterListBuilder
 import org.kobjects.sugarcoat.ast.ParameterReference
+import org.kobjects.sugarcoat.ast.ParenthesizedExpression
 import org.kobjects.sugarcoat.ast.ResolutionContext
 import org.kobjects.sugarcoat.ast.UnresolvedAsExpression
 import org.kobjects.sugarcoat.ast.UnresolvedLambdaExpression
@@ -68,7 +69,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
                 if (tokenizer.tryConsume("(")) {
                     val expr = parseExpression(tokenizer, context)
                     tokenizer.consume(")")
-                    expr
+                    ParenthesizedExpression(tokenizer.position(), expr)
                 } else if (tokenizer.tryConsume("[")) {
                     val builder = ParameterListBuilder()
                     if (tokenizer.current.text != "]") {
@@ -124,9 +125,9 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             scanner.consume(")")
         }
 
-        val optionalLambda = parseOptionalLambda(scanner, context)
-        if (optionalLambda != null) {
-            builder.add(optionalLambda)
+        val firstOptionalLambda = parseOptionalLambda(scanner, context)
+        if (firstOptionalLambda != null) {
+            builder.add(firstOptionalLambda)
         }
 
 
