@@ -13,6 +13,6 @@ enum class ResolutionPass {
     /** Collect a map of pairs of traits and structs to the corresponding implementations */
     IMPLS,
 
-    /** Resolve expressions inside functions. */
+    /** Resolve expressions inside functions and default expressions. */
     EXPRESSIONS,
 }

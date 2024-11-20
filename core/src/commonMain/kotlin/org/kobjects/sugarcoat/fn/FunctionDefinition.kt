@@ -46,7 +46,7 @@ data class FunctionDefinition(
     }
 
     override fun resolveSignatures() {
-        parameters = parameters.map { it.resolve(this) }
+        parameters = parameters.map { it.resolveType(this) }
         returnType = returnType.resolve(this)
     }
 

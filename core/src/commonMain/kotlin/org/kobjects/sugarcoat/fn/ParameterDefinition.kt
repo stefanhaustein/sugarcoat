@@ -13,7 +13,7 @@ data class ParameterDefinition(
 ) {
     override fun toString() = "$name: $type"
 
-    fun resolve(context: Classifier) = copy(type = type.resolve(context))
+    fun resolveType(context: Classifier) = copy(type = type.resolve(context))
 
     fun restType(): Type = if (repeated) ListType(type) else type
 }
