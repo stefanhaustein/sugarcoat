@@ -6,7 +6,7 @@ import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
-import org.kobjects.sugarcoat.fn.TypedCallable
+import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.model.Classifier
 
 data class NativeFunction(
@@ -16,7 +16,7 @@ data class NativeFunction(
     override val name: String,
     val args: List<ParameterDefinition>,
     val op: (NativeArgList) -> Any
-) : Classifier(parent, name), TypedCallable {
+) : Classifier(parent, name), Callable {
 
 
     override fun call(

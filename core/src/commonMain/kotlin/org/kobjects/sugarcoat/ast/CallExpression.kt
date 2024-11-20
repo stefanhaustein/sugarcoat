@@ -1,13 +1,13 @@
 package org.kobjects.sugarcoat.ast
 
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
-import org.kobjects.sugarcoat.fn.TypedCallable
+import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.parser.Position
 
 class CallExpression(
     position: Position,
     val receiver: Expression?,
-    val fn: TypedCallable,
+    val fn: Callable,
     val parameter: List<Expression?>
 ): ResolvedExpression(position) {
     override fun eval(context: LocalRuntimeContext): Any =

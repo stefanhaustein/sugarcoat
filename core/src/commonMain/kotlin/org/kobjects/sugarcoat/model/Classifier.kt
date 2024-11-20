@@ -9,7 +9,7 @@ import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
-import org.kobjects.sugarcoat.fn.TypedCallable
+import org.kobjects.sugarcoat.fn.Callable
 
 abstract class Classifier(
     open val parent: Classifier?,
@@ -87,7 +87,7 @@ abstract class Classifier(
 
     fun addControl(name: String, returnType: Type, vararg parameters: ParameterDefinition, action: (List<Expression?>, LocalRuntimeContext) -> Any) {
 
-        addChild(object : TypedCallable, Classifier(this, name, null) {
+        addChild(object : Callable, Classifier(this, name, null) {
             override val static: Boolean
                 get() = true
 

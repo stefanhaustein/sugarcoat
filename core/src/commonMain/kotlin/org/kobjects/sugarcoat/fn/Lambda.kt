@@ -6,7 +6,7 @@ class Lambda(
     override val type: FunctionType,
     val parameterNames: List<String>,
     val body: Expression
-) : TypedCallable {
+) : Callable {
 
     override val static: Boolean
         get() = true

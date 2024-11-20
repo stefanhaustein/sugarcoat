@@ -15,7 +15,7 @@ import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
-import org.kobjects.sugarcoat.fn.TypedCallable
+import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.parser.Position
 import org.kobjects.sugarcoat.type.GenericType
 import kotlin.math.sqrt
@@ -147,7 +147,7 @@ object RootContext : Classifier(null, "") {
     fun evalFor(children: List<Expression?>, parameterContext: LocalRuntimeContext): Any {
         val range = children[0]!!.eval(parameterContext) as LongRange
         for (value in range) {
-            (children[1]!!.eval(parameterContext) as TypedCallable).call(null, listOf(
+            (children[1]!!.eval(parameterContext) as Callable).call(null, listOf(
                 LiteralExpression(children[1]!!.position, value)), parameterContext)
         }
         return Unit

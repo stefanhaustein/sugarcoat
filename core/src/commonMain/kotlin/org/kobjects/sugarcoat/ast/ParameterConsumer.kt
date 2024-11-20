@@ -1,7 +1,7 @@
 package org.kobjects.sugarcoat.ast
 
 import org.kobjects.sugarcoat.fn.ParameterDefinition
-import org.kobjects.sugarcoat.fn.TypedCallable
+import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.parser.Position
 
 class ParameterConsumer(
@@ -44,7 +44,7 @@ class ParameterConsumer(
         return null
     }
 
-    fun done(target: TypedCallable) {
+    fun done(target: Callable) {
         require(consumed.size == parameterReferences.size) {
             "Only ${consumed.size} $consumed of ${parameterReferences.size} parameters consumed from $parameterReferences for $target"
         }

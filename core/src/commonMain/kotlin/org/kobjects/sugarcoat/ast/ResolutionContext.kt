@@ -4,7 +4,7 @@ import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
-import org.kobjects.sugarcoat.fn.TypedCallable
+import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.type.Type
 
@@ -22,7 +22,7 @@ class ResolutionContext(
         locals[name] = Variable(name, type, mutable)
     }
 
-    fun resolveOrNull(name: String): TypedCallable? {
+    fun resolveOrNull(name: String): Callable? {
         val variable = locals[name]
         if (variable != null) {
             return LocalGetter(variable)
@@ -42,7 +42,7 @@ class ResolutionContext(
         val mutable: Boolean = false
     )
 
-    data class LocalGetter(val variable: Variable) : TypedCallable {
+    data class LocalGetter(val variable: Variable) : Callable {
         override val type: FunctionType
             get() = FunctionType(variable.type)
 
@@ -59,7 +59,7 @@ class ResolutionContext(
         }
     }
 
-    data class LocalSetter(val variable: Variable) : TypedCallable {
+    data class LocalSetter(val variable: Variable) : Callable {
         override val type: FunctionType
             get() = FunctionType(VoidType, ParameterDefinition("value", variable.type))
 

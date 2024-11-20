@@ -12,7 +12,7 @@ class DelegateToImpl(
     name: String,
     var parameters: List<ParameterDefinition>,
     var returnType: Type,
-) : Classifier(parent, name, fallback), TypedCallable {
+) : Classifier(parent, name, fallback), Callable {
     override fun serialize(sb: StringBuilder) {
         sb.append(name)
         sb.append("(<TBD>)")

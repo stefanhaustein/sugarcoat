@@ -5,7 +5,7 @@ import org.kobjects.sugarcoat.fn.Lambda
 import org.kobjects.sugarcoat.type.MetaType
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
-import org.kobjects.sugarcoat.fn.TypedCallable
+import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.parser.Position
 import org.kobjects.sugarcoat.type.GenericTypeResolverState
@@ -57,7 +57,7 @@ class UnresolvedSymbolExpression(
 
     override fun getType() = throw UnsupportedOperationException()
 
-    fun arrangeChildren(callable: TypedCallable): List<Expression?> {
+    fun arrangeChildren(callable: Callable): List<Expression?> {
         val parameterConsumer = ParameterConsumer(position.copy(description = "$callable"), children)
         val builder = mutableListOf<Expression?>()
         for (param in callable.type.parameterTypes) {
@@ -74,7 +74,7 @@ class UnresolvedSymbolExpression(
         resolvedMember: Classifier,
         expectedType: Type?
     ): CallExpression {
-        require(resolvedMember is TypedCallable) {
+        require(resolvedMember is Callable) {
             "$position: Resolved member is not callable: $resolvedMember"
         }
 
@@ -112,8 +112,8 @@ class UnresolvedSymbolExpression(
             val resolvedMember = if (self == null) null else
                 (self.type.returnType as Classifier).resolveSymbolOrNull(name)
 
-            if (resolvedMember is TypedCallable && !resolvedMember.static) {
-                val selfExpression = CallExpression(position, null, self as TypedCallable, emptyList())
+            if (resolvedMember is Callable && !resolvedMember.static) {
+                val selfExpression = CallExpression(position, null, self as Callable, emptyList())
                 return buildMethodCall(context, selfExpression, resolvedMember, expectedType)
             }
 
@@ -141,7 +141,7 @@ class UnresolvedSymbolExpression(
 
     fun buildStaticCallOrTypeReference(context: ResolutionContext, resolvedMember: Classifier, expectedType: Type?): Expression =
         when(resolvedMember) {
-            is TypedCallable -> {
+            is Callable -> {
                 require(resolvedMember.static) {
                     "$position: Can't make static call to instance method '$resolvedMember'"
                 }
@@ -160,7 +160,7 @@ class UnresolvedSymbolExpression(
                 throw IllegalStateException("Unrecognized resolved member: '$resolvedMember'")
         }
 
-    fun buildCallExpression(context: ResolutionContext, resolvedReceiver: Expression?, resolvedMethod: TypedCallable, expectedType: Type?): CallExpression {
+    fun buildCallExpression(context: ResolutionContext, resolvedReceiver: Expression?, resolvedMethod: Callable, expectedType: Type?): CallExpression {
         val arrangedChildren = arrangeChildren(resolvedMethod)
         val resolvedChildren = mutableListOf<Expression?>()
 

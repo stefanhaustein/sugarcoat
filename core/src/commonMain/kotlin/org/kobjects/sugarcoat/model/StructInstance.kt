@@ -1,7 +1,5 @@
 package org.kobjects.sugarcoat.model
 
-import org.kobjects.sugarcoat.fn.Callable
-import org.kobjects.sugarcoat.ast.ParameterReference
 
 class StructInstance(
     override val type: StructDefinition

@@ -6,7 +6,7 @@ import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
-import org.kobjects.sugarcoat.fn.TypedCallable
+import org.kobjects.sugarcoat.fn.Callable
 
 class StructDefinition(
     parent: Classifier,
@@ -55,7 +55,7 @@ class StructDefinition(
     override fun toString() = "struct $name"
 
 
-    class StructConstructor(override val parent: StructDefinition, override val name: String) : TypedCallable, Classifier(parent, name) {
+    class StructConstructor(override val parent: StructDefinition, override val name: String) : Callable, Classifier(parent, name) {
         override val static: Boolean
             get() = true
 
