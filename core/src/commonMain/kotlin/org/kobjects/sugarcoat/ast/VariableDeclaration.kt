@@ -29,11 +29,12 @@ data class VariableDeclaration(
         context: ResolutionContext,
         expectedType: Type?
     ): VariableDeclaration {
-        require(expectedType == null || expectedType.assignableFrom(VoidType)) {
+        val resolvedType = expectedType?.resolve(context.namespace)
+        require(resolvedType == null || resolvedType.assignableFrom(VoidType)) {
             "Expected return type must be void for assignments."
         }
-        val resolvedValue = initialValue.resolve(context, explicitType)
+        val resolvedValue = initialValue.resolve(context, resolvedType)
         context.addLocal(name, resolvedValue.getType(), mutable)
-        return copy(initialValue = resolvedValue)
+        return copy(initialValue = resolvedValue, explicitType = resolvedType)
     }
 }

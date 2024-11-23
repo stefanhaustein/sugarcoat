@@ -18,5 +18,5 @@ class UnresolvedTypeReference(
         return classifier.resolveGenericParameters(parameters)
     }
 
-    override fun toString() = name
+    override fun toString() = "Unresolved:$name"
 }

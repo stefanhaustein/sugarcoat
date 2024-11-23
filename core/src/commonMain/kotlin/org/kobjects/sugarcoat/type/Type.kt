@@ -37,8 +37,7 @@ interface Type {
                 is String -> StringType
                 is Typed -> value.type
                 is Unit -> VoidType
-                is StructDefinition -> MetaType(value)
-                is TraitDefinition -> MetaType(value)
+                is Classifier -> MetaType(value)
                 else -> throw IllegalArgumentException("Type of value '$value' not supported.")
             }
 

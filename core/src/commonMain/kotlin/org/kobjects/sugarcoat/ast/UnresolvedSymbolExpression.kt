@@ -149,10 +149,10 @@ class UnresolvedSymbolExpression(
             }
             is Type -> {
                 require(children.isEmpty()) {
-                    "$position: Types can't have function parameters; got $children"
+                    "$position: Type '$resolvedMember' can't have function parameters; got $children"
                 }
                 require(!parens) {
-                    "$position: Types shouldn't be followed by empty parens"
+                    "$position: Type '$resolvedMember' shouldn't be followed by empty parens"
                 }
                 LiteralExpression(position, resolvedMember)
             }

@@ -1,6 +1,7 @@
 package org.kobjects.sugarcoat.model
 
 import org.kobjects.sugarcoat.ast.Expression
+import org.kobjects.sugarcoat.ast.ResolutionContext
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.FunctionType
@@ -82,12 +83,14 @@ class StructDefinition(
             return instance
         }
 
-        override val type: FunctionType
-
-        get() = FunctionType(
+        override var type: FunctionType = FunctionType(
             parent,
-            parent.instanceFields.values.map { ParameterDefinition(it.name, it.type, false) }
+            parent.instanceFields.values.map  { ParameterDefinition(it.name, it.type, false, it.unresolvedDefaultExpression) }
         )
+
+        override fun resolveExpressions() {
+            type = type.resolveDefaultExpressions(ResolutionContext(parent))
+        }
 
     }
 }

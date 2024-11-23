@@ -121,7 +121,7 @@ abstract class Classifier(
     open fun resolveStaticFields() {
         val resolutionContext = ResolutionContext(this)
         for (field in staticFields.values) {
-            field.initializer = field.initializer.resolve(resolutionContext, field.explicitType)
+            field.initializer = field.initializer.resolve(resolutionContext, field.explicitType?.resolve(this))
             addControl(field.name, field.getType()) { param, localContext ->
                 localContext.globalRuntimeContext.symbols[field]!!
             }

@@ -2,6 +2,7 @@ package org.kobjects.sugarcoat.fn
 
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.ResolutionContext
+import org.kobjects.sugarcoat.ast.ResolvedExpression
 import org.kobjects.sugarcoat.ast.UnresolvedFunctionBody
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.model.Classifier
@@ -13,8 +14,7 @@ data class FunctionDefinition(
     override val fallback: Classifier,
     override val static: Boolean,
     override val name: String,
-    var parameters: List<ParameterDefinition>,
-    var returnType: Type,
+    override var type: FunctionType,
 ) : Callable, Classifier(parent, name, fallback) {
 
     var body: Expression = UnresolvedFunctionBody(this)
@@ -29,25 +29,21 @@ data class FunctionDefinition(
         }
 
         val localContext = LocalRuntimeContext(parameterScope.globalRuntimeContext, receiver)
-        for ((i, p) in parameters.withIndex()) {
+        for ((i, p) in type.parameterTypes.withIndex()) {
             localContext.symbols[p.name] = children[i]!!.eval(localContext)
         }
 
         return body.eval(localContext)
     }
 
-    override val type: FunctionType
-        get() = FunctionType(returnType, parameters)
-
     override fun serialize(sb: StringBuilder) {
-        sb.append("fn $name(${parameters.joinToString (", ")})\n  ")
+        sb.append("fn $name(${type.parameterTypes.joinToString (", ")})\n  ")
         body.stringify(sb)
         sb.append("\n")
     }
 
     override fun resolveSignatures() {
-        parameters = parameters.map { it.resolveType(this) }
-        returnType = returnType.resolve(this)
+        type = type.resolve(parent)
     }
 
     private fun createResolutionContext(): ResolutionContext {
@@ -55,7 +51,7 @@ data class FunctionDefinition(
         if (!static) {
             resolutionContext.addLocal("self", parent.selfType(), false)
         }
-        for (parameter in parameters) {
+        for (parameter in type.parameterTypes) {
             resolutionContext.addLocal(parameter.name, parameter.type, false)
         }
         return resolutionContext
@@ -63,7 +59,9 @@ data class FunctionDefinition(
 
 
     override fun resolveExpressions() {
-        body = body.resolve(createResolutionContext(), null)
+        type = type.resolveDefaultExpressions(ResolutionContext(parent))
+        // TODO: Hand in function return type to type resolution.
+        body = body.resolve(createResolutionContext(), null /*type.returnType*/)
     }
 
     override fun toString() =

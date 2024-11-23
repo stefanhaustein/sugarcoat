@@ -18,6 +18,7 @@ import org.kobjects.sugarcoat.type.UnresolvedTypeReference
 import org.kobjects.sugarcoat.ast.VariableDeclaration
 import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.DelegateToImpl
+import org.kobjects.sugarcoat.fn.FunctionType
 
 object SugarcoatParser {
 
@@ -89,8 +90,7 @@ object SugarcoatParser {
                 parentContext.namespace,
                 static,
                 name,
-                parameters,
-                returnType
+                FunctionType(returnType, parameters),
             )
             fd.body = parseBlock(scanner, parentContext.copy(namespace = fd))
             fd

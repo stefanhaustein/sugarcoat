@@ -14,9 +14,12 @@ import org.kobjects.sugarcoat.ast.UnresolvedAsExpression
 import org.kobjects.sugarcoat.ast.UnresolvedLambdaExpression
 import org.kobjects.sugarcoat.model.Program
 import org.kobjects.sugarcoat.ast.UnresolvedSymbolExpression
+import org.kobjects.sugarcoat.datatype.ListType
 import org.kobjects.sugarcoat.model.GlobalRuntimeContext
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.parser.SugarcoatParser.parseType
+import org.kobjects.sugarcoat.type.GenericType
+import org.kobjects.sugarcoat.type.MetaType
 import org.kobjects.sugarcoat.type.Type
 import kotlin.coroutines.suspendCoroutine
 
@@ -78,7 +81,12 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
                         } while (tokenizer.tryConsume(","))
                     }
                     tokenizer.consume("]") { "',' or ']' expected" }
-                    UnresolvedSymbolExpression(tokenizer.position(), null, "listOf", true, builder.build())
+                    UnresolvedSymbolExpression(
+                        tokenizer.position(),
+                        LiteralExpression(tokenizer.position(), ListType(GenericType("E"))),
+                        "create",
+                        true,
+                        builder.build())
                 } else {
                     throw tokenizer.exception("'(' or '[' expected.")
                 }

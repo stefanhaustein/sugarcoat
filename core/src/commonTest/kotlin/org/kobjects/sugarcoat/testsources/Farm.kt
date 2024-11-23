@@ -8,7 +8,7 @@ struct Sheep
   name: String
   
 impl Animal for Sheep
-  fn sound()
+  fn sound() -> String
      "maeh"
      
 fn main() 
