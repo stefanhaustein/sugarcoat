@@ -110,8 +110,7 @@ abstract class Classifier(
 
         })
     }
-
-
+    
     open fun resolveSignatures() {}
 
     open fun resolveImpls(program: Program) {}
@@ -121,15 +120,17 @@ abstract class Classifier(
     open fun resolveStaticFields() {
         val resolutionContext = ResolutionContext(this)
         for (field in staticFields.values) {
-            field.initializer = field.initializer.resolve(resolutionContext, field.explicitType?.resolve(this))
-            addControl(field.name, field.getType()) { param, localContext ->
+            val resolvedExplicitType = field.explicitType?.resolve(this)
+            field.initializer = field.initializer.resolve(resolutionContext, resolvedExplicitType)
+            val resolvedType = resolvedExplicitType ?: field.initializer.getType()
+            addControl(field.name, resolvedType) { param, localContext ->
                 localContext.globalRuntimeContext.symbols[field]!!
             }
             if (field.mutable) {
                 addControl(
                     field.name,
                     VoidType,
-                    ParameterDefinition("value", field.getType())
+                    ParameterDefinition("value", resolvedType)
                 ) { params, localRuntimeContext ->
                     localRuntimeContext.globalRuntimeContext.symbols[field] = params[0]!!.eval(localRuntimeContext)
                     Unit

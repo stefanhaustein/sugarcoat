@@ -9,7 +9,5 @@ data class StaticFieldDefinition(
     val name: String,
     val explicitType: Type?,
     var initializer: Expression
-) {
-    fun getType(): Type = explicitType ?: initializer.getType()
-}
+)
 
