@@ -2,7 +2,20 @@ package org.kobjects.sugarcoat.type
 
 data class GenericType(val name: String) : Type {
 
-    override fun matches(other: Type) = true
+    override fun matchImpl(
+        other: Type,
+        genericTypeResolver: GenericTypeResolver,
+        lazyMessage: () -> String
+    ): Type {
+        val resolved = genericTypeResolver.resolveTopLevel(this)
+        return when (resolved) {
+            is GenericType -> {
+                genericTypeResolver.map[this] = other
+                other
+            }
+            else -> resolved.match(other, genericTypeResolver, lazyMessage)
+        }
+    }
 
     override fun resolveGenerics(state: GenericTypeResolver, expected: Type?): Type? {
         val resolved = state.map[this]

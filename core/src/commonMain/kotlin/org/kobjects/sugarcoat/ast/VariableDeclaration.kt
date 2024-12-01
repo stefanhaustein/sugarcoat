@@ -32,8 +32,8 @@ data class VariableDeclaration(
         expectedType: Type?
     ): VariableDeclaration {
         val resolvedType = expectedType?.resolveType(context.namespace)
-        require(resolvedType == null || resolvedType.matches(VoidType)) {
-            "Expected return type must be void for assignments."
+        resolvedType?.match(VoidType, genericTypeResolver) {
+            "$position: Expected return type must be void for assignments."
         }
         val resolvedValue = initialValue.resolve(context, genericTypeResolver, resolvedType)
         context.addLocal(name, resolvedValue.getType(), mutable)

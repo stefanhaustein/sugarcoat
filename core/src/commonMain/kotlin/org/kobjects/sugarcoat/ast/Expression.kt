@@ -17,6 +17,7 @@ abstract class Expression(open val position: Position) {
         stringBuilder.append(this)
     }
 
+    /** Note that genericTypeResolve is not rolled into context, as it has a different (shorter) scope */
     abstract fun resolve(
         context: ResolutionContext,
         genericTypeResolver: GenericTypeResolver,

@@ -50,6 +50,8 @@ class ResolutionContext(
         expectedType: Type
     ): Expression {
         val position = expression.position
+        val expectedType = genericTypeResolver.resolveTopLevel(expectedType)
+
         val result: Expression = if (expectedType is FunctionType && actualType !is FunctionType) {
             require(expectedType.parameterTypes.isEmpty()) {
                 "$position: Cannot imply lambda for function type with parameters: $expectedType"
@@ -60,8 +62,11 @@ class ResolutionContext(
             ).resolve(this, genericTypeResolver, expectedType)
         } else expression
 
-        require(expectedType.matches(result.getType())) {
-            "$position: Expected type $expectedType is not assignable from Literal expression type ${result.getType()} of expression $result"
+        expectedType.match(
+            result.getType(),
+            genericTypeResolver
+        ) {
+            "$position: Expected type $expectedType is not assignable from expression type ${result.getType()} of expression $result"
         }
 
         return result

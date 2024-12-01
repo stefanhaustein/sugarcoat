@@ -7,8 +7,12 @@ import org.kobjects.sugarcoat.type.GenericTypeResolver
 
 data class PairType(val firstType: Type, val secondType: Type) : Type {
 
-    override fun matches(other: Type) =
-        other is GenericType || (other is PairType && firstType.matches(other.firstType) && secondType.matches(other.secondType))
+    override fun matchImpl(other: Type, genericTypeResolver: GenericTypeResolver, lazyMessage: () -> String): PairType {
+        require(other is PairType, lazyMessage)
+        return PairType(
+            firstType.match(other.firstType, genericTypeResolver, lazyMessage),
+            secondType.match(other.secondType, genericTypeResolver, lazyMessage))
+    }
 
     override fun resolveType(context: Classifier): Type {
         return PairType(firstType.resolveType(context), secondType.resolveType(context))

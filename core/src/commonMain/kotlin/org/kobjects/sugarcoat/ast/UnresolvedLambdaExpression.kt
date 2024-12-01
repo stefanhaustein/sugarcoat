@@ -37,7 +37,7 @@ class UnresolvedLambdaExpression(
         for ((i, expectedParameter) in expectedType.parameterTypes.withIndex()) {
             val lambdaParameter = parameters[i]
             val lambdaParameterType = lambdaParameter.second?.resolveType(context.namespace)
-            require(lambdaParameterType?.matches(expectedParameter.type) ?: true) {
+            lambdaParameterType?.match(expectedParameter.type, genericTypeResolver) {
                 "Lambda parameter $lambdaParameter is not assignable from $expectedParameter"
             }
             innerContext.addLocal(lambdaParameter.first, lambdaParameterType ?: expectedParameter.type, false)

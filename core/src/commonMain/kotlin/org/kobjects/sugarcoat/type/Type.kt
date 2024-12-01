@@ -7,6 +7,7 @@ import org.kobjects.sugarcoat.datatype.I64Type
 import org.kobjects.sugarcoat.datatype.StringType
 import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.model.Classifier
+import org.kobjects.sugarcoat.parser.Position
 
 /**
  * Note that there are types that are not classifiers such as MetaType and function types.
@@ -15,7 +16,26 @@ interface Type {
 
     fun resolveType(context: Classifier): Type = this
 
-    fun matches(other: Type) = this == other || other is GenericType
+    // Override matchImpl instead.
+    fun match(
+        other: Type?,
+        genericTypeResolver: GenericTypeResolver,
+        lazyMessage: () -> String
+    ): Type = when(other) {
+        null -> this
+        is GenericType -> genericTypeResolver.match(this, other, lazyMessage)
+        else -> matchImpl(other, genericTypeResolver, lazyMessage)
+    }
+
+    fun matchImpl(
+        other: Type,
+        genericTypeResolver: GenericTypeResolver,
+        lazyMessage: () -> String
+    ): Type {
+        require(other == this, lazyMessage)
+        return this
+    }
+
 
     fun resolveGenerics(state: GenericTypeResolver, expected: Type? = null): Type? {
         /*require (other == null || other == this) {

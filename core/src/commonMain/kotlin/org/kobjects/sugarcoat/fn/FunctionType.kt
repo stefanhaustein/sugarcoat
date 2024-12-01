@@ -18,7 +18,7 @@ data class FunctionType(
         return FunctionType(resolvedReturnType, resolvedParameterTypes)
     }
 
-   fun resolveDefaultExpressions(resolutionContext: ResolutionContext): FunctionType {
+    fun resolveDefaultExpressions(resolutionContext: ResolutionContext): FunctionType {
         val resolvedParameters = List(parameterTypes.size) { parameterTypes[it].resolveDefaultExpression(resolutionContext) }
         return FunctionType(returnType, resolvedParameters)
     }
@@ -50,25 +50,17 @@ data class FunctionType(
         return FunctionType(returnType, builder.toList())
     }
 
-    override fun matches(other: Type): Boolean {
-        if (other is GenericType) {
-            return true
-        }
-        if (other !is FunctionType)  {
-            return false
-        }
-        if (parameterTypes.size != other.parameterTypes.size) {
-            return false
-        }
-        if (!returnType.matches(other.returnType)) {
-            return false
-        }
-        for ((index, parameter) in parameterTypes.withIndex()) {
-            if (!parameter.type.matches(other.parameterTypes[index].type)) {
-                return false
+    override fun matchImpl(other: Type, genericTypeResolver: GenericTypeResolver, lazyMessage: () -> String): Type {
+        require(other is FunctionType && parameterTypes.size == other.parameterTypes.size, lazyMessage)
+
+        return FunctionType(
+            returnType.match(other.returnType, genericTypeResolver, lazyMessage),
+            parameterTypes.mapIndexed { index, param ->
+                val otherParam = other.parameterTypes[index]
+                require (param.repeated == otherParam.repeated, lazyMessage)
+                param.copy(type = param.type.match(otherParam.type, genericTypeResolver, lazyMessage))
             }
-        }
-        return true
+        )
     }
 
 }
