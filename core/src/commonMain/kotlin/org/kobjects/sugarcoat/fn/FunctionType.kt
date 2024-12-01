@@ -3,7 +3,7 @@ package org.kobjects.sugarcoat.fn
 import org.kobjects.sugarcoat.ast.ResolutionContext
 import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.type.GenericType
-import org.kobjects.sugarcoat.type.GenericTypeResolverState
+import org.kobjects.sugarcoat.type.GenericTypeResolver
 import org.kobjects.sugarcoat.type.Type
 
 data class FunctionType(
@@ -12,8 +12,8 @@ data class FunctionType(
 ) : Type {
     constructor(returnType: Type, vararg parameterTypes: ParameterDefinition) : this(returnType, parameterTypes.asList())
 
-    override fun resolve(context: Classifier): FunctionType {
-        val resolvedReturnType = returnType.resolve(context)
+    override fun resolveType(context: Classifier): FunctionType {
+        val resolvedReturnType = returnType.resolveType(context)
         val resolvedParameterTypes = List(parameterTypes.size) { parameterTypes[it].resolveType(context) }
         return FunctionType(resolvedReturnType, resolvedParameterTypes)
     }
@@ -23,7 +23,7 @@ data class FunctionType(
         return FunctionType(returnType, resolvedParameters)
     }
 
-    override fun resolveGenerics(state: GenericTypeResolverState, expected: Type?): Type? {
+    override fun resolveGenerics(state: GenericTypeResolver, expected: Type?): Type? {
         if (expected != null && expected !is FunctionType) {
             if (parameterTypes.isEmpty()) {
                 val resolvedType = returnType.resolveGenerics(state, expected)
@@ -50,18 +50,21 @@ data class FunctionType(
         return FunctionType(returnType, builder.toList())
     }
 
-    override fun assignableFrom(other: Type): Boolean {
+    override fun matches(other: Type): Boolean {
+        if (other is GenericType) {
+            return true
+        }
         if (other !is FunctionType)  {
             return false
         }
         if (parameterTypes.size != other.parameterTypes.size) {
             return false
         }
-        if (!returnType.assignableFrom(other.returnType)) {
+        if (!returnType.matches(other.returnType)) {
             return false
         }
         for ((index, parameter) in parameterTypes.withIndex()) {
-            if (!parameter.type.assignableFrom(other.parameterTypes[index].type)) {
+            if (!parameter.type.matches(other.parameterTypes[index].type)) {
                 return false
             }
         }

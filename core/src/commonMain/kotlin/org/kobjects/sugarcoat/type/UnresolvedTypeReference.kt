@@ -10,10 +10,10 @@ class UnresolvedTypeReference(
     val genericParameters: List<Type>
 ) : Type {
 
-    override fun resolve(context: Classifier): Type {
+    override fun resolveType(context: Classifier): Type {
         val classifier = context.resolveSymbol(name)
 
-        val parameters = genericParameters.map { it.resolve(context) }
+        val parameters = genericParameters.map { it.resolveType(context) }
 
         return classifier.resolveGenericParameters(parameters)
     }

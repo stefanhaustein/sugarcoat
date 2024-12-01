@@ -2,17 +2,19 @@ package org.kobjects.sugarcoat.datatype
 
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.model.Classifier
-import org.kobjects.sugarcoat.type.GenericTypeResolverState
-import kotlin.math.exp
+import org.kobjects.sugarcoat.type.GenericType
+import org.kobjects.sugarcoat.type.GenericTypeResolver
 
 data class PairType(val firstType: Type, val secondType: Type) : Type {
 
+    override fun matches(other: Type) =
+        other is GenericType || (other is PairType && firstType.matches(other.firstType) && secondType.matches(other.secondType))
 
-    override fun resolve(context: Classifier): Type {
-        return PairType(firstType.resolve(context), secondType.resolve(context))
+    override fun resolveType(context: Classifier): Type {
+        return PairType(firstType.resolveType(context), secondType.resolveType(context))
     }
 
-    override fun resolveGenerics(state: GenericTypeResolverState, expected: Type?): Type? {
+    override fun resolveGenerics(state: GenericTypeResolver, expected: Type?): Type? {
         if (this == expected) {
             return this
         }

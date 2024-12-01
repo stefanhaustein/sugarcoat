@@ -2,11 +2,10 @@ package org.kobjects.sugarcoat.fn
 
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.ResolutionContext
-import org.kobjects.sugarcoat.ast.ResolvedExpression
 import org.kobjects.sugarcoat.ast.UnresolvedFunctionBody
-import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.parser.Position
+import org.kobjects.sugarcoat.type.GenericTypeResolver
 
 data class FunctionDefinition(
     val position: Position,
@@ -43,7 +42,7 @@ data class FunctionDefinition(
     }
 
     override fun resolveSignatures() {
-        type = type.resolve(parent)
+        type = type.resolveType(parent)
     }
 
     private fun createResolutionContext(): ResolutionContext {
@@ -61,7 +60,7 @@ data class FunctionDefinition(
     override fun resolveExpressions() {
         type = type.resolveDefaultExpressions(ResolutionContext(parent))
         // TODO: Hand in function return type to type resolution.
-        body = body.resolve(createResolutionContext(), null /*type.returnType*/)
+        body = body.resolve(createResolutionContext(), GenericTypeResolver(), null/*type.returnType*/)
     }
 
     override fun toString() =

@@ -5,6 +5,7 @@ import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.datatype.ListType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.parser.Position
+import org.kobjects.sugarcoat.type.GenericTypeResolver
 
 class ListExpression(position: Position, val elements: List<Expression>) : Expression(position) {
 
@@ -13,8 +14,9 @@ class ListExpression(position: Position, val elements: List<Expression>) : Expre
 
     override fun resolve(
         context: ResolutionContext,
+        genericTypeResolver: GenericTypeResolver,
         expectedType: Type?
-    ) = ListExpression(position, elements.map{ it.resolve(context, null) } )
+    ) = ListExpression(position, elements.map{ it.resolve(context, genericTypeResolver, null) } )
 
     override fun getType() = ListType(elements.firstOrNull()?.getType() ?: AnyType)
 }

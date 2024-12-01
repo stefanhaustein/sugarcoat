@@ -7,19 +7,17 @@ import org.kobjects.sugarcoat.datatype.I64Type
 import org.kobjects.sugarcoat.datatype.StringType
 import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.model.Classifier
-import org.kobjects.sugarcoat.model.StructDefinition
-import org.kobjects.sugarcoat.model.TraitDefinition
 
 /**
  * Note that there are types that are not classifiers such as MetaType and function types.
  */
 interface Type {
 
-    fun resolve(context: Classifier): Type = this
+    fun resolveType(context: Classifier): Type = this
 
-    fun assignableFrom(other: Type) = this == other
+    fun matches(other: Type) = this == other || other is GenericType
 
-    fun resolveGenerics(state: GenericTypeResolverState, expected: Type? = null): Type? {
+    fun resolveGenerics(state: GenericTypeResolver, expected: Type? = null): Type? {
         /*require (other == null || other == this) {
              "${state.errorPrefix()}: Can't resolve type '$this' to '$other'"
         }*/

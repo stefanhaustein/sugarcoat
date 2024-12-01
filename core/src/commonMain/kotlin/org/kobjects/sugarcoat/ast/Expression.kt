@@ -1,10 +1,9 @@
 package org.kobjects.sugarcoat.ast
 
-import org.kobjects.parsek.tokenizer.Token
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.parser.Position
-import org.kobjects.sugarcoat.parser.TokenType
+import org.kobjects.sugarcoat.type.GenericTypeResolver
 
 abstract class Expression(open val position: Position) {
 
@@ -18,7 +17,16 @@ abstract class Expression(open val position: Position) {
         stringBuilder.append(this)
     }
 
-    abstract fun resolve(context: ResolutionContext, expectedType: Type?): Expression
+    abstract fun resolve(
+        context: ResolutionContext,
+        genericTypeResolver: GenericTypeResolver,
+        expectedType: Type?
+    ): Expression
 
     abstract fun getType(): Type
+
+
+
+
+
 }

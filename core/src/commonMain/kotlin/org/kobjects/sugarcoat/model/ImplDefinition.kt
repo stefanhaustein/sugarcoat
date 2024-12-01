@@ -11,8 +11,8 @@ class ImplDefinition(
 //    override fun resolve() = trait.resolve()
 
     override fun resolveSignatures() {
-        trait = trait.resolve(this)
-        wrapped = wrapped.resolve(this)
+        trait = trait.resolveType(this)
+        wrapped = wrapped.resolveType(this)
     }
 
     override fun resolveImpls(program: Program) {

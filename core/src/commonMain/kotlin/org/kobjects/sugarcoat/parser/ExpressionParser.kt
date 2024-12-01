@@ -2,8 +2,6 @@ package org.kobjects.sugarcoat.parser
 
 import org.kobjects.parsek.expressionparser.ConfigurableExpressionParser
 import org.kobjects.parsek.tokenizer.Scanner
-import org.kobjects.sugarcoat.fn.FunctionDefinition
-import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.ast.ParameterListBuilder
@@ -19,9 +17,8 @@ import org.kobjects.sugarcoat.model.GlobalRuntimeContext
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.parser.SugarcoatParser.parseType
 import org.kobjects.sugarcoat.type.GenericType
-import org.kobjects.sugarcoat.type.MetaType
+import org.kobjects.sugarcoat.type.GenericTypeResolver
 import org.kobjects.sugarcoat.type.Type
-import kotlin.coroutines.suspendCoroutine
 
 
 fun Scanner<TokenType>.position() = Position(current.line, current.col)
@@ -211,7 +208,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             scanner, ParsingContext(Program())
         )
         val program = Program()
-        return parsed.resolve(ResolutionContext(program), null)
+        return parsed.resolve(ResolutionContext(program), GenericTypeResolver(), null)
             .eval(LocalRuntimeContext(GlobalRuntimeContext(program), /*program,*/ null))
     }
 }

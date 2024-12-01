@@ -3,9 +3,9 @@ package org.kobjects.sugarcoat.ast
 import org.kobjects.sugarcoat.type.MetaType
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
-import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.model.TraitDefinition
 import org.kobjects.sugarcoat.parser.Position
+import org.kobjects.sugarcoat.type.GenericTypeResolver
 
 class UnresolvedAsExpression(
     position: Position,
@@ -17,9 +17,13 @@ class UnresolvedAsExpression(
 
     override fun getType() = throw UnsupportedOperationException("Unresolved.")
 
-    override fun resolve(context: ResolutionContext, expectedType: Type?): Expression {
-        val resolvedTarget = target.resolve(context, null)
-        val resolvedSource = source.resolve(context, null)
+    override fun resolve(
+        context: ResolutionContext,
+        genericTypeResolver: GenericTypeResolver,
+        expectedType: Type?
+    ): Expression {
+        val resolvedTarget = target.resolve(context, genericTypeResolver, null)
+        val resolvedSource = source.resolve(context, genericTypeResolver, null)
 
         val type = resolvedTarget.getType()
         require (type is MetaType && type.type is TraitDefinition) {

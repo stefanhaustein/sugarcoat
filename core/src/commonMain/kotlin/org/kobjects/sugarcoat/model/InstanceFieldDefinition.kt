@@ -9,7 +9,7 @@ data class InstanceFieldDefinition(
     val unresolvedDefaultExpression: Expression?
 ) {
     fun resolveType(context: Classifier) {
-        type = type.resolve(context)
+        type = type.resolveType(context)
     }
 }
 

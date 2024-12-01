@@ -10,6 +10,7 @@ import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.fn.Callable
+import org.kobjects.sugarcoat.type.GenericTypeResolver
 
 abstract class Classifier(
     open val parent: Classifier?,
@@ -120,8 +121,8 @@ abstract class Classifier(
     open fun resolveStaticFields() {
         val resolutionContext = ResolutionContext(this)
         for (field in staticFields.values) {
-            val resolvedExplicitType = field.explicitType?.resolve(this)
-            field.initializer = field.initializer.resolve(resolutionContext, resolvedExplicitType)
+            val resolvedExplicitType = field.explicitType?.resolveType(this)
+            field.initializer = field.initializer.resolve(resolutionContext, GenericTypeResolver(), resolvedExplicitType)
             val resolvedType = resolvedExplicitType ?: field.initializer.getType()
             addControl(field.name, resolvedType) { param, localContext ->
                 localContext.globalRuntimeContext.symbols[field]!!

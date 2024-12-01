@@ -2,9 +2,9 @@ package org.kobjects.sugarcoat.type
 
 data class GenericType(val name: String) : Type {
 
-    override fun assignableFrom(other: Type) = true
+    override fun matches(other: Type) = true
 
-    override fun resolveGenerics(state: GenericTypeResolverState, expected: Type?): Type? {
+    override fun resolveGenerics(state: GenericTypeResolver, expected: Type?): Type? {
         val resolved = state.map[this]
 
         // HACK... In "resolveGenerics", check if the expected.isGeneric(); if so, ignore it and hand to "impl" call

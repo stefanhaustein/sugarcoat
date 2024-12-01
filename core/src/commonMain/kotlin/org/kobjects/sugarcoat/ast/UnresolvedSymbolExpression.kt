@@ -8,7 +8,7 @@ import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.parser.Position
-import org.kobjects.sugarcoat.type.GenericTypeResolverState
+import org.kobjects.sugarcoat.type.GenericTypeResolver
 
 
 class UnresolvedSymbolExpression(
@@ -91,16 +91,20 @@ class UnresolvedSymbolExpression(
     }
 
 
-    override fun resolve(context: ResolutionContext, expectedType: Type?): Expression {
+    override fun resolve(
+        context: ResolutionContext,
+        genericTypeResolver: GenericTypeResolver,
+        expectedType: Type?
+    ): Expression {
         if (expectedType is FunctionType && expectedType.parameterTypes.isEmpty()) {
-            val result = resolveImpl(context, expectedType.returnType)
+            val result = resolveImpl(context, genericTypeResolver, expectedType.returnType)
             return LiteralExpression(position, Lambda(FunctionType(result.getType(), emptyList()), emptyList(), result))
         }
-        return resolveImpl(context, expectedType)
+        return resolveImpl(context, genericTypeResolver, expectedType)
     }
 
 
-    fun resolveImpl(context: ResolutionContext, expectedType: Type?): Expression {
+    fun resolveImpl(context: ResolutionContext, genericTypeResolver: GenericTypeResolver, expectedType: Type?): Expression {
         if (receiver == null) {
             val localVariable = context.resolveOrNull(name)
             if (localVariable != null) {
@@ -123,8 +127,8 @@ class UnresolvedSymbolExpression(
                 expectedType)
         }
 
-        val resolvedReceiver = receiver.resolve(context, null)
-        val receiverType = resolvedReceiver.getType().resolve(context.namespace) // TODO: resolve() should not be necessary here.
+        val resolvedReceiver = receiver.resolve(context, genericTypeResolver, null)
+        val receiverType = resolvedReceiver.getType().resolveType(context.namespace) // TODO: resolve() should not be necessary here.
         return when (receiverType) {
             is MetaType -> {
                 val resolvedMember = receiverType.type.resolveSymbol(name) { "$position" }
@@ -160,30 +164,35 @@ class UnresolvedSymbolExpression(
                 throw IllegalStateException("Unrecognized resolved member: '$resolvedMember'")
         }
 
-    fun buildCallExpression(context: ResolutionContext, resolvedReceiver: Expression?, resolvedMethod: Callable, expectedType: Type?): CallExpression {
+    fun buildCallExpression(
+        context: ResolutionContext,
+        resolvedReceiver: Expression?,
+        resolvedMethod: Callable,
+        expectedType: Type?
+    ): CallExpression {
         val arrangedChildren = arrangeChildren(resolvedMethod)
         val resolvedChildren = mutableListOf<Expression?>()
 
-        val genericTypeResolverState = GenericTypeResolverState {
+        val genericTypeResolver = GenericTypeResolver {
             "$position: Resolving $this"
         }
-        resolvedMethod.type.returnType.resolveGenerics(genericTypeResolverState, expectedType)
+        resolvedMethod.type.returnType.resolveGenerics(genericTypeResolver, expectedType)
 
         for ((i, parameter) in resolvedMethod.type.parameterTypes.withIndex()) {
-            println("state: $genericTypeResolverState")
-            if (genericTypeResolverState.map.isNotEmpty()) {
+            println("state: $genericTypeResolver")
+            if (genericTypeResolver.map.isNotEmpty()) {
                 println("boo")
             }
             val parameterRestType = parameter.restType()
-            val expectedParameterType = parameterRestType.resolveGenerics(genericTypeResolverState)
-            val resolvedChild = arrangedChildren[i]?.resolve(context, expectedParameterType)
+            val expectedParameterType = parameterRestType.resolveGenerics(genericTypeResolver)
+            val resolvedChild = arrangedChildren[i]?.resolve(context, genericTypeResolver, expectedParameterType)
             if (resolvedChild != null) {
-                parameter.restType().resolveGenerics(genericTypeResolverState, resolvedChild.getType())
+                parameter.restType().resolveGenerics(genericTypeResolver, resolvedChild.getType())
             }
             resolvedChildren.add(resolvedChild)
         }
 
-        val resolvedReturnType = resolvedMethod.type.returnType.resolveGenerics(genericTypeResolverState, expectedType)
+        val resolvedReturnType = resolvedMethod.type.returnType.resolveGenerics(genericTypeResolver, expectedType)
         return CallExpression(position, resolvedReceiver, resolvedMethod, resolvedChildren)
     }
 
