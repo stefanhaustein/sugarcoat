@@ -1,5 +1,6 @@
 package org.kobjects.sugarcoat.datatype
 
+import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.ast.Expression
 
 import org.kobjects.sugarcoat.type.Type
@@ -37,7 +38,7 @@ data class NativeFunction(
     override val type: FunctionType
         get() = FunctionType(returnType, args)
 
-    override fun serialize(sb: StringBuilder) {
-        sb.append("native fn $name\n")
+    override fun serialize(writer: CodeWriter) {
+        writer.append("native fn $name\n")
     }
 }

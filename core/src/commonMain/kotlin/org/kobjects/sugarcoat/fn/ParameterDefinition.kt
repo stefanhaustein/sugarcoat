@@ -5,7 +5,6 @@ import org.kobjects.sugarcoat.ast.ResolutionContext
 import org.kobjects.sugarcoat.datatype.ListType
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.model.Classifier
-import org.kobjects.sugarcoat.type.GenericTypeResolver
 
 data class ParameterDefinition(
     val name: String,
@@ -19,7 +18,6 @@ data class ParameterDefinition(
 
     fun resolveDefaultExpression(context: ResolutionContext) = copy(defaultValue = defaultValue?.resolve(
         context,
-        GenericTypeResolver(),
         type
     ))
 

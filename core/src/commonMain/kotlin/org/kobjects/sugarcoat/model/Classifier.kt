@@ -1,5 +1,6 @@
 package org.kobjects.sugarcoat.model
 
+import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.ResolutionContext
 import org.kobjects.sugarcoat.type.Type
@@ -10,7 +11,6 @@ import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.fn.Callable
-import org.kobjects.sugarcoat.type.GenericTypeResolver
 
 abstract class Classifier(
     open val parent: Classifier?,
@@ -100,7 +100,7 @@ abstract class Classifier(
                 return action(children, parameterScope)
             }
 
-            override fun serialize(sb: StringBuilder) {
+            override fun serialize(writer: CodeWriter) {
                 throw UnsupportedOperationException()
             }
 
@@ -122,7 +122,7 @@ abstract class Classifier(
         val resolutionContext = ResolutionContext(this)
         for (field in staticFields.values) {
             val resolvedExplicitType = field.explicitType?.resolveType(this)
-            field.initializer = field.initializer.resolve(resolutionContext, GenericTypeResolver(), resolvedExplicitType)
+            field.initializer = field.initializer.resolve(resolutionContext, resolvedExplicitType)
             val resolvedType = resolvedExplicitType ?: field.initializer.getType()
             addControl(field.name, resolvedType) { param, localContext ->
                 localContext.globalRuntimeContext.symbols[field]!!
@@ -163,7 +163,7 @@ abstract class Classifier(
     }
 
 
-    abstract fun serialize(sb: StringBuilder)
+    abstract fun serialize(writer: CodeWriter)
 
     fun resolveSymbol(name: String, errorPrefix: (() -> String) = { "(Unknown location)" }): Classifier {
         val result = resolveSymbolOrNull(name)
@@ -181,10 +181,10 @@ abstract class Classifier(
 
     abstract override fun toString(): String
 
-    fun serializeBody(sb: StringBuilder) {
+    fun serializeBody(writer: CodeWriter) {
         for ((name, definition) in definitions) {
-            sb.append("  ")
-            definition.serialize(sb)
+            writer.append("  ")
+            definition.serialize(writer)
         }
 
     }

@@ -7,7 +7,6 @@ import org.kobjects.sugarcoat.datatype.I64Type
 import org.kobjects.sugarcoat.datatype.StringType
 import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.model.Classifier
-import org.kobjects.sugarcoat.parser.Position
 
 /**
  * Note that there are types that are not classifiers such as MetaType and function types.
@@ -19,29 +18,40 @@ interface Type {
     // Override matchImpl instead.
     fun match(
         other: Type?,
-        genericTypeResolver: GenericTypeResolver,
+        genericTypeResolver: GenericTypeResolver? = null,
         lazyMessage: () -> String
-    ): Type = when(other) {
-        null -> this
-        is GenericType -> genericTypeResolver.match(this, other, lazyMessage)
-        else -> matchImpl(other, genericTypeResolver, lazyMessage)
+    ) {
+        when (other) {
+            null -> Unit
+            is GenericType -> {
+                if (genericTypeResolver != null) {
+                    val resolvedOther = genericTypeResolver.map[other]
+                    if (resolvedOther == null) {
+                        genericTypeResolver.map[other] = this
+                    } else if (resolvedOther !is GenericType) {
+                        matchImpl(resolvedOther, genericTypeResolver, lazyMessage)
+                    }
+                }
+            }
+
+            else -> matchImpl(other, genericTypeResolver, lazyMessage)
+        }
     }
 
     fun matchImpl(
         other: Type,
-        genericTypeResolver: GenericTypeResolver,
+        genericTypeResolver: GenericTypeResolver?,
         lazyMessage: () -> String
-    ): Type {
+    ) {
         require(other == this, lazyMessage)
-        return this
     }
 
 
-    fun resolveGenerics(state: GenericTypeResolver, expected: Type? = null): Type? {
+    fun resolveGenerics(state: GenericTypeResolver): Type {
         /*require (other == null || other == this) {
              "${state.errorPrefix()}: Can't resolve type '$this' to '$other'"
         }*/
-        return expected ?: this
+        return this
     }
 
     companion object {

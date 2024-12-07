@@ -1,5 +1,6 @@
 package org.kobjects.sugarcoat.ast
 
+import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.Lambda
 import org.kobjects.sugarcoat.type.MetaType
@@ -10,6 +11,7 @@ import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.parser.Position
 import org.kobjects.sugarcoat.type.GenericTypeResolver
 
+var indent = ""
 
 class UnresolvedSymbolExpression(
     position: Position,
@@ -25,33 +27,33 @@ class UnresolvedSymbolExpression(
 
     override fun eval(context: LocalRuntimeContext) = throw UnsupportedOperationException()
 
-    override fun toString(): String = buildString { stringify(this) }
+    override fun toString(): String = CodeWriter().apply { serialize(this) }.toString()
 
-    override fun stringify(stringBuilder: StringBuilder) {
+    override fun serialize(writer: CodeWriter) {
         if (receiver != null) {
-            receiver.stringify(stringBuilder)
-            stringBuilder.append(".")
+            receiver.serialize(writer)
+            writer.append(".")
         }
 
         if (name.isEmpty() || !name.first().isLetter()) {
-            stringBuilder.append("`$name`")
+            writer.append("`$name`")
         } else {
-            stringBuilder.append(name)
+            writer.append(name)
         }
 
         if (parens || children.isNotEmpty()) {
-            stringBuilder.append('(')
+            writer.append('(')
             for ((index, child) in children.withIndex()) {
                 if (index > 0) {
-                    stringBuilder.append(", ")
+                    writer.append(", ")
                 }
                 if (child.name.isNotEmpty()) {
-                    stringBuilder.append(name)
-                    stringBuilder.append(" = ")
+                    writer.append(name)
+                    writer.append(" = ")
                 }
-                child.value.stringify(stringBuilder)
+                child.value.serialize(writer)
             }
-            stringBuilder.append(')')
+            writer.append(')')
         }
     }
 
@@ -93,22 +95,21 @@ class UnresolvedSymbolExpression(
 
     override fun resolve(
         context: ResolutionContext,
-        genericTypeResolver: GenericTypeResolver,
         expectedType: Type?
     ): Expression {
         if (expectedType is FunctionType && expectedType.parameterTypes.isEmpty()) {
-            val result = resolveImpl(context, genericTypeResolver, expectedType.returnType)
-            return LiteralExpression(position, Lambda(FunctionType(result.getType(), emptyList()), emptyList(), result))
+            val result = resolveImpl(context, expectedType.returnType)
+            return result.asLambda(expectedType)
         }
-        return resolveImpl(context, genericTypeResolver, expectedType)
+        return resolveImpl(context, expectedType)
     }
 
 
-    fun resolveImpl(context: ResolutionContext, genericTypeResolver: GenericTypeResolver, expectedType: Type?): Expression {
+    fun resolveImpl(context: ResolutionContext, expectedType: Type?): Expression {
         if (receiver == null) {
             val localVariable = context.resolveOrNull(name)
             if (localVariable != null) {
-                return buildCallExpression(context,null, localVariable, expectedType)
+                return buildCallExpression(context, null, localVariable, expectedType)
             }
 
             val self = context.resolveOrNull("self")
@@ -118,38 +119,43 @@ class UnresolvedSymbolExpression(
 
             if (resolvedMember is Callable && !resolvedMember.static) {
                 val selfExpression = CallExpression(position, null, self as Callable, emptyList())
-                return buildMethodCall(context, selfExpression, resolvedMember, expectedType)
+                return buildMethodCall(context,  selfExpression, resolvedMember, expectedType)
             }
 
             return buildStaticCallOrTypeReference(
                 context,
+
                 context.namespace.resolveSymbol(name) { "$position" },
                 expectedType)
         }
 
-        val resolvedReceiver = receiver.resolve(context, genericTypeResolver, null)
+        val resolvedReceiver = receiver.resolve(context, null)
         val receiverType = resolvedReceiver.getType().resolveType(context.namespace) // TODO: resolve() should not be necessary here.
         return when (receiverType) {
             is MetaType -> {
                 val resolvedMember = receiverType.type.resolveSymbol(name) { "$position" }
-                buildStaticCallOrTypeReference(context, resolvedMember, expectedType)
+                buildStaticCallOrTypeReference(context,  resolvedMember, expectedType)
             }
             is Classifier -> {
                 val resolvedMember = receiverType.resolveSymbol(name) { "$position" }
                 buildMethodCall(context, resolvedReceiver, resolvedMember, expectedType)
             }
             else -> throw IllegalStateException(
-                "$position: Type '$receiverType' (${receiverType::class}) of resolved receiver '$resolvedReceiver' must be classifier for resolving '$name'")
+                "$position: Type '$receiverType' (${receiverType::class}) of resolved receiver '$resolvedReceiver' must be classifier for resolving '$name'.")
         }
     }
 
-    fun buildStaticCallOrTypeReference(context: ResolutionContext, resolvedMember: Classifier, expectedType: Type?): Expression =
+    fun buildStaticCallOrTypeReference(
+        context: ResolutionContext,
+        resolvedMember: Classifier,
+        expectedType: Type?
+    ): Expression =
         when(resolvedMember) {
             is Callable -> {
                 require(resolvedMember.static) {
                     "$position: Can't make static call to instance method '$resolvedMember'"
                 }
-                buildCallExpression(context, null, resolvedMember, expectedType)
+                buildCallExpression(context,null, resolvedMember, expectedType)
             }
             is Type -> {
                 require(children.isEmpty()) {
@@ -174,25 +180,47 @@ class UnresolvedSymbolExpression(
         val resolvedChildren = mutableListOf<Expression?>()
 
         val genericTypeResolver = GenericTypeResolver {
-            "$position: Resolving $this"
+           "$position: Resolving $this"
+         }
+        resolvedMethod.type.returnType.match(expectedType, genericTypeResolver) {
+            "$position: Return type '${resolvedMethod.type.returnType}' for $this does not match expected type $expectedType"
         }
-        resolvedMethod.type.returnType.resolveGenerics(genericTypeResolver, expectedType)
+        //
+        // resolvedMethod.type.returnType.resolveGenerics(genericTypeResolver)
 
         for ((i, parameter) in resolvedMethod.type.parameterTypes.withIndex()) {
-            println("state: $genericTypeResolver")
-            if (genericTypeResolver.map.isNotEmpty()) {
-                println("boo")
-            }
+
             val parameterRestType = parameter.restType()
             val expectedParameterType = parameterRestType.resolveGenerics(genericTypeResolver)
-            val resolvedChild = arrangedChildren[i]?.resolve(context, genericTypeResolver, expectedParameterType)
+
+            println("${indent}buildCallExpression parameter $parameter")
+            println("$indent > expectedParameterType: $parameterRestType")
+            println("$indent > expectedParameterType with resolved generics: ${expectedParameterType}")
+            println("$indent > unresolved child: ${arrangedChildren[i]}")
+            println("$indent > generic type map: $genericTypeResolver")
+
+            indent += "  "
+
+            val resolvedChild = arrangedChildren[i]?.resolve(context, expectedParameterType)
             if (resolvedChild != null) {
-                parameter.restType().resolveGenerics(genericTypeResolver, resolvedChild.getType())
+                resolvedChild.getType().match(expectedParameterType, genericTypeResolver) {
+                    "$position: Type ${resolvedChild.getType()} of expression $resolvedChild  does not match expected type $expectedType for parameter '$parameter' of method '$this'; generic type map: $genericTypeResolver"
+                }
+                // parameter.restType().resolveGenerics(genericTypeResolver)
             }
+
+            indent = indent.dropLast(2)
+            println("$indent < resolvedChild: $resolvedChild")
+            println("$indent < resolvedChild type: ${resolvedChild?.getType()}")
+            println("$indent < updated generic type map: $genericTypeResolver")
+
             resolvedChildren.add(resolvedChild)
         }
 
-        val resolvedReturnType = resolvedMethod.type.returnType.resolveGenerics(genericTypeResolver, expectedType)
+        resolvedMethod.type.returnType.match(expectedType, genericTypeResolver) {
+            "$position: Return type '${resolvedMethod.type.returnType}' for $this does not match expected type $expectedType"
+        }
+        //val resolvedReturnType = resolvedMethod.type.returnType.resolveGenerics(genericTypeResolver, expectedType)
         return CallExpression(position, resolvedReceiver, resolvedMethod, resolvedChildren)
     }
 

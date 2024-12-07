@@ -17,7 +17,6 @@ import org.kobjects.sugarcoat.model.GlobalRuntimeContext
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.parser.SugarcoatParser.parseType
 import org.kobjects.sugarcoat.type.GenericType
-import org.kobjects.sugarcoat.type.GenericTypeResolver
 import org.kobjects.sugarcoat.type.Type
 
 
@@ -208,7 +207,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             scanner, ParsingContext(Program())
         )
         val program = Program()
-        return parsed.resolve(ResolutionContext(program), GenericTypeResolver(), null)
+        return parsed.resolve(ResolutionContext(program), null)
             .eval(LocalRuntimeContext(GlobalRuntimeContext(program), /*program,*/ null))
     }
 }

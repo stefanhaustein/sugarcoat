@@ -4,7 +4,6 @@ import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.parser.Position
-import org.kobjects.sugarcoat.type.GenericTypeResolver
 
 data class VariableDeclaration(
     override val position: Position,
@@ -28,14 +27,13 @@ data class VariableDeclaration(
 
     override fun resolve(
         context: ResolutionContext,
-        genericTypeResolver: GenericTypeResolver,
         expectedType: Type?
     ): VariableDeclaration {
         val resolvedType = expectedType?.resolveType(context.namespace)
-        resolvedType?.match(VoidType, genericTypeResolver) {
+        resolvedType?.match(VoidType) {
             "$position: Expected return type must be void for assignments."
         }
-        val resolvedValue = initialValue.resolve(context, genericTypeResolver, resolvedType)
+        val resolvedValue = initialValue.resolve(context, resolvedType)
         context.addLocal(name, resolvedValue.getType(), mutable)
         return copy(initialValue = resolvedValue, explicitType = resolvedType)
     }

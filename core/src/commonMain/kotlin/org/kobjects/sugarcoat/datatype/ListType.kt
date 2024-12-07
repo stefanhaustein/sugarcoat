@@ -2,7 +2,6 @@ package org.kobjects.sugarcoat.datatype
 
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.model.RootContext
-import org.kobjects.sugarcoat.type.GenericType
 import org.kobjects.sugarcoat.type.GenericTypeResolver
 import org.kobjects.sugarcoat.type.Type
 
@@ -23,25 +22,16 @@ data class ListType(val elementType: Type) : NativeType("List", RootContext) {
 
     override fun matchImpl(
         other: Type,
-        genericTypeResolver: GenericTypeResolver,
+        genericTypeResolver: GenericTypeResolver?,
         lazyMessage: () -> String
-    ): ListType {
+    ) {
         require(other is ListType, lazyMessage)
-        return this
+        elementType.match(other.elementType, genericTypeResolver, lazyMessage)
     }
 
-    override fun resolveGenerics(state: GenericTypeResolver, expected: Type?): Type? {
-        val expectedElementType = if (expected == null) null else {
-            require(expected is ListType) {
-                "${state.errorPrefix()}: List type expected; got $expected (${expected::class})"
-            }
-            expected.elementType
-        }
-        val resolvedElementType = elementType.resolveGenerics(state, expectedElementType)
-        if (resolvedElementType == null) {
-            return null
-        }
-        return ListType(resolvedElementType)
+    override fun resolveGenerics(state: GenericTypeResolver): Type {
+
+        return ListType(elementType.resolveGenerics(state))
     }
 
 

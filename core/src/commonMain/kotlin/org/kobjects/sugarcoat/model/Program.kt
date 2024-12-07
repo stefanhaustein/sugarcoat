@@ -1,5 +1,6 @@
 package org.kobjects.sugarcoat.model
 
+import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.fn.FunctionDefinition
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
@@ -22,7 +23,7 @@ class Program(
     override fun toString() = "program $name"
 
     fun serialize(): String {
-        val sb = StringBuilder()
+        val sb = CodeWriter()
         serialize(sb)
         return sb.toString()
     }
@@ -43,10 +44,10 @@ class Program(
     }
 
 
-    override fun serialize(sb: StringBuilder) {
+    override fun serialize(writer: CodeWriter) {
         for (definition in definitions.values) {
-            definition.serialize(sb)
-            sb.append("\n")
+            definition.serialize(writer)
+            writer.newline()
         }
     }
 

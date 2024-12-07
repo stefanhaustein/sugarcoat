@@ -2,7 +2,6 @@ package org.kobjects.sugarcoat.fn
 
 import org.kobjects.sugarcoat.ast.ResolutionContext
 import org.kobjects.sugarcoat.model.Classifier
-import org.kobjects.sugarcoat.type.GenericType
 import org.kobjects.sugarcoat.type.GenericTypeResolver
 import org.kobjects.sugarcoat.type.Type
 
@@ -23,44 +22,26 @@ data class FunctionType(
         return FunctionType(returnType, resolvedParameters)
     }
 
-    override fun resolveGenerics(state: GenericTypeResolver, expected: Type?): Type? {
-        if (expected != null && expected !is FunctionType) {
-            if (parameterTypes.isEmpty()) {
-                val resolvedType = returnType.resolveGenerics(state, expected)
-                return if (resolvedType == null) null else FunctionType(resolvedType)
-            }
-        }
+    override fun resolveGenerics(state: GenericTypeResolver): Type {
 
-        require (expected == null || expected is FunctionType) {
-            "${state.errorPrefix()}: Can't resolve function type to expectation: $expected"
-        }
+        val resolvedReturnType = returnType.resolveGenerics(state)
 
-        val resolvedReturnType = returnType.resolveGenerics(state, expected?.returnType)
-        if (resolvedReturnType == null) {
-            return null
-        }
         val builder = mutableListOf<ParameterDefinition>()
-        for ((i, parameter) in parameterTypes.withIndex()) {
-            val resolvedType = parameter.type.resolveGenerics(state, if (expected == null) null else expected.parameterTypes[i].type)
-            if (resolvedType == null) {
-                return null
-            }
+        for (parameter in parameterTypes) {
+            val resolvedType = parameter.type.resolveGenerics(state)
             builder.add(parameter.copy(type = resolvedType))
         }
-        return FunctionType(returnType, builder.toList())
+        return FunctionType(resolvedReturnType, builder.toList())
     }
 
-    override fun matchImpl(other: Type, genericTypeResolver: GenericTypeResolver, lazyMessage: () -> String): Type {
+    override fun matchImpl(other: Type, genericTypeResolver: GenericTypeResolver?, lazyMessage: () -> String) {
         require(other is FunctionType && parameterTypes.size == other.parameterTypes.size, lazyMessage)
 
-        return FunctionType(
-            returnType.match(other.returnType, genericTypeResolver, lazyMessage),
-            parameterTypes.mapIndexed { index, param ->
-                val otherParam = other.parameterTypes[index]
-                require (param.repeated == otherParam.repeated, lazyMessage)
-                param.copy(type = param.type.match(otherParam.type, genericTypeResolver, lazyMessage))
-            }
-        )
+        returnType.match(other.returnType, genericTypeResolver, lazyMessage)
+        for ((index, parameter) in parameterTypes.withIndex()) {
+            parameter.restType().match(other.parameterTypes[index].restType(), genericTypeResolver, lazyMessage)
+
+        }
     }
 
 }

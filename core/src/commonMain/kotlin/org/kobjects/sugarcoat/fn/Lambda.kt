@@ -4,6 +4,7 @@ import org.kobjects.sugarcoat.ast.Expression
 
 class Lambda(
     override val type: FunctionType,
+    val implied: Boolean,
     val parameterNames: List<String>,
     val body: Expression
 ) : Callable {
@@ -21,6 +22,12 @@ class Lambda(
         }
 
         val localContext = LocalRuntimeContext(parameterScope.globalRuntimeContext, receiver)
+
+        // HACK!!!!!
+
+        localContext.symbols.putAll(parameterScope.symbols)
+
+
         for ((i, p) in parameterNames.withIndex()) {
             localContext.symbols[p] = children[i]!!.eval(localContext)
         }

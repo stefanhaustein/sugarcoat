@@ -1,8 +1,8 @@
 package org.kobjects.sugarcoat.ast
 
+import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.parser.Position
-import org.kobjects.sugarcoat.type.GenericTypeResolver
 import org.kobjects.sugarcoat.type.Type
 
 data class ParenthesizedExpression(
@@ -12,16 +12,15 @@ data class ParenthesizedExpression(
 
     override fun resolve(
         context: ResolutionContext,
-        genericTypeResolver: GenericTypeResolver,
         expectedType: Type?
     ) =
-        ParenthesizedExpression(position, child.resolve(context, genericTypeResolver, expectedType))
+        ParenthesizedExpression(position, child.resolve(context, expectedType))
 
     override fun getType(): Type = child.getType()
 
-    override fun stringify(stringBuilder: StringBuilder) {
-        stringBuilder.append('(')
-        child.stringify(stringBuilder)
-        stringBuilder.append(')')
+    override fun serialize(writer: CodeWriter) {
+        writer.append('(')
+        child.serialize(writer)
+        writer.append(')')
     }
 }

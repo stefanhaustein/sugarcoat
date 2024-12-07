@@ -1,5 +1,6 @@
 package org.kobjects.sugarcoat.datatype
 
+import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.type.Type
 
@@ -11,8 +12,8 @@ abstract class NativeType(
 
     override fun toString(): String = "native $name"
 
-    override fun serialize(sb: StringBuilder) {
-        sb.append("native type $name\n")
-        serializeBody(sb)
+    override fun serialize(writer: CodeWriter) {
+        writer.append("native type $name\n")
+        serializeBody(writer)
     }
 }

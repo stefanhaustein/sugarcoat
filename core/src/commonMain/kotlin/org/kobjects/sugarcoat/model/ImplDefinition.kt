@@ -1,5 +1,6 @@
 package org.kobjects.sugarcoat.model
 
+import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.type.Type
 
 class ImplDefinition(
@@ -23,8 +24,8 @@ class ImplDefinition(
 
     override fun selfType() = wrapped
 
-    override fun serialize(sb: StringBuilder) {
-        sb.append("impl $trait for $wrapped\n")
-        serializeBody(sb)
+    override fun serialize(writer: CodeWriter) {
+        writer.append("impl $trait for $wrapped")
+        serializeBody(writer)
     }
 }

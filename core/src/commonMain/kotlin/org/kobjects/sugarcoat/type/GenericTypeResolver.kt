@@ -10,12 +10,9 @@ data class GenericTypeResolver(val errorPrefix: () -> String = {""}) {
         else -> type
     }
 
-    fun resolveTopLevelOrNull(type: Type?): Type? = when(type) {
+    fun resolveTopLevelNullable(type: Type?): Type? = when(type) {
         null -> null
         else -> resolveTopLevel(type)
     }
 
-    fun match(type: Type, genericType: GenericType, messagePrefix: () -> String): Type {
-        throw UnsupportedOperationException()
-    }
 }

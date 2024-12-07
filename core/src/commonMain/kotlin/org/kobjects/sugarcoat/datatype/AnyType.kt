@@ -4,5 +4,5 @@ import org.kobjects.sugarcoat.type.GenericTypeResolver
 import org.kobjects.sugarcoat.type.Type
 
 object AnyType: Type {
-    override fun matchImpl(other: Type, genericTypeResolver: GenericTypeResolver, messagePrefix: () -> String) = this
+    override fun matchImpl(other: Type, genericTypeResolver: GenericTypeResolver?, messagePrefix: () -> String) = Unit
 }

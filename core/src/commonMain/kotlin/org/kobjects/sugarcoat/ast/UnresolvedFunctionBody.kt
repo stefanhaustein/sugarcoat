@@ -2,7 +2,6 @@ package org.kobjects.sugarcoat.ast
 
 import org.kobjects.sugarcoat.fn.FunctionDefinition
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
-import org.kobjects.sugarcoat.type.GenericTypeResolver
 import org.kobjects.sugarcoat.type.Type
 
 data class UnresolvedFunctionBody(val fn: FunctionDefinition) : Expression(fn.position) {
@@ -13,7 +12,6 @@ data class UnresolvedFunctionBody(val fn: FunctionDefinition) : Expression(fn.po
 
     override fun resolve(
         context: ResolutionContext,
-        genericTypeResolver: GenericTypeResolver,
         expectedType: Type?
     ): Expression {
         throw UnsupportedOperationException(this.toString())

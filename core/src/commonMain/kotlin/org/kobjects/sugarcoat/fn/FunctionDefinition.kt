@@ -1,11 +1,11 @@
 package org.kobjects.sugarcoat.fn
 
+import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.ResolutionContext
 import org.kobjects.sugarcoat.ast.UnresolvedFunctionBody
 import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.parser.Position
-import org.kobjects.sugarcoat.type.GenericTypeResolver
 
 data class FunctionDefinition(
     val position: Position,
@@ -35,10 +35,13 @@ data class FunctionDefinition(
         return body.eval(localContext)
     }
 
-    override fun serialize(sb: StringBuilder) {
-        sb.append("fn $name(${type.parameterTypes.joinToString (", ")})\n  ")
-        body.stringify(sb)
-        sb.append("\n")
+    override fun serialize(writer: CodeWriter) {
+        writer.append("fn $name(${type.parameterTypes.joinToString (", ")})")
+        writer.indent()
+        writer.newline()
+        body.serialize(writer)
+        writer.outdent()
+        writer.newline()
     }
 
     override fun resolveSignatures() {
@@ -60,7 +63,7 @@ data class FunctionDefinition(
     override fun resolveExpressions() {
         type = type.resolveDefaultExpressions(ResolutionContext(parent))
         // TODO: Hand in function return type to type resolution.
-        body = body.resolve(createResolutionContext(), GenericTypeResolver(), null/*type.returnType*/)
+        body = body.resolve(createResolutionContext(), null/*type.returnType*/)
     }
 
     override fun toString() =

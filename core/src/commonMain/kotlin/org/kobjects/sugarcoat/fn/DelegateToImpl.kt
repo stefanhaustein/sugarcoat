@@ -1,5 +1,6 @@
 package org.kobjects.sugarcoat.fn
 
+import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.model.Classifier
@@ -13,9 +14,9 @@ class DelegateToImpl(
     var parameters: List<ParameterDefinition>,
     var returnType: Type,
 ) : Classifier(parent, name, fallback), Callable {
-    override fun serialize(sb: StringBuilder) {
-        sb.append(name)
-        sb.append("(<TBD>)")
+    override fun serialize(writer: CodeWriter) {
+        writer.append(name)
+        writer.append("(<TBD>)")
     }
 
     override val type: FunctionType

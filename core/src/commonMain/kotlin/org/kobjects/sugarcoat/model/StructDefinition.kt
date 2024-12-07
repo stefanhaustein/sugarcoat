@@ -1,5 +1,6 @@
 package org.kobjects.sugarcoat.model
 
+import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.ResolutionContext
 import org.kobjects.sugarcoat.type.Type
@@ -46,9 +47,12 @@ class StructDefinition(
         addChild(StructConstructor(this, constructorName))
     }
 
-    override fun serialize(sb: StringBuilder) {
-        sb.append("struct $name\n")
-        serializeBody(sb)
+    override fun serialize(writer: CodeWriter) {
+        writer.newline()
+        writer.append("struct $name")
+        writer.indent()
+        serializeBody(writer)
+        writer.outdent()
     }
 
     override fun selfType() = this
@@ -62,7 +66,7 @@ class StructDefinition(
 
         override fun toString() = "Constructor $name for $parent"
 
-        override fun serialize(sb: StringBuilder) {
+        override fun serialize(writer: CodeWriter) {
             throw UnsupportedOperationException()
         }
 

@@ -4,7 +4,6 @@ import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.Lambda
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.parser.Position
-import org.kobjects.sugarcoat.type.GenericTypeResolver
 import org.kobjects.sugarcoat.type.Type
 
 class UnresolvedLambdaExpression(
@@ -18,14 +17,13 @@ class UnresolvedLambdaExpression(
 
     override fun resolve(
         context: ResolutionContext,
-        genericTypeResolver: GenericTypeResolver,
         expectedType: Type?
     ): Expression {
         if (expectedType !is FunctionType) {
             require(parameters.isEmpty()) {
                 "${position}: No lambda parameters supported for expected type $expectedType"
             }
-            return body.resolve(context, genericTypeResolver, expectedType)
+            return body.resolve(context, expectedType)
         }
 
         require (expectedType.parameterTypes.size == parameters.size) {
@@ -37,14 +35,14 @@ class UnresolvedLambdaExpression(
         for ((i, expectedParameter) in expectedType.parameterTypes.withIndex()) {
             val lambdaParameter = parameters[i]
             val lambdaParameterType = lambdaParameter.second?.resolveType(context.namespace)
-            lambdaParameterType?.match(expectedParameter.type, genericTypeResolver) {
+            lambdaParameterType?.match(expectedParameter.type) {
                 "Lambda parameter $lambdaParameter is not assignable from $expectedParameter"
             }
             innerContext.addLocal(lambdaParameter.first, lambdaParameterType ?: expectedParameter.type, false)
         }
-        val resolvedBody = body.resolve(innerContext, genericTypeResolver, expectedType.returnType)
+        val resolvedBody = body.resolve(innerContext, expectedType.returnType)
 
-        return LiteralExpression(position, Lambda(expectedType, parameters.map { it.first }, resolvedBody))
+        return LiteralExpression(position, Lambda(expectedType, false, parameters.map { it.first }, resolvedBody))
 
     }
 }

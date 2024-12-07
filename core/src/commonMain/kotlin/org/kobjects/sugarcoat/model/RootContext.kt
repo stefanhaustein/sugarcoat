@@ -1,5 +1,6 @@
 package org.kobjects.sugarcoat.model
 
+import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.ListExpression
 import org.kobjects.sugarcoat.ast.LiteralExpression
@@ -21,7 +22,7 @@ import org.kobjects.sugarcoat.type.GenericType
 import kotlin.math.sqrt
 
 object RootContext : Classifier(null, "") {
-    override fun serialize(sb: StringBuilder) {
+    override fun serialize(writer: CodeWriter) {
         throw UnsupportedOperationException()
     }
 
@@ -155,7 +156,8 @@ object RootContext : Classifier(null, "") {
 
     fun evalIf(children: List<Expression?>, parameterContext: LocalRuntimeContext): Any {
         if (children[0]!!.evalBoolean(parameterContext)) {
-            return children[1]!!.eval(parameterContext)
+            val thenLambda = children[1]!!.eval(parameterContext)
+            return (thenLambda as Callable).call(parameterContext.instance, emptyList(), parameterContext)
         }
         if (children.size > 2 && children[2] != null) {
             require(children[2] is ListExpression) {
@@ -170,7 +172,8 @@ object RootContext : Classifier(null, "") {
             }
         }
         if (children.size == 4 && children[3] != null) {
-            return children[3]!!.eval(parameterContext)
+            val elseLambda = children[3]!!.eval(parameterContext)
+            return (elseLambda as Callable).call(parameterContext.instance, emptyList(), parameterContext)
         }
         return Unit
     }

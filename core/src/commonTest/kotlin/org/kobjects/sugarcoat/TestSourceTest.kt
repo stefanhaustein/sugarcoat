@@ -26,6 +26,10 @@ class TestSourceTest {
         val result = StringBuilder()
         val program = SugarcoatParser.parseProgram(source) { result.append(it) }
 
+        val writer = CodeWriter()
+        program.serialize(writer)
+        println(writer.toString())
+
         program.run()
         val actual = trim(result.toString())
 

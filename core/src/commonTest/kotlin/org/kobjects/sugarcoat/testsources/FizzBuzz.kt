@@ -1,5 +1,4 @@
-package org.kobjects.sugarcoat.testsources
-val FIZZBUZZ_CASE = arrayOf("FizzBuzz", """
+package org.kobjects.sugarcoat.testsources; val FIZZBUZZ_CASE = arrayOf("FizzBuzz", """
 fn main()
    for (range(1, 20)) :: x
      if (x % 3 == 0) 
@@ -12,7 +11,7 @@ fn main()
        print("Buzz")
      
      --else
-       print(x)
+       print(x.toString())
      
      print("\n")    
 """, """

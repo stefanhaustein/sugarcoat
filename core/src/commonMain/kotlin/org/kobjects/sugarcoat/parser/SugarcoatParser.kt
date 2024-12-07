@@ -1,6 +1,7 @@
 package org.kobjects.sugarcoat.parser
 
 import org.kobjects.parsek.tokenizer.Scanner
+import org.kobjects.sugarcoat.ast.BlockExpression
 import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.fn.FunctionDefinition
 import org.kobjects.sugarcoat.fn.ParameterDefinition
@@ -213,14 +214,9 @@ object SugarcoatParser {
         return when (result.size) {
             0 -> LiteralExpression(scanner.position(), Unit)
             1 -> result.first()
-            else -> UnresolvedSymbolExpression(
+            else -> BlockExpression(
                 scanner.position(),
-                null,
-                "seq",
-                true,
-                result.mapIndexed { index, expr ->
-                    ParameterReference(if (index == result.size - 1) "result" else "", expr)
-                })
+                result)
         }
 
 //                (result.size == 1) result.first().value

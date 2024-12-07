@@ -45,26 +45,20 @@ class ResolutionContext(
      */
     fun resolveTypeExpectation(
         expression: Expression,
-        genericTypeResolver: GenericTypeResolver,
         actualType: Type,
         expectedType: Type
     ): Expression {
         val position = expression.position
-        val expectedType = genericTypeResolver.resolveTopLevel(expectedType)
 
         val result: Expression = if (expectedType is FunctionType && actualType !is FunctionType) {
             require(expectedType.parameterTypes.isEmpty()) {
                 "$position: Cannot imply lambda for function type with parameters: $expectedType"
             }
-            LiteralExpression(
-                position,
-                Lambda(FunctionType(actualType, emptyList()), emptyList(), expression)
-            ).resolve(this, genericTypeResolver, expectedType)
+            expression.asLambda(expectedType)
         } else expression
 
         expectedType.match(
             result.getType(),
-            genericTypeResolver
         ) {
             "$position: Expected type $expectedType is not assignable from expression type ${result.getType()} of expression $result"
         }
@@ -92,8 +86,10 @@ class ResolutionContext(
             parameterScope: LocalRuntimeContext
         ): Any {
             return if (variable.name == "self")  parameterScope.instance!!
-            else parameterScope.symbols[variable.name]!!
+            else parameterScope.symbols[variable.name] ?: throw IllegalStateException("Variable ${variable.name} not found in $parameterScope")
         }
+
+        override fun toString() = variable.name
     }
 
     data class LocalSetter(val variable: Variable) : Callable {
