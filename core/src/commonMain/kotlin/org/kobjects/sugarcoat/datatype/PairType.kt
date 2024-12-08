@@ -2,6 +2,7 @@ package org.kobjects.sugarcoat.datatype
 
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.model.Classifier
+import org.kobjects.sugarcoat.type.GenericType
 import org.kobjects.sugarcoat.type.GenericTypeResolver
 
 data class PairType(val firstType: Type, val secondType: Type) : Type {
@@ -22,6 +23,13 @@ data class PairType(val firstType: Type, val secondType: Type) : Type {
         val secondResolved = secondType.resolveGenerics(state)
 
         return  PairType(firstResolved, secondResolved)
+    }
+
+    override fun getGenericTypes(): List<GenericType> {
+        val result = mutableListOf<GenericType>()
+        result.addAll(firstType.getGenericTypes())
+        result.addAll(secondType.getGenericTypes())
+        return result.toList()
     }
 
 }

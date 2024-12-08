@@ -1,5 +1,6 @@
 package org.kobjects.sugarcoat.ast
 
+import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.Lambda
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
@@ -44,5 +45,9 @@ class UnresolvedLambdaExpression(
 
         return LiteralExpression(position, Lambda(expectedType, false, parameters.map { it.first }, resolvedBody))
 
+    }
+
+    override fun serialize(writer: CodeWriter) {
+        writer.append("<- unresolved lambda expression ->")
     }
 }

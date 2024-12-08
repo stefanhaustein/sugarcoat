@@ -1,5 +1,6 @@
 package org.kobjects.sugarcoat.ast
 
+import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.model.ImplDefinition
 import org.kobjects.sugarcoat.model.ImplInstance
@@ -15,6 +16,12 @@ class AsExpression(
         // This should be resolved at resolution time.
 
         return ImplInstance(implDefinition, source.eval(context))
+    }
+
+    override fun serialize(writer: CodeWriter) {
+        source.serialize(writer)
+        writer.append(" as ")
+        writer.append(implDefinition)
     }
 
     override fun getType() = implDefinition.trait

@@ -8,9 +8,19 @@ data class GenericType(val name: String) : Type {
         lazyMessage: () -> String
     ) {
         if (genericTypeResolver != null) {
-            val resolved = resolveGenerics(genericTypeResolver)
-            if (resolved !is GenericType) {
-                resolved.match(other, genericTypeResolver, lazyMessage)
+            val thisResolved = resolveGenerics(genericTypeResolver)
+            when (thisResolved) {
+                this -> {
+                    // Unresolved; resolve!
+                    genericTypeResolver.map[this] = other
+                }
+                is GenericType -> {
+                    println("Generic type $this resolved to another generic type: $thisResolved")
+                }
+                else -> {
+                    // Already known, see if it's compatible.
+                    thisResolved.match(other, genericTypeResolver, lazyMessage)
+                }
             }
         }
     }
@@ -19,4 +29,5 @@ data class GenericType(val name: String) : Type {
         return state.map[this] ?: this
     }
 
+    override fun getGenericTypes() = listOf(this)
 }

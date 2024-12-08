@@ -70,4 +70,6 @@ interface Type {
             }
 
     }
+
+    fun getGenericTypes(): List<GenericType> = emptyList()
 }

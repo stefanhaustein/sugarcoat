@@ -20,57 +20,13 @@ data class CallExpression(
 
 
     override fun serialize(writer: CodeWriter) {
-        if (receiver != null) {
-            receiver.serialize(writer)
-            writer.append(".")
-        }
-        if (fn is Classifier) {
-            writer.append(fn.name)
-        } else {
-            writer.append(fn.toString())
-        }
-        writer.append("(")
-     //   writer.indent()
-
-        var index = 0
-        var skipped = false
-        var first = true
-
-        for (p in parameter) {
-            when (p) {
-                null -> {
-                    skipped = true
-                    continue
-                }
-                is LiteralExpression -> if (p.value is Lambda) break
+        writer.writeInvocation(
+            receiver,
+            if (fn is Classifier) fn.name else fn.toString(),
+            parameter.mapIndexed { index, experession ->
+                fn.type.parameterTypes[index].name to experession
             }
-            index++
-            if (first) {
-                first = false
-            } else {
-                writer.append(", ")
-            }
-            if (skipped) {
-                writer.append("${fn.type.parameterTypes[index].name} = ")
-            }
-            p!!.serialize(writer)
-        }
-        writer.append(")")
-
-        while (index < parameter.size) {
-            var p = parameter[index]
-            if (p != null) {
-                writer.newline()
-                writer.append("--${fn.type.parameterTypes[index].name}")
-                writer.indent()
-                writer.newline()
-                p.serialize(writer)
-                writer.outdent()
-            }
-            index++
-        }
-
-        // writer.outdent()
+        )
     }
 
 }

@@ -1,5 +1,6 @@
 package org.kobjects.sugarcoat.ast
 
+import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
@@ -21,9 +22,13 @@ data class VariableDeclaration(
         return Unit
     }
 
-    override fun getType() = VoidType
+    override fun serialize(writer: CodeWriter) {
+        writer.append(name)
+        writer.append(" = ")
+        initialValue.serialize(writer)
+    }
 
-    override fun toString() = "$name = $initialValue"
+    override fun getType() = VoidType
 
     override fun resolve(
         context: ResolutionContext,

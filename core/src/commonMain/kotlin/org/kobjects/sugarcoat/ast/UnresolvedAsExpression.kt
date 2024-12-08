@@ -1,5 +1,6 @@
 package org.kobjects.sugarcoat.ast
 
+import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.type.MetaType
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
@@ -13,6 +14,11 @@ class UnresolvedAsExpression(
 ): Expression(position) {
 
     override fun eval(context: LocalRuntimeContext) = throw UnsupportedOperationException("Unresolved.")
+    override fun serialize(writer: CodeWriter) {
+        source.serialize(writer)
+        writer.append(" as ")
+        target.serialize(writer)
+    }
 
     override fun getType() = throw UnsupportedOperationException("Unresolved.")
 

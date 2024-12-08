@@ -106,17 +106,6 @@ object RootContext : Classifier(null, "") {
             }
         }
 
-        val seqGenericType = GenericType("R")
-        addControl(
-            "seq",
-            seqGenericType,
-            ParameterDefinition("prefix", VoidType, true),
-            ParameterDefinition("result", seqGenericType, false)
-        ) { children, parameterContext ->
-            children.first()!!.eval(parameterContext)
-            children.last()!!.eval(parameterContext)
-        }
-
         val pairFirstGenericType = GenericType("F")
         val pairSecondGenericType = GenericType("S")
         addControl(
@@ -126,7 +115,7 @@ object RootContext : Classifier(null, "") {
             ParameterDefinition("second", pairSecondGenericType),
         ) { children, parameterContext ->
             require(children.size == 2) { "Two parameters expected for 'pair'." }
-            Pair(children[0]!! /*!!.eval(parameterContext) */, children[1]!! /*.eval(parameterContext) */)
+            Pair(children[0]!!.eval(parameterContext), children[1]!!.eval(parameterContext))
         }
 
         addControl(
@@ -165,9 +154,13 @@ object RootContext : Classifier(null, "") {
             }
             val elif = children[2] as ListExpression
             for (pairFn in elif.elements) {
-                val pair = pairFn.eval(parameterContext) as Pair<Expression, Expression>
-                if (pair.first.evalBoolean(parameterContext)) {
-                    return pair.second.eval(parameterContext)
+                println("Current elif: $pairFn")
+                val pair = pairFn.eval(parameterContext) as Pair<*, *>
+                println("Resulting pair: $pair; ${pair.first!!::class} to ${pair.second!!::class} $")
+                val conditionCallable = pair.first as Callable
+                if (conditionCallable.call(parameterContext.instance, emptyList(), parameterContext) as Boolean) {
+                    val thenCallable = pair.second as Callable
+                    return thenCallable.call(parameterContext.instance, emptyList(), parameterContext)
                 }
             }
         }

@@ -15,9 +15,9 @@ abstract class Expression(open val position: Position) {
     open fun evalBoolean(context: LocalRuntimeContext) = eval(context) as Boolean
     open fun evalLong(context: LocalRuntimeContext) = eval(context) as Long
 
-    open fun serialize(writer: CodeWriter) {
-        writer.append(this)
-    }
+    abstract fun serialize(writer: CodeWriter)
+
+    final override fun toString() = CodeWriter().apply { serialize(this) }.toString()
 
     /** Note that genericTypeResolve is not rolled into context, as it has a different (shorter) scope */
     abstract fun resolve(

@@ -2,6 +2,7 @@ package org.kobjects.sugarcoat.datatype
 
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.model.RootContext
+import org.kobjects.sugarcoat.type.GenericType
 import org.kobjects.sugarcoat.type.GenericTypeResolver
 import org.kobjects.sugarcoat.type.Type
 
@@ -41,4 +42,6 @@ data class ListType(val elementType: Type) : NativeType("List", RootContext) {
         }
         return ListType(resolvedTypes[0])
     }
+
+    override fun getGenericTypes() = elementType.getGenericTypes()
 }

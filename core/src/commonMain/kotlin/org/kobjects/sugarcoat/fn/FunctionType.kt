@@ -2,12 +2,13 @@ package org.kobjects.sugarcoat.fn
 
 import org.kobjects.sugarcoat.ast.ResolutionContext
 import org.kobjects.sugarcoat.model.Classifier
+import org.kobjects.sugarcoat.type.GenericType
 import org.kobjects.sugarcoat.type.GenericTypeResolver
 import org.kobjects.sugarcoat.type.Type
 
 data class FunctionType(
     val returnType: Type,
-    val parameterTypes: List<ParameterDefinition>
+    val parameterTypes: List<ParameterDefinition>,
 ) : Type {
     constructor(returnType: Type, vararg parameterTypes: ParameterDefinition) : this(returnType, parameterTypes.asList())
 
@@ -42,6 +43,15 @@ data class FunctionType(
             parameter.restType().match(other.parameterTypes[index].restType(), genericTypeResolver, lazyMessage)
 
         }
+    }
+
+    override fun getGenericTypes(): List<GenericType> {
+        val result = mutableListOf<GenericType>()
+        result.addAll(returnType.getGenericTypes())
+        for (p in parameterTypes) {
+            result.addAll(p.type.getGenericTypes())
+        }
+        return result.toList()
     }
 
 }

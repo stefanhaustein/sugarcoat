@@ -27,34 +27,11 @@ class UnresolvedSymbolExpression(
 
     override fun eval(context: LocalRuntimeContext) = throw UnsupportedOperationException()
 
-    override fun toString(): String = CodeWriter().apply { serialize(this) }.toString()
-
     override fun serialize(writer: CodeWriter) {
-        if (receiver != null) {
-            receiver.serialize(writer)
-            writer.append(".")
-        }
-
-        if (name.isEmpty() || !name.first().isLetter()) {
-            writer.append("`$name`")
-        } else {
-            writer.append(name)
-        }
-
-        if (parens || children.isNotEmpty()) {
-            writer.append('(')
-            for ((index, child) in children.withIndex()) {
-                if (index > 0) {
-                    writer.append(", ")
-                }
-                if (child.name.isNotEmpty()) {
-                    writer.append(name)
-                    writer.append(" = ")
-                }
-                child.value.serialize(writer)
-            }
-            writer.append(')')
-        }
+        writer.writeInvocation(
+            receiver,
+            name,
+            children.map { it.name to it.value } )
     }
 
     override fun getType() = throw UnsupportedOperationException()
@@ -179,27 +156,35 @@ class UnresolvedSymbolExpression(
         val arrangedChildren = arrangeChildren(resolvedMethod)
         val resolvedChildren = mutableListOf<Expression?>()
 
+        val genericTypes = resolvedMethod.type.getGenericTypes()
+
+        if (name == "pair") {
+            println("bp")
+        }
+
         val genericTypeResolver = GenericTypeResolver {
-           "$position: Resolving $this"
+           "$position: Resolving '$this'"
          }
         resolvedMethod.type.returnType.match(expectedType, genericTypeResolver) {
             "$position: Return type '${resolvedMethod.type.returnType}' for $this does not match expected type $expectedType"
         }
         //
-        // resolvedMethod.type.returnType.resolveGenerics(genericTypeResolver)
+        //resolvedMethod.type.returnType.resolveGenerics(genericTypeResolver)
 
         for ((i, parameter) in resolvedMethod.type.parameterTypes.withIndex()) {
 
             val parameterRestType = parameter.restType()
             val expectedParameterType = parameterRestType.resolveGenerics(genericTypeResolver)
 
-            println("${indent}buildCallExpression parameter $parameter")
-            println("$indent > expectedParameterType: $parameterRestType")
-            println("$indent > expectedParameterType with resolved generics: ${expectedParameterType}")
-            println("$indent > unresolved child: ${arrangedChildren[i]}")
-            println("$indent > generic type map: $genericTypeResolver")
+            if (parameterRestType.getGenericTypes().isNotEmpty()) {
+                println("${indent}buildCallExpression for parameter '$parameter' of '$name'")
+                println("$indent > expectedParameterType: $parameterRestType")
+                println("$indent > expectedParameterType with resolved generics: ${expectedParameterType}")
+                println("$indent > unresolved child: ${arrangedChildren[i]}")
+                println("$indent > generic type map: $genericTypeResolver")
 
-            indent += "  "
+                indent += "  "
+            }
 
             val resolvedChild = arrangedChildren[i]?.resolve(context, expectedParameterType)
             if (resolvedChild != null) {
@@ -209,11 +194,12 @@ class UnresolvedSymbolExpression(
                 // parameter.restType().resolveGenerics(genericTypeResolver)
             }
 
-            indent = indent.dropLast(2)
-            println("$indent < resolvedChild: $resolvedChild")
-            println("$indent < resolvedChild type: ${resolvedChild?.getType()}")
-            println("$indent < updated generic type map: $genericTypeResolver")
-
+            if (genericTypes.isNotEmpty()) {
+                indent = indent.dropLast(2)
+                println("$indent < resolvedChild: $resolvedChild")
+                println("$indent < resolvedChild type: ${resolvedChild?.getType()}")
+                println("$indent < updated generic type map: $genericTypeResolver")
+            }
             resolvedChildren.add(resolvedChild)
         }
 
