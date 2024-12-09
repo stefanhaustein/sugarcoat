@@ -2,7 +2,6 @@ package org.kobjects.sugarcoat.ast
 
 import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.fn.FunctionType
-import org.kobjects.sugarcoat.fn.Lambda
 import org.kobjects.sugarcoat.type.MetaType
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext

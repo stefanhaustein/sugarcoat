@@ -45,13 +45,13 @@ data class FunctionType(
         }
     }
 
-    override fun getGenericTypes(): List<GenericType> {
-        val result = mutableListOf<GenericType>()
+    override fun getGenericTypes(): Set<GenericType> {
+        val result = mutableSetOf<GenericType>()
         result.addAll(returnType.getGenericTypes())
         for (p in parameterTypes) {
             result.addAll(p.type.getGenericTypes())
         }
-        return result.toList()
+        return result.toSet()
     }
 
 }

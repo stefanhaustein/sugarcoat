@@ -25,11 +25,11 @@ data class PairType(val firstType: Type, val secondType: Type) : Type {
         return  PairType(firstResolved, secondResolved)
     }
 
-    override fun getGenericTypes(): List<GenericType> {
-        val result = mutableListOf<GenericType>()
+    override fun getGenericTypes(): Set<GenericType> {
+        val result = mutableSetOf<GenericType>()
         result.addAll(firstType.getGenericTypes())
         result.addAll(secondType.getGenericTypes())
-        return result.toList()
+        return result.toSet()
     }
 
 }

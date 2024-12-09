@@ -43,5 +43,5 @@ data class ListType(val elementType: Type) : NativeType("List", RootContext) {
         return ListType(resolvedTypes[0])
     }
 
-    override fun getGenericTypes() = elementType.getGenericTypes()
+    override fun getGenericTypes(): Set<GenericType> = elementType.getGenericTypes()
 }

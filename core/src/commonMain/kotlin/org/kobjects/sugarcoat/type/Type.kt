@@ -71,5 +71,5 @@ interface Type {
 
     }
 
-    fun getGenericTypes(): List<GenericType> = emptyList()
+    fun getGenericTypes(): Set<GenericType> = emptySet()
 }

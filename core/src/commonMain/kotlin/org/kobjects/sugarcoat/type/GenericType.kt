@@ -29,5 +29,5 @@ data class GenericType(val name: String) : Type {
         return state.map[this] ?: this
     }
 
-    override fun getGenericTypes() = listOf(this)
+    override fun getGenericTypes(): Set<GenericType> = setOf(this)
 }
