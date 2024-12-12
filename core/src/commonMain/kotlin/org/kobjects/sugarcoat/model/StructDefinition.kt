@@ -44,7 +44,7 @@ class StructDefinition(
             }
         }
 
-        addChild(StructConstructor(this, constructorName))
+        addChild(StructConstructor(this))
     }
 
     override fun serialize(writer: CodeWriter) {
@@ -60,14 +60,15 @@ class StructDefinition(
     override fun toString() = "struct $name"
 
 
-    class StructConstructor(override val parent: StructDefinition, override val name: String) : Callable, Classifier(parent, name) {
+    class StructConstructor(override val parent: StructDefinition) : Callable, Classifier(parent, "create") {
         override val static: Boolean
             get() = true
 
         override fun toString() = "Constructor $name for $parent"
 
         override fun serialize(writer: CodeWriter) {
-            throw UnsupportedOperationException()
+            writer.append("# create")
+            writer.newline()
         }
 
         override fun call(

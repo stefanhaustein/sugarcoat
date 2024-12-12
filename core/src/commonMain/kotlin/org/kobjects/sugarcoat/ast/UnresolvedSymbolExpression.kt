@@ -7,6 +7,8 @@ import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.model.Classifier
+import org.kobjects.sugarcoat.model.ObjectDefinition
+import org.kobjects.sugarcoat.model.StructDefinition
 import org.kobjects.sugarcoat.parser.Position
 import org.kobjects.sugarcoat.type.GenericTypeResolver
 
@@ -134,13 +136,25 @@ class UnresolvedSymbolExpression(
                 buildCallExpression(context,null, resolvedMember, expectedType)
             }
             is Type -> {
-                require(children.isEmpty()) {
-                    "$position: Type '$resolvedMember' can't have function parameters; got $children"
+                if (parens) {
+                    require (resolvedMember is StructDefinition) {
+                        "Constructors are only supported for structs."
+                    }
+                    val ctor = resolvedMember.resolveSymbol(resolvedMember.constructorName) { "$position" }
+                    require (ctor is Callable) {
+                        "$position: Constructor $ctor for $resolvedMember is not callable."
+                    }
+                    buildCallExpression(context, null, ctor, expectedType)
+
+/*                    require(children.isEmpty()) {
+                        "$position: Type '$resolvedMember' can't have function parameters; got $children"
+                    }
+                    require(!parens) {
+                        "$position: Type '$resolvedMember' shouldn't be followed by empty parens"
+                    }*/
+                } else {
+                    LiteralExpression(position, resolvedMember)
                 }
-                require(!parens) {
-                    "$position: Type '$resolvedMember' shouldn't be followed by empty parens"
-                }
-                LiteralExpression(position, resolvedMember)
             }
             else ->
                 throw IllegalStateException("Unrecognized resolved member: '$resolvedMember'")
@@ -188,7 +202,7 @@ class UnresolvedSymbolExpression(
             val resolvedChild = arrangedChildren[i]?.resolve(context, expectedParameterType)
             if (resolvedChild != null) {
                 resolvedChild.getType().match(expectedParameterType, genericTypeResolver) {
-                    "$position: Type ${resolvedChild.getType()} of expression $resolvedChild  does not match expected type $expectedType for parameter '$parameter' of method '$this'; generic type map: $genericTypeResolver"
+                    "$position: Type '${resolvedChild.getType()}' of expression $resolvedChild  does not match expected type '$expectedParameterType' for parameter '$parameter' of method '$this'; generic type map: $genericTypeResolver"
                 }
                 // parameter.restType().resolveGenerics(genericTypeResolver)
             }

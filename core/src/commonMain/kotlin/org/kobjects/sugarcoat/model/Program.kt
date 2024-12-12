@@ -5,6 +5,7 @@ import org.kobjects.sugarcoat.ast.LiteralExpression
 import org.kobjects.sugarcoat.fn.FunctionDefinition
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.parser.Position
+import org.kobjects.sugarcoat.type.MetaType
 import org.kobjects.sugarcoat.type.Type
 
 class Program(
@@ -16,7 +17,8 @@ class Program(
 
 
     fun findImpl(source: Type, target: Type): ImplDefinition {
-        return impls[source to target] ?: throw IllegalStateException("No impl found that maps $source to $target; available: ${impls.keys}")
+        val resolvedSource = if (source is MetaType && source.type is ObjectDefinition) source.type else source
+        return impls[resolvedSource to target] ?: throw IllegalStateException("No impl found that maps $source to $target; available: ${impls.keys}")
     }
 
 

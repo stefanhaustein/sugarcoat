@@ -32,5 +32,12 @@ class DelegateToImpl(
     ): Any =
         ((receiver as ImplInstance).implDefinition.definitions[name] as Callable).call(receiver, children, parameterScope)
 
+
+
+    override fun resolveSignatures() {
+        returnType = returnType.resolveType(parent)
+        parameters = parameters.map { it.resolveType(parent) }
+    }
+
     override fun toString() = "fn $name(<tbd>)"
 }

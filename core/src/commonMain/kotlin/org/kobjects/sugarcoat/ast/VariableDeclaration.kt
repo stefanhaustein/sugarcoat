@@ -34,10 +34,10 @@ data class VariableDeclaration(
         context: ResolutionContext,
         expectedType: Type?
     ): VariableDeclaration {
-        val resolvedType = expectedType?.resolveType(context.namespace)
-        resolvedType?.match(VoidType) {
+        VoidType.match(expectedType) {
             "$position: Expected return type must be void for assignments."
         }
+        val resolvedType = explicitType?.resolveType(context.namespace)
         val resolvedValue = initialValue.resolve(context, resolvedType)
         context.addLocal(name, resolvedValue.getType(), mutable)
         return copy(initialValue = resolvedValue, explicitType = resolvedType)

@@ -5,7 +5,7 @@ struct Color
   static WHITE = Color.create(1, 1, 1)
     
   static fn s255(color: F64) -> String
-    "" + color * 255.0 
+    (color * 255.0).toString() 
 
   r: F64
   g: F64
@@ -21,7 +21,7 @@ struct Color
     Color.create(r * factor, g * factor, b * factor)
     
   fn times(other: Color) -> Color
-    Color.create(r * other, g * other, b * other)
+    Color.create(r * other.r, g * other.g, b * other.b)
 
 struct Vector
   x: F64
@@ -56,7 +56,7 @@ struct Camera
   up: Vector
 
   static fn lookingAt(pos: Vector, lookAt: Vector) -> Camera
-    let down = Vector.create(0, -1, 0)
+    let down = Vector.create(0, -1.0, 0)
     let forward = lookAt.minus(pos).norm()
     let right = forward.cross(down).norm().times(1.5)
     let up = forward.cross(right).norm().times(1.5)
@@ -92,13 +92,13 @@ struct Scene
     camera: Camera
     background: Color
 
-struct Sphere constructor createImpl
+struct Sphere constructor createWithRadius
   center: Vector
   radius2: F64
   surface: Surface
 
-  static fn create(center: Vector, radius: F64, surface: Surface) -> Sphere
-    createImpl(center, radius * radius, surface)
+  static fn createWithRadius(center: Vector, radius: F64, surface: Surface) -> Sphere
+    create(center, radius * radius, surface)
 
 impl Thing for Sphere
   fn surface() -> Surface
@@ -110,13 +110,13 @@ impl Thing for Sphere
   fn intersect(r: Ray) -> Intersection
     let eo = center.minus(r.start)
     let v = eo.dot(r.dir)
-    let mut dist = 1/0
+    let mut dist = 1.0/0.0
     if (v >= 0)
       let disc = radius2 - (eo.dot(eo) - v * v)
       if (disc >= 0)
         dist = v - sqrt(disc)
 
-    Intersection.create(self, r, dist)
+    Intersection.create(self as Thing, r, dist)
 
 struct Plane
   norm: Vector
@@ -132,11 +132,11 @@ impl Thing for Plane
 
   fn intersect(r: Ray) -> Intersection
     let denom = norm.dot(r.dir)
-    let mut dist = 1/0
+    let mut dist = 1.0/0.0
     if (denom <= 0)
       dist = (norm.dot(r.start) + offset) / -denom
 
-    Intersection.create(self, r, dist)
+    Intersection.create(self as Thing, r, dist)
 
 
 object Shiny
@@ -191,18 +191,18 @@ struct RayTracer
   fn testRay(r: Ray, s: Scene) -> F64
     intersections(r, s).dist
 
-  fn traceRay(r: Ray, s: Scene, depth: F64) -> Color
+  fn traceRay(r: Ray, s: Scene, depth: I64) -> Color
     let isect = intersections(r, s)
-    if (isect.dist == 1/0)
+    if (isect.dist == 1.0/0.0)
       s.background
     --else
       shade(isect, s, depth)
 
-  fn shade(isect: Intersection, s: Scene, depth: F64) -> Color
+  fn shade(isect: Intersection, s: Scene, depth: I64) -> Color
     let d = isect.ray.dir
     let pos = d.times(isect.dist).plus(isect.ray.start)
     let normal = isect.thing.normal(pos)
-    let reflectDir = d.minus(normal.times(2 * normal.dot(d)))
+    let reflectDir = d.minus(normal.times(2.0 * normal.dot(d)))
     let naturalColor = s.background.plus(getNaturalColor(isect.thing, pos, normal, reflectDir, s))
     let mut reflectedColor = Color.GRAY
     if (depth < maxDepth)
@@ -210,7 +210,7 @@ struct RayTracer
 
     naturalColor.plus(reflectedColor)
 
-  fn getReflectionColor(t: Thing, pos: Vector, normal: Vector, rd: Vector, s: Scene, depth: F64) -> Color
+  fn getReflectionColor(t: Thing, pos: Vector, normal: Vector, rd: Vector, s: Scene, depth: I64) -> Color
     traceRay(Ray.create(pos, rd), s, depth + 1).scale(t.surface().reflect(pos))
 
   fn addLight(t: Thing, pos: Vector, norm: Vector, rd: Vector, s: Scene, col: Color, l: Light) -> Color
@@ -253,15 +253,15 @@ struct RayTracer
     for (range(0, height // 2)) :: yy
       let y = yy * 2    
       for (range(0, width)) :: x
-        let color1 = traceRay(Ray.create(s.camera.pos, getPoint((x - cx) * scale, (cy - y) * scale, s.camera)), s, 0)
-        let color2 = traceRay(Ray.create(s.camera.pos, getPoint((x - cx) * scale, (cy - y - 1) * scale, s.camera)), s, 0)
+        let color1 = traceRay(Ray.create(s.camera.pos, getPoint((x - cx).toF64() * scale, (cy - y).toF64() * scale, s.camera)), s, 0)
+        let color2 = traceRay(Ray.create(s.camera.pos, getPoint((x - cx).toF64() * scale, (cy - y - 1).toF64() * scale, s.camera)), s, 0)
         print(color1.toAnsi(true) + color2.toAnsi(false) + "▀")
       
       print("\n")
         
-  static defaultThings: List<Thing> = [Plane.create(Vector.create(0,1,0), 0, Checkerboard) as Thing, Sphere.create(Vector.create(0,1,-0.25), 1, Shiny) as Thing, Sphere.create(Vector.create(-1,0.5,1.5),0.5, Shiny) as Thing]
-  static defaultLights: List<Light> = [Light.create(Vector.create(-2,2.5,0), Color.create(0.49,0.07,0.07)), Light.create(Vector.create(1.5,2.5,1.5), Color.create(0.07,0.07,0.49)), Light.create(Vector.create(1.5,2.5,-1.5), Color.create(0.07,0.49,0.071)), Light.create(Vector.create(0,3.5,0), Color.create(0.21,0.21,0.35))]
-  static defaultCamera: Camera = Camera.lookingAt(Vector.create(3,2,4), Vector.create(-1,0.5,0))
+  static defaultThings: List<Thing> = [Plane(Vector(0,1,0), 0, Checkerboard as Surface) as Thing, Sphere(Vector(0,1,-0.25), 1, Shiny as Surface) as Thing, Sphere(Vector.create(-1.0,0.5,1.5),0.5, Shiny as Surface) as Thing]
+  static defaultLights: List<Light> = [Light(Vector.create(-2.0,2.5,0), Color.create(0.49,0.07,0.07)), Light.create(Vector.create(1.5,2.5,1.5), Color.create(0.07,0.07,0.49)), Light.create(Vector.create(1.5,2.5,-1.5), Color.create(0.07,0.49,0.071)), Light.create(Vector.create(0,3.5,0), Color.create(0.21,0.21,0.35))]
+  static defaultCamera: Camera = Camera.lookingAt(Vector.create(3,2,4), Vector.create(-1.0,0.5,0))
   static defaultScene: Scene = Scene.create(defaultThings, defaultLights, defaultCamera, Color.BLACK)
 
 fn main()
