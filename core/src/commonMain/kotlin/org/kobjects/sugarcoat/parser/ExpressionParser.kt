@@ -24,10 +24,28 @@ fun Scanner<TokenType>.position() = Position(current.line, current.col)
 
 object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, ParsingContext, Expression>(
     { scanner, context -> ExpressionParser.parsePrimary(scanner, context) },
-    prefix(10, "+", "-") { scanner, context, name, operand -> UnresolvedSymbolExpression(scanner.position(), operand, "0$name") },
+    prefix(10, "+", "-") { scanner, context, name, operand ->
+        if (operand is LiteralExpression && operand.value is Number) {
+            if (name == "+") {
+                operand
+            } else {
+                LiteralExpression(
+                    operand.position,
+                    when (operand.value) {
+                        is Int -> -operand.value
+                        is Long -> -operand.value
+                        is Double -> -operand.value
+                        is Float -> -operand.value
+                        else -> UnresolvedSymbolExpression(scanner.position(), operand, "0$name")
+                    })
+            }
+        } else {
+            UnresolvedSymbolExpression(scanner.position(), operand, "0$name")
+        }
+    },
     infix(9, "**") { scanner, context, _, left, right -> UnresolvedSymbolExpression(scanner.position(), left, "**", right) },
     infix(8, "as") { scanner, context, _, left, right -> UnresolvedAsExpression(scanner.position(), left, right) },
-    infix(7, "*", "/", "%", "//") { scanner, context, name, left, right -> UnresolvedSymbolExpression(scanner.position(), left, name, right) },
+    infix(7, "*", "/", "%") { scanner, context, name, left, right -> UnresolvedSymbolExpression(scanner.position(), left, name, right) },
     infix(6, "+", "-") { scanner, context, name, left, right -> UnresolvedSymbolExpression(scanner.position(), left, name, right) },
     infix(5, "<", "<=", ">", ">=") { scanner, context, name, left, right -> UnresolvedSymbolExpression(scanner.position(), left, name, right) },
     infix(4, "==", "!=") { scanner, context, name, left, right -> UnresolvedSymbolExpression(scanner.position(), left, name, right) },

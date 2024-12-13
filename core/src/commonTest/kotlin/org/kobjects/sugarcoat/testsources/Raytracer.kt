@@ -1,8 +1,8 @@
 package org.kobjects.sugarcoat.testsources; val RAYTRACER_SOURCE: String = """
 struct Color
-  static BLACK = Color.create(0, 0, 0.)
-  static GRAY = Color.create(0.5, 0.5, 0.5)
-  static WHITE = Color.create(1, 1, 1)
+  static BLACK = Color(0, 0, 0)
+  static GRAY = Color(0.5, 0.5, 0.5)
+  static WHITE = Color(1, 1, 1)
     
   static fn s255(color: F64) -> String
     (color * 255.0).toString() 
@@ -15,13 +15,13 @@ struct Color
     "\u001b[" + if(bg, "38", else="48") + "2;" + s255(r) + ";" + s255(g) + s255(b)
 
   fn plus(other: Color) -> Color
-    Color.create(r + other.r, g + other.g, b + other.b)
+    Color(r + other.r, g + other.g, b + other.b)
 
   fn scale(factor: F64) -> Color
-    Color.create(r * factor, g * factor, b * factor)
+    Color(r * factor, g * factor, b * factor)
     
   fn times(other: Color) -> Color
-    Color.create(r * other.r, g * other.g, b * other.b)
+    Color(r * other.r, g * other.g, b * other.b)
 
 struct Vector
   x: F64
@@ -247,10 +247,10 @@ struct RayTracer
     cam.forward.plus(cam.right.times(x / 200)).plus(cam.up.times(y / 200)).norm()
 
   fn render(s: Scene, width: I64, height: I64) 
-    let cx = width // 2
-    let cy = height // 2
+    let cx = width / 2
+    let cy = height / 2
     let scale = 1.0
-    for (range(0, height // 2)) :: yy
+    for (range(0, height / 2)) :: yy
       let y = yy * 2    
       for (range(0, width)) :: x
         let color1 = traceRay(Ray.create(s.camera.pos, getPoint((x - cx).toF64() * scale, (cy - y).toF64() * scale, s.camera)), s, 0)
@@ -260,7 +260,7 @@ struct RayTracer
       print("\n")
         
   static defaultThings: List<Thing> = [Plane(Vector(0,1,0), 0, Checkerboard as Surface) as Thing, Sphere(Vector(0,1,-0.25), 1, Shiny as Surface) as Thing, Sphere(Vector.create(-1.0,0.5,1.5),0.5, Shiny as Surface) as Thing]
-  static defaultLights: List<Light> = [Light(Vector.create(-2.0,2.5,0), Color.create(0.49,0.07,0.07)), Light.create(Vector.create(1.5,2.5,1.5), Color.create(0.07,0.07,0.49)), Light.create(Vector.create(1.5,2.5,-1.5), Color.create(0.07,0.49,0.071)), Light.create(Vector.create(0,3.5,0), Color.create(0.21,0.21,0.35))]
+  static defaultLights: List<Light> = [Light(Vector.create(-2,2.5,0), Color.create(0.49,0.07,0.07)), Light.create(Vector.create(1.5,2.5,1.5), Color.create(0.07,0.07,0.49)), Light.create(Vector.create(1.5,2.5,-1.5), Color.create(0.07,0.49,0.071)), Light.create(Vector.create(0,3.5,0), Color.create(0.21,0.21,0.35))]
   static defaultCamera: Camera = Camera.lookingAt(Vector.create(3,2,4), Vector.create(-1.0,0.5,0))
   static defaultScene: Scene = Scene.create(defaultThings, defaultLights, defaultCamera, Color.BLACK)
 
