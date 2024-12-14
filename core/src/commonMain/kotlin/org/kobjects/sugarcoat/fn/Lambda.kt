@@ -17,16 +17,15 @@ class Lambda(
         children: List<Expression?>,
         parameterScope: LocalRuntimeContext
     ): Any {
-        require(static == (receiver == null)) {
+        /*require(static == (receiver == null)) {
             if (static) "Unexpected receiver for static method." else "Receiver expected for instance method."
-        }
+        }*/
 
         val localContext = LocalRuntimeContext(parameterScope.globalRuntimeContext, receiver)
 
         // HACK!!!!!
 
         localContext.symbols.putAll(parameterScope.symbols)
-
 
         for ((i, p) in parameterNames.withIndex()) {
             localContext.symbols[p] = children[i]!!.eval(localContext)

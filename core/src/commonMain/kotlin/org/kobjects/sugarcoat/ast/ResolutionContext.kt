@@ -7,6 +7,7 @@ import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.fn.Lambda
 import org.kobjects.sugarcoat.model.Classifier
+import org.kobjects.sugarcoat.parser.Position
 import org.kobjects.sugarcoat.type.GenericTypeResolver
 import org.kobjects.sugarcoat.type.Type
 
@@ -24,15 +25,15 @@ class ResolutionContext(
         locals[name] = Variable(name, type, mutable)
     }
 
-    fun resolveOrNull(name: String): Callable? {
+    fun resolveOrNull(pos: Position, name: String): Callable? {
         val variable = locals[name]
         if (variable != null) {
-            return LocalGetter(variable)
+            return LocalGetter(pos, variable)
         }
         if (name.startsWith("set_")) {
             val setVariable = locals[name.substring(4)]
             if (setVariable != null) {
-                return LocalSetter(setVariable)
+                return LocalSetter(pos, setVariable)
             }
         }
         return null
@@ -73,7 +74,7 @@ class ResolutionContext(
         val mutable: Boolean = false
     )
 
-    data class LocalGetter(val variable: Variable) : Callable {
+    data class LocalGetter(val pos: Position, val variable: Variable) : Callable {
         override val type: FunctionType
             get() = FunctionType(variable.type)
 
@@ -85,14 +86,14 @@ class ResolutionContext(
             children: List<Expression?>,
             parameterScope: LocalRuntimeContext
         ): Any {
-            return if (variable.name == "self")  parameterScope.instance!!
-            else parameterScope.symbols[variable.name] ?: throw IllegalStateException("Variable ${variable.name} not found in $parameterScope")
+            return if (variable.name == "self")  parameterScope.instance ?: throw IllegalStateException("$pos: self can't be resolved in $parameterScope")
+            else parameterScope.symbols[variable.name] ?: throw IllegalStateException("$pos: Variable ${variable.name} not found in $parameterScope")
         }
 
         override fun toString() = variable.name
     }
 
-    data class LocalSetter(val variable: Variable) : Callable {
+    data class LocalSetter(val pos: Position, val variable: Variable) : Callable {
         override val type: FunctionType
             get() = FunctionType(VoidType, ParameterDefinition("value", variable.type))
 

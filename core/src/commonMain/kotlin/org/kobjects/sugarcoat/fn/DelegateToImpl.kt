@@ -30,7 +30,7 @@ class DelegateToImpl(
         children: List<Expression?>,
         parameterScope: LocalRuntimeContext
     ): Any =
-        ((receiver as ImplInstance).implDefinition.definitions[name] as Callable).call(receiver, children, parameterScope)
+        ((receiver as ImplInstance).implDefinition.definitions[name] as Callable).call(receiver.wrapped, children, parameterScope)
 
 
 

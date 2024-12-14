@@ -74,12 +74,12 @@ class UnresolvedSymbolExpression(
 
     override fun resolve(context: ResolutionContext, expectedType: Type?): Expression {
         if (receiver == null) {
-            val localVariable = context.resolveOrNull(name)
+            val localVariable = context.resolveOrNull(position, name)
             if (localVariable != null) {
                 return buildCallExpression(context, null, localVariable, expectedType)
             }
 
-            val self = context.resolveOrNull("self")
+            val self = context.resolveOrNull(position, "self")
             
             val resolvedMember = if (self == null) null else
                 (self.type.returnType as Classifier).resolveSymbolOrNull(name)

@@ -9,5 +9,6 @@ class RaytracerTest {
    @Test
    fun parsingTest() {
        val parsed = SugarcoatParser.parseProgram(RAYTRACER_SOURCE)
+       parsed.run()
    }
 }

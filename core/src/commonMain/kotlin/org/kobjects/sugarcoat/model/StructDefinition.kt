@@ -79,11 +79,11 @@ class StructDefinition(
 
             val instance = StructInstance(parent)
 
-            for ((i, definition) in parent.instanceFields.values.withIndex()) {
-                instance.fields[definition.name] = children[i]!!.eval(parameterScope)
+            for ((i, definition) in type.parameterTypes.withIndex()) {
+                instance.fields[definition.name] = children[i]?.eval(parameterScope) ?: definition.defaultValue?.eval(parameterScope) ?: throw IllegalStateException("Missing parameter: $definition")
             }
 
-            println("struct instance created: $instance")
+            // println("struct instance created: $instance")
 
             return instance
         }

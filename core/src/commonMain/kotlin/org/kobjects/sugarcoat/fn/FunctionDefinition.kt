@@ -29,7 +29,7 @@ data class FunctionDefinition(
 
         val localContext = LocalRuntimeContext(parameterScope.globalRuntimeContext, receiver)
         for ((i, p) in type.parameterTypes.withIndex()) {
-            localContext.symbols[p.name] = children[i]!!.eval(localContext)
+            localContext.symbols[p.name] = children[i]?.eval(parameterScope) ?: p.defaultValue?.eval(parameterScope) ?: throw IllegalStateException("Parameter not foud: ${p.name} in $localContext")
         }
 
         return body.eval(localContext)

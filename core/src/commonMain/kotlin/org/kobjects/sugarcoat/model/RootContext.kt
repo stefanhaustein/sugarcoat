@@ -137,7 +137,7 @@ object RootContext : Classifier(null, "") {
     fun evalFor(children: List<Expression?>, parameterContext: LocalRuntimeContext): Any {
         val range = children[0]!!.eval(parameterContext) as LongRange
         for (value in range) {
-            (children[1]!!.eval(parameterContext) as Callable).call(null, listOf(
+            (children[1]!!.eval(parameterContext) as Callable).call(parameterContext.instance, listOf(
                 LiteralExpression(children[1]!!.position, value)), parameterContext)
         }
         return Unit

@@ -4,6 +4,7 @@ import org.kobjects.parsek.expressionparser.ConfigurableExpressionParser
 import org.kobjects.parsek.tokenizer.Scanner
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.LiteralExpression
+import org.kobjects.sugarcoat.ast.LiteralExpression.Companion.unescape
 import org.kobjects.sugarcoat.ast.ParameterListBuilder
 import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.ast.ParenthesizedExpression
@@ -64,8 +65,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
                 val text = tokenizer.consume().text
                 LiteralExpression(
                     tokenizer.position(),
-                    text.substring(1, text.length - 1)
-                        .replace("\\n", "\n")
+                    text.substring(1, text.length - 1).unescape()
                 )
             }
 

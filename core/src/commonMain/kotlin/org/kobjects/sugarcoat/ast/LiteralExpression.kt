@@ -48,4 +48,31 @@ class LiteralExpression(
 
        return context.resolveTypeExpectation(this, getType(), expectedType)
     }
+
+    companion object {
+        fun String.unescape(): String {
+            val result = StringBuilder()
+            var i = 0
+            while (i < length) {
+                val c = this[i++]
+                if (c == '\\' && i < length) {
+                    val d = this[i++]
+                    when (d) {
+                        'b' -> result.append('\b')
+                        'e' -> result.append('\u001b')
+                        'n' -> result.append('\n')
+                        'r' -> result.append('\r')
+                        't' -> result.append('\t')
+                        '\\',
+                        '"',
+                        '\'' -> result.append(d)
+                        else -> throw IllegalArgumentException("Unrecognized character escape: $d")
+                    }
+                } else {
+                    result.append(c)
+                }
+            }
+            return result.toString()
+        }
+    }
 }
