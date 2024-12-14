@@ -6,6 +6,8 @@ import org.kobjects.sugarcoat.fn.ParameterDefinition
 object I64Type : NativeType("I64", RootContext) {
 
     init {
+        addNativeFunction(I64Type, "parse", ParameterDefinition("s", StringType)) { it.list[0].toString().toLong() }
+
         addNativeMethod(StringType, "toString") { it.i64(0).toString() }
         addNativeMethod(F64Type, "toF64") { it.i64(0).toDouble() }
         addNativeMethod(I64Type, "0-", ) {  -it.i64(0) }

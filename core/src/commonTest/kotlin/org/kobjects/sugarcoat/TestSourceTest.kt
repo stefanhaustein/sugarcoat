@@ -10,15 +10,15 @@ import kotlin.test.assertEquals
 class TestSourceTest {
 
     @Test
-    fun testComplex() = testSource(COMPLEX_CASE)
+    fun testComplex() = runCase(COMPLEX_CASE)
 
     @Test
-    fun testFizzBuzz() = testSource(FIZZBUZZ_CASE)
+    fun testFizzBuzz() = runCase(FIZZBUZZ_CASE)
 
     @Test
-    fun testFarm() = testSource(FARM_CASE)
+    fun testFarm() = runCase(FARM_CASE)
 
-    fun testSource(case: Array<String>) {
+    fun runCase(case: Array<String>) {
         val name = case[0]
         val source = case[1]
         val expected = trim(case[2])

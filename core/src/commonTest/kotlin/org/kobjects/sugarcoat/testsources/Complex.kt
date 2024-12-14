@@ -1,5 +1,4 @@
-package org.kobjects.sugarcoat.testsources
-val COMPLEX_CASE = arrayOf("Complex", """
+package org.kobjects.sugarcoat.testsources; val COMPLEX_CASE = arrayOf("Complex", """
 struct Complex
   a: F64
   b: F64

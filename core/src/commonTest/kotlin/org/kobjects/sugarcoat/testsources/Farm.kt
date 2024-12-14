@@ -1,5 +1,4 @@
-package org.kobjects.sugarcoat.testsources
-val FARM_CASE = arrayOf("Farm", """
+package org.kobjects.sugarcoat.testsources; val FARM_CASE = arrayOf("Farm", """
 
 trait Animal 
   fn sound() -> String
