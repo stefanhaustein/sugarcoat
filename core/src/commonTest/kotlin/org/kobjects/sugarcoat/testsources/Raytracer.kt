@@ -29,13 +29,13 @@ struct Vector
   z: F64
 
   fn times(k: F64) -> Vector
-    Vector.create(k * x, k * y, k * z)
+    Vector(k * x, k * y, k * z)
 
   fn minus(v2: Vector) -> Vector
-    Vector.create(x - v2.x, y - v2.y, z - v2.z)
+    Vector(x - v2.x, y - v2.y, z - v2.z)
 
   fn plus(v2: Vector) -> Vector
-    Vector.create(x + v2.x, y + v2.y, z + v2.z)
+    Vector(x + v2.x, y + v2.y, z + v2.z)
 
   fn dot(v2: Vector) -> F64
     x * v2.x + y * v2.y + z * v2.z
@@ -47,7 +47,7 @@ struct Vector
     times(1.0 / mag())
 
   fn cross(v2: Vector) -> Vector
-    Vector.create(y * v2.z - z * v2.y, z * v2.x - x * v2.z, x * v2.y - y * v2.x)
+    Vector(y * v2.z - z * v2.y, z * v2.x - x * v2.z, x * v2.y - y * v2.x)
 
 struct Camera
   pos: Vector
@@ -56,11 +56,11 @@ struct Camera
   up: Vector
 
   static fn lookingAt(pos: Vector, lookAt: Vector) -> Camera
-    let down = Vector.create(0, -1.0, 0)
+    let down = Vector(0, -1.0, 0)
     let forward = lookAt.minus(pos).norm()
     let right = forward.cross(down).norm().times(1.5)
     let up = forward.cross(right).norm().times(1.5)
-    Camera.create(pos, forward, right, up)
+    Camera(pos, forward, right, up)
 
 struct Ray
   start: Vector
@@ -116,7 +116,7 @@ impl Thing for Sphere
       if (disc >= 0)
         dist = v - sqrt(disc)
 
-    Intersection.create(self as Thing, r, dist)
+    Intersection(self, r, dist)
 
 struct Plane
   norm: Vector
@@ -136,7 +136,7 @@ impl Thing for Plane
     if (denom <= 0)
       dist = (norm.dot(r.start) + offset) / -denom
 
-    Intersection.create(self as Thing, r, dist)
+    Intersection(self, r, dist)
 
 
 object Shiny
@@ -211,12 +211,12 @@ struct RayTracer
     naturalColor.plus(reflectedColor)
 
   fn getReflectionColor(t: Thing, pos: Vector, normal: Vector, rd: Vector, s: Scene, depth: I64) -> Color
-    traceRay(Ray.create(pos, rd), s, depth + 1).scale(t.surface().reflect(pos))
+    traceRay(Ray(pos, rd), s, depth + 1).scale(t.surface().reflect(pos))
 
   fn addLight(t: Thing, pos: Vector, norm: Vector, rd: Vector, s: Scene, col: Color, l: Light) -> Color
     let ldis = l.pos.minus(pos)
     let livec = ldis.norm()
-    let nearIsect = testRay(Ray.create(pos, livec), s)
+    let nearIsect = testRay(Ray(pos, livec), s)
     let isInShadow = (nearIsect <= ldis.mag())
     if (isInShadow) 
       col
@@ -253,18 +253,18 @@ struct RayTracer
     for (range(0, height / 2)) :: yy
       let y = yy * 2    
       for (range(0, width)) :: x
-        let color1 = traceRay(Ray.create(s.camera.pos, getPoint((x - cx).toF64() * scale, (cy - y).toF64() * scale, s.camera)), s, 0)
-        let color2 = traceRay(Ray.create(s.camera.pos, getPoint((x - cx).toF64() * scale, (cy - y - 1).toF64() * scale, s.camera)), s, 0)
+        let color1 = traceRay(Ray(s.camera.pos, getPoint((x - cx).toF64() * scale, (cy - y).toF64() * scale, s.camera)), s, 0)
+        let color2 = traceRay(Ray(s.camera.pos, getPoint((x - cx).toF64() * scale, (cy - y - 1).toF64() * scale, s.camera)), s, 0)
         print(color1.toAnsi(true) + color2.toAnsi(false) + "▀")
       
       print("\n")
         
-  static defaultThings: List<Thing> = [Plane(Vector(0,1,0), 0, Checkerboard as Surface), Sphere(Vector(0, 1,-0.25), 1, Shiny as Surface), Sphere(Vector.create(-1.0,0.5,1.5),0.5, Shiny as Surface) as Thing]
-  static defaultLights: List<Light> = [Light(Vector.create(-2,2.5,0), Color.create(0.49,0.07,0.07)), Light.create(Vector.create(1.5,2.5,1.5), Color.create(0.07,0.07,0.49)), Light.create(Vector.create(1.5,2.5,-1.5), Color.create(0.07,0.49,0.071)), Light.create(Vector.create(0,3.5,0), Color.create(0.21,0.21,0.35))]
-  static defaultCamera: Camera = Camera.lookingAt(Vector.create(3,2,4), Vector.create(-1.0,0.5,0))
-  static defaultScene: Scene = Scene.create(defaultThings, defaultLights, defaultCamera, Color.BLACK)
+  static defaultThings: List<Thing> = [Plane(Vector(0,1,0), 0, Checkerboard), Sphere(Vector(0, 1,-0.25), 1, Shiny), Sphere(Vector(-1.0,0.5,1.5),0.5, Shiny)]
+  static defaultLights: List<Light> = [Light(Vector(-2,2.5,0), Color(0.49,0.07,0.07)), Light(Vector(1.5,2.5,1.5), Color(0.07,0.07,0.49)), Light(Vector(1.5,2.5,-1.5), Color(0.07,0.49,0.071)), Light(Vector(0,3.5,0), Color(0.21,0.21,0.35))]
+  static defaultCamera: Camera = Camera.lookingAt(Vector(3,2,4), Vector(-1.0,0.5,0))
+  static defaultScene: Scene = Scene(defaultThings, defaultLights, defaultCamera, Color.BLACK)
 
 fn main()
-  let rayTracer = RayTracer.create() 
+  let rayTracer = RayTracer() 
   rayTracer.render(RayTracer.defaultScene, 72, 40)
 """

@@ -19,9 +19,10 @@ class AsExpression(
     }
 
     override fun serialize(writer: CodeWriter) {
-        source.serialize(writer)
-        writer.append(" as ")
         writer.append(implDefinition)
+        writer.append("(")
+        source.serialize(writer)
+        writer.append(")")
     }
 
     override fun getType() = implDefinition.trait

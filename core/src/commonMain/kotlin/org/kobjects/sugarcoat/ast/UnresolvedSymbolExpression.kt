@@ -91,7 +91,6 @@ class UnresolvedSymbolExpression(
 
             return buildStaticCallOrTypeReference(
                 context,
-
                 context.namespace.resolveSymbol(name) { "$position" },
                 expectedType)
         }
@@ -126,23 +125,33 @@ class UnresolvedSymbolExpression(
             }
             is Type -> {
                 if (parens) {
-                    require (resolvedMember is StructDefinition) {
-                        "Constructors are only supported for structs."
+                    when (resolvedMember) {
+                        is StructDefinition -> {
+                            val ctor = resolvedMember.resolveSymbol(resolvedMember.constructorName) { "$position" }
+                            require (ctor is Callable) {
+                                "$position: Constructor $ctor for $resolvedMember is not callable."
+                            }
+                            buildCallExpression(context, null, ctor, expectedType)
+                        }
+                        is TraitDefinition -> {
+                            require(children.size == 1) {
+                                "$position: Exactly one parameter expected."
+                            }
+                            val parameter = children.first().value.resolve(context, null)
+                            val impl = context.namespace.program.findImpl(parameter.getType(), resolvedMember)
+                            AsExpression(position, parameter, impl)
+                        }
+                        else -> throw IllegalArgumentException("$position: Constructor-like calls on types are only supported for structs and traits.")
                     }
-                    val ctor = resolvedMember.resolveSymbol(resolvedMember.constructorName) { "$position" }
-                    require (ctor is Callable) {
-                        "$position: Constructor $ctor for $resolvedMember is not callable."
-                    }
-                    buildCallExpression(context, null, ctor, expectedType)
 
-/*                    require(children.isEmpty()) {
-                        "$position: Type '$resolvedMember' can't have function parameters; got $children"
-                    }
-                    require(!parens) {
-                        "$position: Type '$resolvedMember' shouldn't be followed by empty parens"
-                    }*/
                 } else {
-                    LiteralExpression(position, resolvedMember)
+                    val result = LiteralExpression(position, resolvedMember)
+                    if (expectedType is TraitDefinition && result.getType() != expectedType) {
+                        val impl = context.namespace.program.findImpl(result.getType(), expectedType)
+                        AsExpression(position, result, impl)
+                    } else {
+                        result
+                    }
                 }
             }
             else ->
