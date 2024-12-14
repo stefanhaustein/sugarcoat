@@ -259,7 +259,7 @@ struct RayTracer
       
       print("\n")
         
-  static defaultThings: List<Thing> = [Plane(Vector(0,1,0), 0, Checkerboard as Surface) as Thing, Sphere(Vector(0,1,-0.25), 1, Shiny as Surface) as Thing, Sphere(Vector.create(-1.0,0.5,1.5),0.5, Shiny as Surface) as Thing]
+  static defaultThings: List<Thing> = [Plane(Vector(0,1,0), 0, Checkerboard as Surface), Sphere(Vector(0, 1,-0.25), 1, Shiny as Surface), Sphere(Vector.create(-1.0,0.5,1.5),0.5, Shiny as Surface) as Thing]
   static defaultLights: List<Light> = [Light(Vector.create(-2,2.5,0), Color.create(0.49,0.07,0.07)), Light.create(Vector.create(1.5,2.5,1.5), Color.create(0.07,0.07,0.49)), Light.create(Vector.create(1.5,2.5,-1.5), Color.create(0.07,0.49,0.071)), Light.create(Vector.create(0,3.5,0), Color.create(0.21,0.21,0.35))]
   static defaultCamera: Camera = Camera.lookingAt(Vector.create(3,2,4), Vector.create(-1.0,0.5,0))
   static defaultScene: Scene = Scene.create(defaultThings, defaultLights, defaultCamera, Color.BLACK)

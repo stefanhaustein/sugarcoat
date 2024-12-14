@@ -9,6 +9,7 @@ import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.model.ObjectDefinition
 import org.kobjects.sugarcoat.model.StructDefinition
+import org.kobjects.sugarcoat.model.TraitDefinition
 import org.kobjects.sugarcoat.parser.Position
 import org.kobjects.sugarcoat.type.GenericTypeResolver
 
@@ -53,7 +54,7 @@ class UnresolvedSymbolExpression(
         resolvedReceiver: Expression,
         resolvedMember: Classifier,
         expectedType: Type?
-    ): CallExpression {
+    ): Expression {
         require(resolvedMember is Callable) {
             "$position: Resolved member is not callable: $resolvedMember"
         }
@@ -71,19 +72,7 @@ class UnresolvedSymbolExpression(
     }
 
 
-    override fun resolve(
-        context: ResolutionContext,
-        expectedType: Type?
-    ): Expression {
-        if (expectedType is FunctionType && expectedType.parameterTypes.isEmpty()) {
-            val result = resolveImpl(context, expectedType.returnType)
-            return result.asLambda(expectedType)
-        }
-        return resolveImpl(context, expectedType)
-    }
-
-
-    fun resolveImpl(context: ResolutionContext, expectedType: Type?): Expression {
+    override fun resolve(context: ResolutionContext, expectedType: Type?): Expression {
         if (receiver == null) {
             val localVariable = context.resolveOrNull(name)
             if (localVariable != null) {
@@ -160,7 +149,27 @@ class UnresolvedSymbolExpression(
                 throw IllegalStateException("Unrecognized resolved member: '$resolvedMember'")
         }
 
+
     fun buildCallExpression(
+        context: ResolutionContext,
+        resolvedReceiver: Expression?,
+        resolvedMethod: Callable,
+        expectedType: Type?
+    ): Expression {
+        val returnType = resolvedMethod.type.returnType
+        if (expectedType is FunctionType && expectedType.parameterTypes.isEmpty() && returnType !is FunctionType) {
+            val result = buildCallExpressionImpl(context, resolvedReceiver, resolvedMethod, expectedType.returnType)
+            return result.asLambda(expectedType)
+        }
+        if (expectedType is TraitDefinition && returnType != expectedType) {
+            val impl = context.namespace.program.findImpl(returnType, expectedType)
+            val result = buildCallExpressionImpl(context, resolvedReceiver, resolvedMethod, null)
+            return AsExpression(position, result, impl)
+        }
+        return buildCallExpressionImpl(context, resolvedReceiver, resolvedMethod, expectedType)
+    }
+
+    fun buildCallExpressionImpl(
         context: ResolutionContext,
         resolvedReceiver: Expression?,
         resolvedMethod: Callable,
