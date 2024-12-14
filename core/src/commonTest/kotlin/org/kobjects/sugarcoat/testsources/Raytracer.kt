@@ -5,14 +5,14 @@ struct Color
   static WHITE = Color(1, 1, 1)
     
   static fn s255(color: F64) -> String
-    (color * 255.0).toString() 
+    (color * 255.0).toI64().toString() 
 
   r: F64
   g: F64
   b: F64
          
   fn toAnsi(bg: Bool) -> String
-    "\u001b[" + if(bg, "38", else="48") + "2;" + s255(r) + ";" + s255(g) + s255(b)
+    "\e[" + if(bg, "38", else="48") + ";2;" + s255(r) + ";" + s255(g) + ";" + s255(b) + "m"
 
   fn plus(other: Color) -> Color
     Color(r + other.r, g + other.g, b + other.b)
