@@ -87,7 +87,7 @@ class ResolutionContext(
             parameterScope: LocalRuntimeContext
         ): Any {
             return if (variable.name == "self")  parameterScope.instance ?: throw IllegalStateException("$pos: self can't be resolved in $parameterScope")
-            else parameterScope.symbols[variable.name] ?: throw IllegalStateException("$pos: Variable ${variable.name} not found in $parameterScope")
+            else parameterScope.get(variable.name, pos)
         }
 
         override fun toString() = variable.name
@@ -105,7 +105,7 @@ class ResolutionContext(
             children: List<Expression?>,
             parameterScope: LocalRuntimeContext
         ): Any {
-            parameterScope.symbols[variable.name] = children[0]!!.eval(parameterScope)
+            parameterScope.set(variable.name, children[0]!!.eval(parameterScope))
             return Unit
         }
     }

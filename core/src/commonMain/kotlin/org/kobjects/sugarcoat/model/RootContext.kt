@@ -45,8 +45,7 @@ object RootContext : Classifier(null, "") {
         ) { children, parameterContext ->
             require(children.size == 2) { "Two parameters expected for assignment" }
             val target = (children.first() as LiteralExpression).value as String
-            parameterContext.symbols[target] =
-                children.last()!!.eval(parameterContext)
+            parameterContext.set(target, children.last()!!.eval(parameterContext))
             Unit
         }
 

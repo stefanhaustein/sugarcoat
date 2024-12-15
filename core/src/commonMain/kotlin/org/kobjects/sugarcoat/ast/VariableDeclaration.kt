@@ -14,11 +14,7 @@ data class VariableDeclaration(
     val initialValue: Expression) : Expression(position) {
 
     override fun eval(context: LocalRuntimeContext): Any {
-
-        require (!context.symbols.containsKey(name)) {
-            "Local variable '$name' already declared in this context."
-        }
-        context.symbols[name] = initialValue.eval(context)
+        context.declare(name, initialValue.eval(context), position)
         return Unit
     }
 
