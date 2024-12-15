@@ -11,16 +11,12 @@ class DelegateToImpl(
     override val parent: TraitDefinition,
     fallback: Classifier?,
     name: String,
-    var parameters: List<ParameterDefinition>,
-    var returnType: Type,
+    override var type: FunctionType,
 ) : Classifier(parent, name, fallback), Callable {
     override fun serialize(writer: CodeWriter) {
         writer.append(name)
         writer.append("(<TBD>)")
     }
-
-    override val type: FunctionType
-        get() = FunctionType(returnType, parameters)
 
     override val static: Boolean
         get() = false
@@ -35,8 +31,7 @@ class DelegateToImpl(
 
 
     override fun resolveSignatures() {
-        returnType = returnType.resolveType(parent)
-        parameters = parameters.map { it.resolveType(parent) }
+        type = type.resolveType(parent)
     }
 
     override fun toString() = "fn $name(<tbd>)"
