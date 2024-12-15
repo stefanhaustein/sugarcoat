@@ -143,7 +143,7 @@ object Shiny
 
 impl Surface for Shiny
   fn roughness() -> F64
-    250
+    250.0
 
   fn diffuse(pos: Vector) -> Color
     Color.WHITE
@@ -158,7 +158,7 @@ object Checkerboard
 
 impl Surface for Checkerboard
   fn roughness() -> F64
-    150
+    150.0
 
   fn diffuse(pos: Vector) -> Color
     if (((1000.0 + pos.z).toI64 + (1000.0 + pos.x).toI64) % 2 != 0) 
@@ -244,20 +244,20 @@ struct RayTracer
     col
 
   fn getPoint(x: F64, y: F64, cam: Camera) -> Vector
-    cam.forward.plus(cam.right.times(x / 200)).plus(cam.up.times(y / 200)).norm()
+    cam.forward.plus(cam.right.times(x)).plus(cam.up.times(y)).norm()
 
   fn render(s: Scene, width: I64, height: I64) 
     let cx = width / 2
     let cy = height / 2
-    let scale = 1.0
+    let scale = 1.5/(width + height).toF64()
     for (range(0, height / 2)) :: yy
       let y = yy * 2    
       for (range(0, width)) :: x
         let color1 = traceRay(Ray(s.camera.pos, getPoint((x - cx).toF64() * scale, (cy - y).toF64() * scale, s.camera)), s, 0)
         let color2 = traceRay(Ray(s.camera.pos, getPoint((x - cx).toF64() * scale, (cy - y - 1).toF64() * scale, s.camera)), s, 0)
-        print(color1.toAnsi(true) + color2.toAnsi(false) + "▀")
+        print(color1.toAnsi(false) + color2.toAnsi(true) + "▄")
       
-      print("\n")
+      print(Color.BLACK.toAnsi(false) + "\n")
         
   static defaultThings: List<Thing> = [Plane(Vector(0,1,0), 0, Checkerboard), Sphere(Vector(0, 1,-0.25), 1, Shiny), Sphere(Vector(-1.0,0.5,1.5),0.5, Shiny)]
   static defaultLights: List<Light> = [Light(Vector(-2,2.5,0), Color(0.49,0.07,0.07)), Light(Vector(1.5,2.5,1.5), Color(0.07,0.07,0.49)), Light(Vector(1.5,2.5,-1.5), Color(0.07,0.49,0.071)), Light(Vector(0,3.5,0), Color(0.21,0.21,0.35))]
@@ -266,5 +266,5 @@ struct RayTracer
 
 fn main()
   let rayTracer = RayTracer() 
-  rayTracer.render(RayTracer.defaultScene, 72, 40)
+  rayTracer.render(RayTracer.defaultScene, 78, 44)
 """

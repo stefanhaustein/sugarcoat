@@ -7,7 +7,7 @@ import kotlin.test.Test
 class RaytracerTest {
 
    @Test
-   fun parsingTest() {
+   fun renderTest() {
        val parsed = SugarcoatParser.parseProgram(RAYTRACER_SOURCE)
        parsed.run()
    }

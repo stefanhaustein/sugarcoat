@@ -13,8 +13,17 @@ data class CallExpression(
     val fn: Callable,
     val parameter: List<Expression?>
 ): ResolvedExpression(position) {
-    override fun eval(context: LocalRuntimeContext): Any =
-        fn.call(receiver?.eval(context), parameter, context)
+    override fun eval(context: LocalRuntimeContext): Any {
+        try {
+            return fn.call(receiver?.eval(context), parameter, context)
+        } catch (e: Exception) {
+            if (e.message?.contains(": Native call exception in") ?: false) {
+                throw e
+            } else {
+                throw RuntimeException("$position: Native call exception in $fn", e)
+            }
+        }
+    }
 
     override fun getType() = fn.type.returnType
 

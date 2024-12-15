@@ -13,7 +13,9 @@ object F64Type : NativeType("F64", RootContext) {
         addNativeMethod(I64Type, "toI64", ) {  it.f64(0).toLong() }
         addNativeMethod(StringType, "toString", ) {  it.f64(0).toString() }
 
-        addNativeMethod(F64Type, "**", ParameterDefinition("other", F64Type)) { it.f64(0).pow(it.f64(1)) }
+        addNativeMethod(F64Type, "**", ParameterDefinition("other", F64Type)) {
+            it.f64(0).pow(it.f64(1))
+        }
         addNativeMethod(F64Type, "*", ParameterDefinition("other", F64Type)) { it.f64(0) * it.f64(1) }
         addNativeMethod(F64Type, "/", ParameterDefinition("other", F64Type)) { it.f64(0) / it.f64(1) }
         addNativeMethod(F64Type, "%", ParameterDefinition("other", F64Type)) { it.f64(0) % it.f64(1) }
