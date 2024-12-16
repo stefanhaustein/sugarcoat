@@ -12,6 +12,7 @@ import org.kobjects.sugarcoat.datatype.I64Type
 import org.kobjects.sugarcoat.datatype.ListType
 import org.kobjects.sugarcoat.datatype.PairType
 import org.kobjects.sugarcoat.datatype.StringType
+import org.kobjects.sugarcoat.datatype.ToStringTrait
 import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
@@ -36,6 +37,8 @@ object RootContext : Classifier(null, "") {
         addChild(I64RangeType)
         addChild(VoidType)
         addChild(ListType(GenericType("E")))
+
+        addChild(ToStringTrait)
 
         addControl(
             "=",

@@ -3,7 +3,7 @@ package org.kobjects.sugarcoat.model
 import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.type.Type
 
-class TraitDefinition(
+open class TraitDefinition(
     parent: Classifier,
     fallback: Classifier,
     name: String
