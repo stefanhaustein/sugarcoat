@@ -38,35 +38,7 @@ class ResolutionContext(
         }
         return null
     }
-
-
-    /**
-     * The expression is not the receiver here because it might become confusing for multiple
-     * transformations. This is also why actualType is explicit.
-     */
-    fun resolveTypeExpectation(
-        expression: Expression,
-        actualType: Type,
-        expectedType: Type
-    ): Expression {
-        val position = expression.position
-
-        val result: Expression = if (expectedType is FunctionType && actualType !is FunctionType) {
-            require(expectedType.parameterTypes.isEmpty()) {
-                "$position: Cannot imply lambda for function type with parameters: $expectedType"
-            }
-            expression.asLambda(expectedType)
-        } else expression
-
-        expectedType.match(
-            result.getType(),
-        ) {
-            "$position: Expected type $expectedType is not assignable from expression type ${result.getType()} of expression $result"
-        }
-
-        return result
-    }
-
+    
 
     data class Variable(
         val name: String,
