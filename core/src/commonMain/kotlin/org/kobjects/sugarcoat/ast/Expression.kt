@@ -5,6 +5,7 @@ import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.Lambda
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
+import org.kobjects.sugarcoat.model.TraitDefinition
 import org.kobjects.sugarcoat.parser.Position
 
 abstract class Expression(open val position: Position) {
@@ -33,6 +34,23 @@ abstract class Expression(open val position: Position) {
             Lambda(functionType, true, emptyList(), this)
         )
 
+    fun withImpliedTransformations(
+        context: ResolutionContext,
+        expectedType: Type?,
+        actualType: Type,
+        resolve: (Type?) -> Expression
+    ): Expression {
+        if (expectedType is FunctionType && expectedType.parameterTypes.isEmpty() && actualType !is FunctionType) {
+            val result = withImpliedTransformations(context, expectedType.returnType, actualType, resolve)
+            return result.asLambda(expectedType)
+        }
+        if (expectedType is TraitDefinition && actualType != expectedType) {
+            val impl = context.namespace.program.findImpl(actualType, expectedType)
+            val result = resolve(actualType)
+            return AsExpression(position, result, impl)
+        }
+        return resolve(expectedType)
+    }
 
 
 

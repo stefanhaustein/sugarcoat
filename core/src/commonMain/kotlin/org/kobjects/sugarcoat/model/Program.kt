@@ -41,7 +41,10 @@ class Program(
 
     fun resolveAll() {
         for (pass in ResolutionPass.entries) {
-            resolutionPass(this, pass)
+            if (pass == ResolutionPass.IMPLS) {
+                RootContext.resolutionPass(this, pass)
+            }
+           resolutionPass(this, pass)
         }
     }
 

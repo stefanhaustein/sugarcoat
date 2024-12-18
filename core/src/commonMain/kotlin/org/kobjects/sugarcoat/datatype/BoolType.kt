@@ -15,7 +15,7 @@ object BoolType : NativeType( "Bool", RootContext) {
         addNativeMethod(BoolType, "&&", ParameterDefinition("other", BoolType)) { it.bool(0) && it.bool(1) }
         addNativeMethod(BoolType, "||", ParameterDefinition("other", BoolType)) { it.bool(0) || it.bool(1) }
 
-
+        addImpl(ToStringTrait)
     }
 
 

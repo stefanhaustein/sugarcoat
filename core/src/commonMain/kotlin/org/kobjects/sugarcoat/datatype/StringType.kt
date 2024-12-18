@@ -10,7 +10,8 @@ object StringType : NativeType("String", RootContext) {
 
         addNativeMethod(ListType(StringType), "split", ParameterDefinition("by", StringType)) { it.list[0].toString().split(Regex.fromLiteral(it.list[1].toString()))}
 
+        addNativeMethod(StringType, "toString") { it.list[0].toString() }
 
-        addChild(ImplDefinition(this, this, ToStringTrait, this))
+        addImpl(ToStringTrait)
     }
 }

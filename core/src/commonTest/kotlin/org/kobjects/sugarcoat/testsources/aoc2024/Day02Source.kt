@@ -11,7 +11,7 @@ fn main(input: String) -> I64
     let mut safe = true
     for (range(1, numbers.size)) :: j
       let delta = I64.parse(numbers[j]) - I64.parse(numbers[j - 1])
-      print (delta.toString())
+      print (delta)
       if (delta == 0 || delta < -3 || delta > 3) 
         safe = false
         print ("Unsafe because range")

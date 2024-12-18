@@ -24,6 +24,8 @@ object I64Type : NativeType("I64", RootContext) {
         addNativeMethod(BoolType, ">=", ParameterDefinition("other", I64Type)) { it.i64(0) >= it.i64(1) }
         addNativeMethod(BoolType, "<", ParameterDefinition("other", I64Type)) { it.i64(0) < it.i64(1) }
         addNativeMethod(BoolType, ">", ParameterDefinition("other", I64Type)) { it.i64(0) > it.i64(1) }
+
+        addImpl(ToStringTrait)
     }
 
 }

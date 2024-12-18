@@ -37,17 +37,14 @@ class LiteralExpression(
     override fun resolve(
         context: ResolutionContext,
         expectedType: Type?
-    ): Expression {
-        if (expectedType == null) {
-            return this
+    ) = withImpliedTransformations(context, expectedType, getType()) { resolvedExpectedType ->
+            if (resolvedExpectedType == F64Type && getType() == I64Type) {
+                LiteralExpression(position, (value as Long).toDouble())
+            } else {
+                this
+            }
         }
 
-        if (expectedType == F64Type && getType() == I64Type) {
-            return LiteralExpression(position, (value as Long).toDouble())
-        }
-
-       return context.resolveTypeExpectation(this, getType(), expectedType)
-    }
 
     companion object {
         fun String.unescape(): String {

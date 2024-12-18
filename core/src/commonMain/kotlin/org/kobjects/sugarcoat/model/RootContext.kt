@@ -78,9 +78,9 @@ object RootContext : Classifier(null, "") {
         addControl(
             "print",
             VoidType,
-            ParameterDefinition("value", StringType, repeated = true)
+            ParameterDefinition("value", ToStringTrait, repeated = true)
         ) { children, context ->
-            context.globalRuntimeContext.printFn((children[0]!!.eval(context) as List<Any>).joinToString())
+            context.globalRuntimeContext.printFn((children[0]!!.eval(context) as List<ImplInstance>).joinToString { (it.implDefinition.definitions["toString"] as Callable).call(it.wrapped, emptyList(), context).toString()  } )
         }
 
         addControl(

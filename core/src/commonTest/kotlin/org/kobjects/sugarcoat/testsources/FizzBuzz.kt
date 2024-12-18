@@ -11,7 +11,7 @@ fn main()
        print("Buzz")
      
      --else
-       print(x.toString())
+       print(x)
      
      print("\n")    
 """, """

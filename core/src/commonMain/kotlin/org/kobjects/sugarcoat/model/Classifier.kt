@@ -6,6 +6,7 @@ import org.kobjects.sugarcoat.ast.ResolutionContext
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.datatype.NativeArgList
 import org.kobjects.sugarcoat.datatype.NativeFunction
+import org.kobjects.sugarcoat.datatype.ToStringTrait
 import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
@@ -83,6 +84,10 @@ abstract class Classifier(
         op: (NativeArgList) -> Any
     ) {
         addChild(NativeFunction(this, true, returnType, name, args.toList(), op))
+    }
+
+    fun addImpl(trait: TraitDefinition) {
+        addChild(ImplDefinition(this, this, trait, this as Type))
     }
 
 

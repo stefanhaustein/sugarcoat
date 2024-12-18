@@ -165,9 +165,12 @@ class UnresolvedSymbolExpression(
         resolvedMethod: Callable,
         expectedType: Type?
     ): Expression {
-        val returnType = resolvedMethod.type.returnType
+        return withImpliedTransformations(context, expectedType, resolvedMethod.type.returnType) { resolvedExpectedType ->
+            buildCallExpressionImpl(context, resolvedReceiver, resolvedMethod, resolvedExpectedType)
+        }
+/*
         if (expectedType is FunctionType && expectedType.parameterTypes.isEmpty() && returnType !is FunctionType) {
-            val result = buildCallExpressionImpl(context, resolvedReceiver, resolvedMethod, expectedType.returnType)
+            val result = buildCallExpression(context, resolvedReceiver, resolvedMethod, expectedType.returnType)
             return result.asLambda(expectedType)
         }
         if (expectedType is TraitDefinition && returnType != expectedType) {
@@ -175,7 +178,7 @@ class UnresolvedSymbolExpression(
             val result = buildCallExpressionImpl(context, resolvedReceiver, resolvedMethod, null)
             return AsExpression(position, result, impl)
         }
-        return buildCallExpressionImpl(context, resolvedReceiver, resolvedMethod, expectedType)
+        return buildCallExpressionImpl(context, resolvedReceiver, resolvedMethod, expectedType)*/
     }
 
     fun buildCallExpressionImpl(
