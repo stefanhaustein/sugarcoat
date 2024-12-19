@@ -26,8 +26,8 @@ class AocTest {
         println(writer.toString())
 
         for (case in cases.cases) {
-            val result = program.run(case.first)
-            assertEquals(case.second, result)
+            val result = program.run(case.second)
+            assertEquals(case.first, result)
         }
 
     }
