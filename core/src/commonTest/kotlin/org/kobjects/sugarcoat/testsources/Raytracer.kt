@@ -238,7 +238,7 @@ struct RayTracer
 
   fn getNaturalColor(t: Thing, pos: Vector, norm: Vector, rd: Vector, s: Scene) -> Color
     let mut col = defaultColor
-    for (s.lights) :: l
+    for (s.lights) : l
       col = addLight(t, pos, norm, rd, s, col, l)
 
     col
@@ -250,9 +250,9 @@ struct RayTracer
     let cx = width / 2
     let cy = height / 2
     let scale = 1.5/(width + height).toF64()
-    for (range(0, height / 2)) :: yy
+    for (range(0, height / 2)) : yy
       let y = yy * 2    
-      for (range(0, width)) :: x
+      for (range(0, width)) : x
         let color1 = traceRay(Ray(s.camera.pos, getPoint((x - cx).toF64() * scale, (cy - y).toF64() * scale, s.camera)), s, 0)
         let color2 = traceRay(Ray(s.camera.pos, getPoint((x - cx).toF64() * scale, (cy - y - 1).toF64() * scale, s.camera)), s, 0)
         print(color1.toAnsi(false) + color2.toAnsi(true) + "▄")

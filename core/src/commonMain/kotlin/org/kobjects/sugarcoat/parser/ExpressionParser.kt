@@ -176,7 +176,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
     }
 
     fun parseOptionalLambda(scanner: Scanner<TokenType>, context: ParsingContext): Expression? {
-        if (scanner.tryConsume("::")) {
+        if (scanner.tryConsume("::") || scanner.tryConsume(":")) {
             return parseLambdaArgumentsAndBody(scanner, context)
         }
 

@@ -1,6 +1,8 @@
 package org.kobjects.sugarcoat.datatype
 
 import org.kobjects.sugarcoat.fn.ParameterDefinition
+import org.kobjects.sugarcoat.model.ImplDefinition
+import org.kobjects.sugarcoat.model.ImplInstance
 import org.kobjects.sugarcoat.model.RootContext
 import org.kobjects.sugarcoat.type.GenericType
 import org.kobjects.sugarcoat.type.GenericTypeResolver
@@ -18,6 +20,12 @@ data class ListType(val elementType: Type) : NativeType("List", RootContext) {
 
         addNativeFunction(this, "create", ParameterDefinition("values", elementType, true)) {
             it.list[0] as List<Any>
+        }
+
+        val iteratorTrait = IteratorTrait(elementType)
+        val nativeIterator = NativeIterator(elementType)
+        addNativeFunction(iteratorTrait, "iterator") {
+           ImplInstance(nativeIterator.impl, (it.list[0] as List<Any>).iterator())
         }
     }
 

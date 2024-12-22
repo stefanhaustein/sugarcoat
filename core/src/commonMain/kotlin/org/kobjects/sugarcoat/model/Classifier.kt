@@ -86,8 +86,10 @@ abstract class Classifier(
         addChild(NativeFunction(this, true, returnType, name, args.toList(), op))
     }
 
-    fun addImpl(trait: TraitDefinition) {
-        addChild(ImplDefinition(this, this, trait, this as Type))
+    fun addImpl(trait: TraitDefinition): ImplDefinition {
+        val implDefinition = ImplDefinition(this, this, trait, this as Type)
+        addChild(implDefinition)
+        return implDefinition
     }
 
 
