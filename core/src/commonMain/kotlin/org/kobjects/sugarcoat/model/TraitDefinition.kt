@@ -1,6 +1,7 @@
 package org.kobjects.sugarcoat.model
 
 import org.kobjects.sugarcoat.CodeWriter
+import org.kobjects.sugarcoat.type.GenericTypeResolver
 import org.kobjects.sugarcoat.type.Type
 
 open class TraitDefinition(
@@ -15,5 +16,17 @@ open class TraitDefinition(
     }
 
     override fun toString() = "trait $name"
+
+    override fun matchImpl(
+        other: Type,
+        genericTypeResolver: GenericTypeResolver?,
+        lazyMessage: () -> String
+    ) {
+       require(other == this, lazyMessage)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is TraitDefinition && other.name == name && other.parent == parent
+    }
 
 }

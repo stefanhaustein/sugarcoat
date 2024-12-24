@@ -27,6 +27,8 @@ data class ListType(val elementType: Type) : NativeType("List", RootContext) {
         addNativeFunction(iteratorTrait, "iterator") {
            ImplInstance(nativeIterator.impl, (it.list[0] as List<Any>).iterator())
         }
+
+        addImpl(IterableTrait(elementType))
     }
 
     override fun matchImpl(

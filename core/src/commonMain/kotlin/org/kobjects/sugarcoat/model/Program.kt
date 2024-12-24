@@ -18,6 +18,14 @@ class Program(
 
     fun findImpl(source: Type, target: Type): ImplDefinition {
         val resolvedSource = if (source is MetaType && source.type is ObjectDefinition) source.type else source
+        if (resolvedSource is Classifier) {
+            for (def in resolvedSource.unnamed) {
+                println("Local candidate: $def")
+                if (def is ImplDefinition && def.trait == target) {
+                    return def
+                }
+            }
+        }
         return impls[resolvedSource to target] ?: throw IllegalStateException("No impl found that maps $source to $target; available: ${impls.keys}")
     }
 

@@ -9,6 +9,7 @@ import org.kobjects.sugarcoat.datatype.BoolType
 import org.kobjects.sugarcoat.datatype.F64Type
 import org.kobjects.sugarcoat.datatype.I64RangeType
 import org.kobjects.sugarcoat.datatype.I64Type
+import org.kobjects.sugarcoat.datatype.IterableTrait
 import org.kobjects.sugarcoat.datatype.ListType
 import org.kobjects.sugarcoat.datatype.PairType
 import org.kobjects.sugarcoat.datatype.StringType
@@ -56,8 +57,8 @@ object RootContext : Classifier(null, "") {
         addControl(
             "for",
             VoidType,
-            ParameterDefinition("iterable", ListType(forGenericType)),
-            ParameterDefinition("body", FunctionType(VoidType, ParameterDefinition("iteratpr", forGenericType))),
+            ParameterDefinition("iterable", IterableTrait(forGenericType)),
+            ParameterDefinition("body", FunctionType(VoidType, ParameterDefinition("iterator", forGenericType))),
         ) { params, context ->
             evalFor(params, context)
         }
@@ -137,8 +138,9 @@ object RootContext : Classifier(null, "") {
 
 
     fun evalFor(children: List<Expression?>, parameterContext: LocalRuntimeContext): Any {
-        val range = children[0]!!.eval(parameterContext) as Iterable<*>
-        for (value in range) {
+        val iterableImpl = children[0]!!.eval(parameterContext) as ImplInstance
+        val iterable = iterableImpl.wrapped as Iterable<Any>
+        for (value in iterable) {
             (children[1]!!.eval(parameterContext) as Callable).call(parameterContext.instance, listOf(
                 LiteralExpression(children[1]!!.position, value!!)), parameterContext)
         }
