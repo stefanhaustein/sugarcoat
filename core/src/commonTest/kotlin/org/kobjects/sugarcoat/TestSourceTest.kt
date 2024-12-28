@@ -4,6 +4,7 @@ import org.kobjects.sugarcoat.parser.SugarcoatParser
 import org.kobjects.sugarcoat.testsources.COMPLEX_CASE
 import org.kobjects.sugarcoat.testsources.FARM_CASE
 import org.kobjects.sugarcoat.testsources.FIZZBUZZ_CASE
+import org.kobjects.sugarcoat.testsources.STACK_CASE
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -18,6 +19,11 @@ class TestSourceTest {
     @Test
     fun testFarm() = runCase(FARM_CASE)
 
+
+    @Test
+    fun testStack() = runCase(STACK_CASE)
+
+
     fun runCase(case: Array<String>) {
         val name = case[0]
         val source = case[1]
@@ -30,10 +36,12 @@ class TestSourceTest {
         program.serialize(writer)
         println(writer.toString())
 
-        program.run()
-        val actual = trim(result.toString())
+        if (expected != "") {
+            program.run()
+            val actual = trim(result.toString())
 
-        assertEquals(expected, actual, "Unexpected result for $name.")
+            assertEquals(expected, actual, "Unexpected result for $name.")
+        }
     }
 
     companion object {

@@ -10,7 +10,7 @@ import org.kobjects.sugarcoat.type.Type
 
 class Program(
     val printFn: (String) -> Unit = ::print
-) : Classifier(null, "", RootContext) {
+) : Classifier(null, "", emptyList(), RootContext) {
 
     val impls = mutableMapOf<Pair<Type, TraitDefinition>, ImplDefinition>()
 

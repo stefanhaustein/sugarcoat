@@ -12,10 +12,12 @@ import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.fn.Callable
+import org.kobjects.sugarcoat.type.GenericType
 
 abstract class Classifier(
     open val parent: Classifier?,
     open val name: String,
+    open val genericTypes: List<GenericType> = emptyList(),
     open val fallback: Classifier? = null
 ) {
     val definitions = mutableMapOf<String, Classifier>()
@@ -95,7 +97,7 @@ abstract class Classifier(
 
     fun addControl(name: String, returnType: Type, vararg parameters: ParameterDefinition, action: (List<Expression?>, LocalRuntimeContext) -> Any) {
 
-        addChild(object : Callable, Classifier(this, name, null) {
+        addChild(object : Callable, Classifier(this, name) {
             override val static: Boolean
                 get() = true
 

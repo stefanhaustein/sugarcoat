@@ -9,13 +9,15 @@ import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.fn.Callable
+import org.kobjects.sugarcoat.type.GenericType
 
 class StructDefinition(
     parent: Classifier,
     fallback: Classifier,
     name: String,
+    genericType: List<GenericType>,
     val constructorName: String = "create"
-): Type, Classifier(parent, name, fallback) {
+): Type, Classifier(parent, name, genericType, fallback) {
 
     val instanceFields = mutableMapOf<String, InstanceFieldDefinition>()
 

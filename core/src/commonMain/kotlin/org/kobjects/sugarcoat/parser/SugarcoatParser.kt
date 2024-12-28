@@ -20,6 +20,7 @@ import org.kobjects.sugarcoat.ast.VariableDeclaration
 import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.DelegateToImpl
 import org.kobjects.sugarcoat.fn.FunctionType
+import org.kobjects.sugarcoat.type.GenericType
 
 object SugarcoatParser {
 
@@ -60,9 +61,24 @@ object SugarcoatParser {
         return program
     }
 
+    fun parseGenericsDeclarations(scanner: Scanner<TokenType>):List<GenericType> {
+        if (!scanner.tryConsume("<")) {
+            return emptyList()
+        }
+        val result = mutableListOf<GenericType>()
+        do {
+            result.add(GenericType(scanner.consume(TokenType.IDENTIFIER) { "Generic type name expected" }.text))
+        } while (scanner.tryConsume(","))
+        scanner.consume(">") {
+            "Generic type list end marker ('>') expected"
+        }
+        return result.toList()
+    }
+
     fun parseFn(scanner: Scanner<TokenType>, parentContext: ParsingContext, static: Boolean) {
         scanner.consume("fn")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'fn'." }.text
+        val generics = parseGenericsDeclarations(scanner)
         scanner.consume("(") { "Opening brace expected after function name '$name'." }
         val parameters = mutableListOf<ParameterDefinition>()
         if (!scanner.tryConsume(")")) {
@@ -88,6 +104,7 @@ object SugarcoatParser {
             val fd = FunctionDefinition(
                 scanner.position(),
                 parentContext.namespace,
+                generics,
                 parentContext.namespace,
                 static,
                 name,
@@ -116,8 +133,9 @@ object SugarcoatParser {
     fun parseStruct(scanner: Scanner<TokenType>, parentContext: ParsingContext) {
         scanner.consume("struct")
         val name = scanner.consume(TokenType.IDENTIFIER) { "Identifier expected after 'struct'." }.text
+        val genericType = parseGenericsDeclarations(scanner)
         val constructorName = if (scanner.tryConsume("constructor")) scanner.consume(TokenType.IDENTIFIER).text else "create"
-        val struct = StructDefinition(parentContext.namespace, parentContext.program, name, constructorName)
+        val struct = StructDefinition(parentContext.namespace, parentContext.program, name, genericType, constructorName)
         parseClassifier(scanner, parentContext, struct)
         parentContext.namespace.addChild(struct)
     }

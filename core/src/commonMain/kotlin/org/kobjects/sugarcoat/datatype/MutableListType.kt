@@ -8,7 +8,7 @@ import org.kobjects.sugarcoat.type.GenericType
 import org.kobjects.sugarcoat.type.GenericTypeResolver
 import org.kobjects.sugarcoat.type.Type
 
-data class ListType(val elementType: Type) : NativeType("List", RootContext) {
+data class MutableListType(val elementType: Type) : NativeType("MutableList", RootContext) {
 
     init {
         addNativeMethod(elementType, "[]", ParameterDefinition("index", I64Type)) {
@@ -17,9 +17,12 @@ data class ListType(val elementType: Type) : NativeType("List", RootContext) {
         addNativeMethod(I64Type, "size") {
             (it.list[0] as List<Any>).size.toLong()
         }
+        addNativeMethod(I64Type, "add") {
+            (it.list[0] as MutableList<Any>).add(it.list[1])
+        }
 
         addNativeFunction(this, "create", ParameterDefinition("values", elementType, true)) {
-            it.list[0] as List<Any>
+            (it.list[0] as List<Any>).toMutableList()
         }
 
         val iteratorTrait = IteratorTrait(elementType)
@@ -35,12 +38,12 @@ data class ListType(val elementType: Type) : NativeType("List", RootContext) {
         genericTypeResolver: GenericTypeResolver?,
         lazyMessage: () -> String
     ) {
-        require(other is ListType, lazyMessage)
+        require(other is MutableListType, lazyMessage)
         elementType.match(other.elementType, genericTypeResolver, lazyMessage)
     }
 
     override fun resolveGenerics(state: GenericTypeResolver): Type {
-        return ListType(elementType.resolveGenerics(state))
+        return MutableListType(elementType.resolveGenerics(state))
     }
 
 
@@ -48,7 +51,7 @@ data class ListType(val elementType: Type) : NativeType("List", RootContext) {
         require(resolvedTypes.size == 1) {
             "List requires 1 generic parameter. Provided: $resolvedTypes"
         }
-        return ListType(resolvedTypes[0])
+        return MutableListType(resolvedTypes[0])
     }
 
     override fun getGenericTypes(): Set<GenericType> = elementType.getGenericTypes()

@@ -10,7 +10,7 @@ class ImplDefinition(
     fallback: Classifier,
     var trait: Type,
     var wrapped: Type
-) : Classifier(parent, "", fallback) {
+) : Classifier(parent, "", emptyList(), fallback) {
 //    override fun resolve() = trait.resolve()
 
     override fun resolveSignatures() {
