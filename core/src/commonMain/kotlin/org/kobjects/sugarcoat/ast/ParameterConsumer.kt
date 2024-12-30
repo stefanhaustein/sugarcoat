@@ -46,7 +46,7 @@ class ParameterConsumer(
 
     fun done(target: Callable) {
         require(consumed.size == parameterReferences.size) {
-            "Only ${consumed.size} $consumed of ${parameterReferences.size} parameters consumed from $parameterReferences for $target"
+            "$position: Only ${consumed.size} $consumed of ${parameterReferences.size} parameters consumed from $parameterReferences for $target"
         }
     }
 }

@@ -5,10 +5,8 @@ import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.fn.Callable
-import org.kobjects.sugarcoat.fn.Lambda
 import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.parser.Position
-import org.kobjects.sugarcoat.type.GenericTypeResolver
 import org.kobjects.sugarcoat.type.Type
 
 class ResolutionContext(
@@ -25,7 +23,7 @@ class ResolutionContext(
         locals[name] = Variable(name, type, mutable)
     }
 
-    fun resolveOrNull(pos: Position, name: String): Callable? {
+    fun resolveLocalVariableOrNull(pos: Position, name: String): Callable? {
         val variable = locals[name]
         if (variable != null) {
             return LocalGetter(pos, variable)
@@ -36,6 +34,20 @@ class ResolutionContext(
                 return LocalSetter(pos, setVariable)
             }
         }
+        /*
+        if (namespace is FunctionDefinition) {
+            val genericType = namespace.genericTypes.firstOrNull { it.name == name }
+            if (genericType != null) {
+                return
+            }
+            if (!namespace.static) {
+                val genericType = namespace.parent.genericTypes.firstOrNull { it.name == name }
+                if (genericType != null) {
+                    return genericType
+                }
+            }
+        }*/
+
         return null
     }
     

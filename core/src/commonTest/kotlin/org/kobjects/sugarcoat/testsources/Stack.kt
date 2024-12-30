@@ -8,7 +8,7 @@ struct Stack[T]
   fn pop() -> T
     let index = data.size - 1
     let result = data[index]
-    data.remove(index)
+    data.removeAt(index)
     result
 
 fn main() -> I64

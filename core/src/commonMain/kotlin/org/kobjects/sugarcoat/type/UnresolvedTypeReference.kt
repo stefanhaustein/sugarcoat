@@ -11,7 +11,11 @@ class UnresolvedTypeReference(
 ) : Type {
 
     override fun resolveType(context: Classifier): Type {
-        val classifier = context.resolveSymbol(name)
+        val genericType = context.genericTypes.firstOrNull() { it.name == name}
+        if (genericType != null) {
+            return genericType
+        }
+        val classifier = context.resolveSymbol(name) { "$position" }
 
         val parameters = genericParameters.map { it.resolveType(context) }
 

@@ -17,10 +17,12 @@ data class MutableListType(val elementType: Type) : NativeType("MutableList", Ro
         addNativeMethod(I64Type, "size") {
             (it.list[0] as List<Any>).size.toLong()
         }
-        addNativeMethod(I64Type, "add") {
+        addNativeMethod(I64Type, "add", ParameterDefinition("value", elementType)) {
             (it.list[0] as MutableList<Any>).add(it.list[1])
         }
-
+        addNativeMethod(VoidType, "removeAt", ParameterDefinition("index", I64Type)) {
+            (it.list[0] as MutableList<Any>).removeAt((it.list[1] as Long).toInt())
+        }
         addNativeFunction(this, "create", ParameterDefinition("values", elementType, true)) {
             (it.list[0] as List<Any>).toMutableList()
         }

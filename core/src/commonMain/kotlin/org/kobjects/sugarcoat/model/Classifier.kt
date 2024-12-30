@@ -31,7 +31,7 @@ abstract class Classifier(
 
     open fun resolveGenericParameters(resolvedTypes: List<Type>): Type {
         require(resolvedTypes.isEmpty()) {
-            "$this does not support generic type parameters"
+            "$this does not support any generic type parameters; Supplied: $resolvedTypes"
         }
         require(this is Type) {
             "$this is not a type"
@@ -167,6 +167,9 @@ abstract class Classifier(
         if (result != null) {
             return result
         }
+        val genericType = genericTypes.firstOrNull { it.name == name }
+
+
         val fb = fallback
         return fb?.resolveSymbolOrNull(name)
     }

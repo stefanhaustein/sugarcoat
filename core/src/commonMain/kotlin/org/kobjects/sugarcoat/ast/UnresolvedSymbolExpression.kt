@@ -82,12 +82,12 @@ class UnresolvedSymbolExpression(
 
     override fun resolve(context: ResolutionContext, expectedType: Type?): Expression {
         if (receiver == null) {
-            val localVariable = context.resolveOrNull(position, name)
+            val localVariable = context.resolveLocalVariableOrNull(position, name)
             if (localVariable != null) {
                 return buildCallExpression(context, null, localVariable, expectedType)
             }
 
-            val self = context.resolveOrNull(position, "self")
+            val self = context.resolveLocalVariableOrNull(position, "self")
             
             val resolvedMember = if (self == null) null else
                 (self.type.returnType as Classifier).resolveSymbolOrNull(name)
@@ -107,8 +107,12 @@ class UnresolvedSymbolExpression(
         val receiverType = resolvedReceiver.getType().resolveType(context.namespace) // TODO: resolve() should not be necessary here.
         return when (receiverType) {
             is MetaType -> {
-                val resolvedMember = receiverType.type.resolveSymbol(name) { "$position" }
-                buildStaticCallOrTypeReference(context,  resolvedMember, expectedType)
+                if (name == "[]") {
+                    buildTypeReferenceWithResolveGenerics(context, resolvedReceiver, expectedType)
+                } else {
+                    val resolvedMember = receiverType.type.resolveSymbol(name) { "$position" }
+                    buildStaticCallOrTypeReference(context, resolvedMember, expectedType)
+                }
             }
             is Classifier -> {
                 val resolvedMember = receiverType.resolveSymbol(name) { "$position" }
@@ -117,6 +121,27 @@ class UnresolvedSymbolExpression(
             else -> throw IllegalStateException(
                 "$position: Type '$receiverType' (${receiverType::class}) of resolved receiver '$resolvedReceiver' must be classifier for resolving '$name'.")
         }
+    }
+
+    fun buildTypeReferenceWithResolveGenerics(
+        context: ResolutionContext,
+        resolvedReceiver: Expression,
+        expectedType: Type?
+    ): Expression {
+        require(resolvedReceiver is LiteralExpression) {
+            "$position: Literal expression expected for generic type specification"
+        }
+        // Migrate to something like "ResolveAsType"
+        val classifier = resolvedReceiver.value as Classifier
+        val resolvedTypes = mutableListOf<Type>()
+        for (child in children.map { it.value }) {
+            require(child is UnresolvedSymbolExpression && !child.parens && child.children.isEmpty())
+            val resolved = context.namespace.resolveSymbol(child.name)
+            require(resolved is Type)
+            resolvedTypes.add(resolved)
+        }
+        val resolvedGenericType = classifier.resolveGenericParameters(resolvedTypes)
+        return LiteralExpression(position, resolvedGenericType)
     }
 
     fun buildStaticCallOrTypeReference(
