@@ -19,11 +19,9 @@ class TestSourceTest {
     @Test
     fun testFarm() = runCase(FARM_CASE)
 
-
     @Test
     fun testStack() = runCase(STACK_CASE)
-
-
+    
     fun runCase(case: Array<String>) {
         val name = case[0]
         val source = case[1]

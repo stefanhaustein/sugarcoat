@@ -62,15 +62,15 @@ object SugarcoatParser {
     }
 
     fun parseGenericsDeclarations(scanner: Scanner<TokenType>):List<GenericType> {
-        if (!scanner.tryConsume("<")) {
+        if (!scanner.tryConsume("[")) {
             return emptyList()
         }
         val result = mutableListOf<GenericType>()
         do {
             result.add(GenericType(scanner.consume(TokenType.IDENTIFIER) { "Generic type name expected" }.text))
         } while (scanner.tryConsume(","))
-        scanner.consume(">") {
-            "Generic type list end marker ('>') expected"
+        scanner.consume("]") {
+            "Generic type list end marker (']') expected"
         }
         return result.toList()
     }
@@ -251,7 +251,13 @@ object SugarcoatParser {
                     "Unsupported assignment target: $result"
                 }
                 val source = parseExpression(scanner, parsingContext)
-                result = UnresolvedSymbolExpression(scanner.position(), result.receiver,"set_${result.name}", true, listOf(ParameterReference("", source)))
+                result = UnresolvedSymbolExpression(
+                    scanner.position(),
+                    result.receiver,
+                    "set_${result.name}",
+                    true,
+                    listOf(ParameterReference("", source))
+                )
             }
             result
         }
@@ -264,11 +270,11 @@ object SugarcoatParser {
         }
 
         val genericParameters = mutableListOf<Type>()
-        if (scanner.tryConsume("<")) {
+        if (scanner.tryConsume("[")) {
             do {
                 genericParameters.add(parseType(scanner, parsingContext))
             } while (scanner.tryConsume(","))
-            scanner.consume(">") { "'>' expected at the end of the generic parameter name list." }
+            scanner.consume("]") { "'>' expected at the end of the generic parameter name list." }
         }
         return UnresolvedTypeReference(scanner.position(), name, genericParameters.toList())
     }

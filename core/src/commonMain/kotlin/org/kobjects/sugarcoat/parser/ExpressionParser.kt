@@ -77,7 +77,13 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
                     else -> {
                         val parens = tokenizer.current.text == "("
                         val children = parseParameterList(tokenizer, context)
-                        UnresolvedSymbolExpression(tokenizer.position(), null, name, parens, children)
+                        UnresolvedSymbolExpression(
+                            tokenizer.position(),
+                            null,
+                            name,
+                            parens,
+                            children
+                        )
                     }
                 }
             }
@@ -100,7 +106,8 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
                         LiteralExpression(tokenizer.position(), ListType(GenericType("E"))),
                         "create",
                         true,
-                        builder.build())
+                        builder.build()
+                    )
                 } else {
                     throw tokenizer.exception("'(' or '[' expected.")
                 }
@@ -109,8 +116,24 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             else ->
                 throw tokenizer.exception("Unrecognized primary expression.")
         }
-        while (tokenizer.current.type == TokenType.PROPERTY || tokenizer.current.text == "[") {
-            if (tokenizer.tryConsume("[")) {
+        while (tokenizer.current.type == TokenType.PROPERTY || tokenizer.current.text == "[" || tokenizer.current.text == "(") {
+            if (tokenizer.tryConsume("(")) {
+                val builder = ParameterListBuilder()
+                if (tokenizer.current.text != ")") {
+                    do {
+                        builder.add(parseExpression(tokenizer, context))
+                    } while (tokenizer.tryConsume(","))
+                }
+                tokenizer.consume(")") { "',' or ']' expected" }
+                expr = UnresolvedSymbolExpression(
+                    tokenizer.position(),
+                    expr,
+                    "()",
+                    true,
+                    builder.build()
+                )
+            }
+            else if (tokenizer.tryConsume("[")) {
                 val builder = ParameterListBuilder()
                 if (tokenizer.current.text != "]") {
                     do {
@@ -118,12 +141,24 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
                     } while (tokenizer.tryConsume(","))
                 }
                 tokenizer.consume("]") { "',' or ']' expected" }
-                expr = UnresolvedSymbolExpression(tokenizer.position(), expr, "[]", true, builder.build())
+                expr = UnresolvedSymbolExpression(
+                    tokenizer.position(),
+                    expr,
+                    "[]",
+                    true,
+                    builder.build()
+                )
             } else {
                 val name = tokenizer.consume().text.substring(1)
                 val hasParens = tokenizer.current.text == "("
                 val parameterList = parseParameterList(tokenizer, context)
-                expr = UnresolvedSymbolExpression(tokenizer.position(), expr, name, hasParens, parameterList)
+                expr = UnresolvedSymbolExpression(
+                    tokenizer.position(),
+                    expr,
+                    name,
+                    hasParens,
+                    parameterList
+                )
             }
         }
         return expr

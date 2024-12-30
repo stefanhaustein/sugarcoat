@@ -87,8 +87,8 @@ struct Light
     color: Color
 
 struct Scene
-    things: List<Thing>
-    lights: List<Light>
+    things: List[Thing]
+    lights: List[Light]
     camera: Camera
     background: Color
 
@@ -259,8 +259,8 @@ struct RayTracer
       
       print(Color.BLACK.toAnsi(false) + "\n")
         
-  static defaultThings: List<Thing> = [Plane(Vector(0,1,0), 0, Checkerboard), Sphere(Vector(0, 1,-0.25), 1, Shiny), Sphere(Vector(-1.0,0.5,1.5),0.5, Shiny)]
-  static defaultLights: List<Light> = [Light(Vector(-2,2.5,0), Color(0.49,0.07,0.07)), Light(Vector(1.5,2.5,1.5), Color(0.07,0.07,0.49)), Light(Vector(1.5,2.5,-1.5), Color(0.07,0.49,0.071)), Light(Vector(0,3.5,0), Color(0.21,0.21,0.35))]
+  static defaultThings: List[Thing] = [Plane(Vector(0,1,0), 0, Checkerboard), Sphere(Vector(0, 1,-0.25), 1, Shiny), Sphere(Vector(-1.0,0.5,1.5),0.5, Shiny)]
+  static defaultLights: List[Light] = [Light(Vector(-2,2.5,0), Color(0.49,0.07,0.07)), Light(Vector(1.5,2.5,1.5), Color(0.07,0.07,0.49)), Light(Vector(1.5,2.5,-1.5), Color(0.07,0.49,0.071)), Light(Vector(0,3.5,0), Color(0.21,0.21,0.35))]
   static defaultCamera: Camera = Camera.lookingAt(Vector(3,2,4), Vector(-1.0,0.5,0))
   static defaultScene: Scene = Scene(defaultThings, defaultLights, defaultCamera, Color.BLACK)
 

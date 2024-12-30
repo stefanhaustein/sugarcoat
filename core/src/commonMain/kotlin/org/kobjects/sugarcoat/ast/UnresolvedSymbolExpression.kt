@@ -1,13 +1,11 @@
 package org.kobjects.sugarcoat.ast
 
 import org.kobjects.sugarcoat.CodeWriter
-import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.type.MetaType
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.model.Classifier
-import org.kobjects.sugarcoat.model.ObjectDefinition
 import org.kobjects.sugarcoat.model.StructDefinition
 import org.kobjects.sugarcoat.model.TraitDefinition
 import org.kobjects.sugarcoat.parser.Position
@@ -23,9 +21,19 @@ class UnresolvedSymbolExpression(
     val children: List<ParameterReference>,
 ) : Expression(position) {
 
-    constructor(position: Position, receiver: Expression, name: String, vararg children: Expression) : this(position, receiver, name, children.size > 0, children.map { ParameterReference("", it) })
+    constructor(position: Position, receiver: Expression, name: String, vararg children: Expression) : this(
+        position,
+        receiver,
+        name,
+        children.size > 0,
+        children.map { ParameterReference("", it) })
 
-    constructor(position: Position, name: String, vararg children: Expression) : this(position, null, name, children.size > 0, children.map { ParameterReference("", it) })
+    constructor(position: Position, name: String, vararg children: Expression) : this(
+        position,
+        null,
+        name,
+        children.size > 0,
+        children.map { ParameterReference("", it) })
 
     override fun eval(context: LocalRuntimeContext) = throw UnsupportedOperationException()
 

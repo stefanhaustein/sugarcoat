@@ -1,6 +1,6 @@
 package org.kobjects.sugarcoat.testsources; val STACK_CASE = arrayOf("StackTest", """
-struct Stack<T>
-  data: MutableList<T>
+struct Stack[T]
+  data: MutableList[T]
   
   fn push(value: T)
     data.add(value)
@@ -12,7 +12,7 @@ struct Stack<T>
     result
 
 fn main() -> I64
-  let s = Stack()
+  let s = Stack[I64]
   s.push(42)
   s.pop
 """,
