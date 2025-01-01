@@ -1,13 +1,11 @@
 package org.kobjects.sugarcoat.ast
 
 import org.kobjects.sugarcoat.CodeWriter
-import org.kobjects.sugarcoat.datatype.NativeType
 import org.kobjects.sugarcoat.type.MetaType
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.Callable
-import org.kobjects.sugarcoat.model.Classifier
-import org.kobjects.sugarcoat.model.StructDefinition
+import org.kobjects.sugarcoat.model.Namespace
 import org.kobjects.sugarcoat.model.TraitDefinition
 import org.kobjects.sugarcoat.parser.Position
 import org.kobjects.sugarcoat.type.GenericTypeResolver
@@ -61,7 +59,7 @@ class UnresolvedSymbolExpression(
     fun buildMethodCall(
         context: ResolutionContext,
         resolvedReceiver: Expression,
-        resolvedMember: Classifier,
+        resolvedMember: Namespace,
         expectedType: Type?
     ): Expression {
         require(resolvedMember is Callable) {
@@ -91,7 +89,7 @@ class UnresolvedSymbolExpression(
             val self = context.resolveLocalVariableOrNull(position, "self")
             
             val resolvedMember = if (self == null) null else
-                (self.type.returnType as Classifier).resolveSymbolOrNull(name)
+                (self.type.returnType as Namespace).resolveSymbolOrNull(name)
 
             if (resolvedMember is Callable && !resolvedMember.static) {
                 val selfExpression = CallExpression(position, null, self as Callable, emptyList())
@@ -117,7 +115,7 @@ class UnresolvedSymbolExpression(
                     buildStaticCallOrTypeReference(context, resolvedMember, expectedType)
                 }
             }
-            is Classifier -> {
+            is Namespace -> {
                 val resolvedMember = receiverType.resolveSymbol(name) { "$position" }
                 buildMethodCall(context, resolvedReceiver, resolvedMember, expectedType)
             }
@@ -135,7 +133,7 @@ class UnresolvedSymbolExpression(
             "$position: Literal expression expected for generic type specification"
         }
         // Migrate to something like "ResolveAsType"
-        val classifier = resolvedReceiver.value as Classifier
+        val classifier = resolvedReceiver.value as Namespace
         val resolvedTypes = mutableListOf<Type>()
         for (child in children.map { it.value }) {
             require(child is UnresolvedSymbolExpression && !child.parens && child.children.isEmpty())
@@ -149,7 +147,7 @@ class UnresolvedSymbolExpression(
 
     fun buildStaticCallOrTypeReference(
         context: ResolutionContext,
-        resolvedMember: Classifier,
+        resolvedMember: Namespace,
         expectedType: Type?
     ): Expression =
         when(resolvedMember) {

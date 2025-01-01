@@ -4,19 +4,19 @@ import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.ResolutionContext
 import org.kobjects.sugarcoat.ast.UnresolvedFunctionBody
-import org.kobjects.sugarcoat.model.Classifier
+import org.kobjects.sugarcoat.model.Namespace
 import org.kobjects.sugarcoat.parser.Position
 import org.kobjects.sugarcoat.type.GenericType
 
 data class FunctionDefinition(
     val position: Position,
-    override val parent: Classifier,
+    override val parent: Namespace,
     override val genericTypes: List<GenericType>,
-    override val fallback: Classifier,
+    override val fallback: Namespace,
     override val static: Boolean,
     override val name: String,
     override var type: FunctionType,
-) : Callable, Classifier(parent, name, genericTypes, fallback) {
+) : Callable, Namespace(parent, name, genericTypes, fallback) {
 
     var body: Expression = UnresolvedFunctionBody(this)
 

@@ -6,14 +6,14 @@ import org.kobjects.sugarcoat.datatype.I64RangeType
 import org.kobjects.sugarcoat.datatype.I64Type
 import org.kobjects.sugarcoat.datatype.StringType
 import org.kobjects.sugarcoat.datatype.VoidType
-import org.kobjects.sugarcoat.model.Classifier
+import org.kobjects.sugarcoat.model.Namespace
 
 /**
  * Note that there are types that are not classifiers such as MetaType and function types.
  */
 interface Type {
 
-    fun resolveType(context: Classifier): Type = this
+    fun resolveType(context: Namespace): Type = this
 
     // Override matchImpl instead.
     fun match(
@@ -65,7 +65,7 @@ interface Type {
                 is String -> StringType
                 is Typed -> value.type
                 is Unit -> VoidType
-                is Classifier -> MetaType(value)
+                is Namespace -> MetaType(value)
                 else -> throw IllegalArgumentException("Type of value '$value' not supported.")
             }
 

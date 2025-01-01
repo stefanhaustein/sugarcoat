@@ -2,7 +2,7 @@ package org.kobjects.sugarcoat.parser
 
 import org.kobjects.parsek.tokenizer.Scanner
 import org.kobjects.sugarcoat.ast.BlockExpression
-import org.kobjects.sugarcoat.model.Classifier
+import org.kobjects.sugarcoat.model.Namespace
 import org.kobjects.sugarcoat.fn.FunctionDefinition
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.ast.Expression
@@ -93,7 +93,7 @@ object SugarcoatParser {
         val returnType = if (scanner.tryConsume("->")) parseType(scanner, parentContext) else VoidType
         val functionType = FunctionType(returnType, parameters)
 
-        val fn: Classifier = if (!static && parentContext.namespace is TraitDefinition) {
+        val fn: Namespace = if (!static && parentContext.namespace is TraitDefinition) {
             DelegateToImpl(
                 parentContext.namespace,
                 parentContext.namespace,
@@ -160,7 +160,7 @@ object SugarcoatParser {
     fun parseClassifier(
         scanner: Scanner<TokenType>,
         parentContext: ParsingContext,
-        classifier: Classifier
+        classifier: Namespace
     ) {
         val depth = currentIndent(scanner)
         if (depth <= parentContext.depth) {

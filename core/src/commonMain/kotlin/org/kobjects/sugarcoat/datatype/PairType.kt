@@ -1,7 +1,7 @@
 package org.kobjects.sugarcoat.datatype
 
 import org.kobjects.sugarcoat.type.Type
-import org.kobjects.sugarcoat.model.Classifier
+import org.kobjects.sugarcoat.model.Namespace
 import org.kobjects.sugarcoat.type.GenericType
 import org.kobjects.sugarcoat.type.GenericTypeResolver
 
@@ -13,7 +13,7 @@ data class PairType(val firstType: Type, val secondType: Type) : NativeType("Pai
         secondType.match(other.secondType, genericTypeResolver, lazyMessage)
     }
 
-    override fun resolveType(context: Classifier): Type {
+    override fun resolveType(context: Namespace): Type {
         return PairType(firstType.resolveType(context), secondType.resolveType(context))
     }
 

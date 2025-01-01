@@ -9,17 +9,15 @@ import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.fn.Callable
-import org.kobjects.sugarcoat.fn.DegenerifiedFunctionProxy
 import org.kobjects.sugarcoat.type.GenericType
-import org.kobjects.sugarcoat.type.GenericTypeResolver
 
 class StructDefinition(
-    parent: Classifier,
-    fallback: Classifier,
+    parent: Namespace,
+    fallback: Namespace,
     name: String,
     genericType: List<GenericType>,
     override val constructorName: String = "create"
-): Type, Classifier(parent, name, genericType, fallback) {
+): Type, Namespace(parent, name, genericType, fallback) {
 
     val instanceFields = mutableMapOf<String, InstanceFieldDefinition>()
 
@@ -65,7 +63,7 @@ class StructDefinition(
     override fun toString() = "struct $name"
 
 
-    class StructConstructor(override val parent: StructDefinition) : Callable, Classifier(parent, "create") {
+    class StructConstructor(override val parent: StructDefinition) : Callable, Namespace(parent, "create") {
         override val static: Boolean
             get() = true
 

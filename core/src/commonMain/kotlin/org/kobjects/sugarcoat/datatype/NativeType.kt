@@ -1,14 +1,14 @@
 package org.kobjects.sugarcoat.datatype
 
 import org.kobjects.sugarcoat.CodeWriter
-import org.kobjects.sugarcoat.model.Classifier
+import org.kobjects.sugarcoat.model.Namespace
 import org.kobjects.sugarcoat.type.Type
 
 abstract class NativeType(
     name: String,
-    override val parent: Classifier? = null
+    override val parent: Namespace? = null
 
-) : Classifier(parent, name), Type {
+) : Namespace(parent, name), Type {
 
     override val constructorName: String
         get() = if (definitions.contains("create")) "create" else ""

@@ -6,7 +6,6 @@ import org.kobjects.sugarcoat.ast.ResolutionContext
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.datatype.NativeArgList
 import org.kobjects.sugarcoat.datatype.NativeFunction
-import org.kobjects.sugarcoat.datatype.ToStringTrait
 import org.kobjects.sugarcoat.datatype.VoidType
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
@@ -14,14 +13,14 @@ import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.type.GenericType
 
-abstract class Classifier(
-    open val parent: Classifier?,
+abstract class Namespace(
+    open val parent: Namespace?,
     open val name: String,
     open val genericTypes: List<GenericType> = emptyList(),
-    open val fallback: Classifier? = null
+    open val fallback: Namespace? = null
 ) {
-    val definitions = mutableMapOf<String, Classifier>()
-    val unnamed = mutableListOf<Classifier>()
+    val definitions = mutableMapOf<String, Namespace>()
+    val unnamed = mutableListOf<Namespace>()
     val staticFields = mutableMapOf<String, StaticFieldDefinition>()
     open val constructorName: String
         get() = ""
@@ -49,7 +48,7 @@ abstract class Classifier(
     }
 
 
-    open fun addChild(value: Classifier) {
+    open fun addChild(value: Namespace) {
         require(value.parent == this) {
             "Parent is not 'this' when trying to add child '$value' to '$this'"
         }
@@ -109,7 +108,7 @@ abstract class Classifier(
 
     fun addControl(name: String, returnType: Type, vararg parameters: ParameterDefinition, action: (List<Expression?>, LocalRuntimeContext) -> Any) {
 
-        addChild(object : Callable, Classifier(this, name) {
+        addChild(object : Callable, Namespace(this, name) {
             override val static: Boolean
                 get() = true
 
@@ -174,7 +173,7 @@ abstract class Classifier(
     }
 
 
-    fun resolveSymbolOrNull(name: String): Classifier? {
+    fun resolveSymbolOrNull(name: String): Namespace? {
         val result = definitions[name]
         if (result != null) {
             return result
@@ -189,7 +188,7 @@ abstract class Classifier(
 
     abstract fun serialize(writer: CodeWriter)
 
-    fun resolveSymbol(name: String, errorPrefix: (() -> String) = { "(Unknown location)" }): Classifier {
+    fun resolveSymbol(name: String, errorPrefix: (() -> String) = { "(Unknown location)" }): Namespace {
         val result = resolveSymbolOrNull(name)
         require (result != null) {
             "${errorPrefix()}: Unable to resolve '$name' in\n${dump()}"

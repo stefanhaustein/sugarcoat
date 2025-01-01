@@ -5,10 +5,10 @@ import org.kobjects.sugarcoat.type.GenericTypeResolver
 import org.kobjects.sugarcoat.type.Type
 
 open class TraitDefinition(
-    parent: Classifier,
-    fallback: Classifier,
+    parent: Namespace,
+    fallback: Namespace,
     name: String
-) : Type, Classifier(parent, name, emptyList(), fallback) {
+) : Type, Namespace(parent, name, emptyList(), fallback) {
 
     override fun serialize(writer: CodeWriter) {
         writer.append("trait $name\n")

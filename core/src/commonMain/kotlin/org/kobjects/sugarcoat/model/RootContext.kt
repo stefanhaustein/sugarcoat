@@ -24,7 +24,7 @@ import org.kobjects.sugarcoat.parser.Position
 import org.kobjects.sugarcoat.type.GenericType
 import kotlin.math.sqrt
 
-object RootContext : Classifier(null, "") {
+object RootContext : Namespace(null, "") {
     override fun serialize(writer: CodeWriter) {
         throw UnsupportedOperationException()
     }

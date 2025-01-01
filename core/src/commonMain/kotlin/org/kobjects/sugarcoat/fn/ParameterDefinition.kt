@@ -4,7 +4,7 @@ import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.ResolutionContext
 import org.kobjects.sugarcoat.datatype.ListType
 import org.kobjects.sugarcoat.type.Type
-import org.kobjects.sugarcoat.model.Classifier
+import org.kobjects.sugarcoat.model.Namespace
 
 data class ParameterDefinition(
     val name: String,
@@ -14,7 +14,7 @@ data class ParameterDefinition(
 ) {
     override fun toString() = "$name: $type"
 
-    fun resolveType(context: Classifier) = copy(type = type.resolveType(context))
+    fun resolveType(context: Namespace) = copy(type = type.resolveType(context))
 
     fun resolveDefaultExpression(context: ResolutionContext) = copy(defaultValue = defaultValue?.resolve(
         context,

@@ -6,11 +6,11 @@ import org.kobjects.sugarcoat.fn.DelegateToImpl
 import org.kobjects.sugarcoat.type.Type
 
 class ImplDefinition(
-    parent: Classifier,
-    fallback: Classifier,
+    parent: Namespace,
+    fallback: Namespace,
     var trait: Type,
     var wrapped: Type
-) : Classifier(parent, "", emptyList(), fallback) {
+) : Namespace(parent, "", emptyList(), fallback) {
 //    override fun resolve() = trait.resolve()
 
     override fun resolveSignatures() {
@@ -26,7 +26,7 @@ class ImplDefinition(
             if (traitMember is DelegateToImpl) {
                 var localMethod = definitions[traitMember.name]
                 if (localMethod == null) {
-                    val wrappedMethod = (wrapped as Classifier).definitions[traitMember.name]
+                    val wrappedMethod = (wrapped as Namespace).definitions[traitMember.name]
                     if (wrappedMethod != null) {
                         definitions[traitMember.name] = wrappedMethod
                         localMethod = wrappedMethod

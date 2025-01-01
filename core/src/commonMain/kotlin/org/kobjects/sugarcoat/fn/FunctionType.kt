@@ -1,7 +1,7 @@
 package org.kobjects.sugarcoat.fn
 
 import org.kobjects.sugarcoat.ast.ResolutionContext
-import org.kobjects.sugarcoat.model.Classifier
+import org.kobjects.sugarcoat.model.Namespace
 import org.kobjects.sugarcoat.type.GenericType
 import org.kobjects.sugarcoat.type.GenericTypeResolver
 import org.kobjects.sugarcoat.type.Type
@@ -12,7 +12,7 @@ data class FunctionType(
 ) : Type {
     constructor(returnType: Type, vararg parameterTypes: ParameterDefinition) : this(returnType, parameterTypes.asList())
 
-    override fun resolveType(context: Classifier): FunctionType {
+    override fun resolveType(context: Namespace): FunctionType {
         val resolvedReturnType = returnType.resolveType(context)
         val resolvedParameterTypes = List(parameterTypes.size) { parameterTypes[it].resolveType(context) }
         return FunctionType(resolvedReturnType, resolvedParameterTypes)

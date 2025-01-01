@@ -2,9 +2,7 @@ package org.kobjects.sugarcoat
 
 import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.LiteralExpression
-import org.kobjects.sugarcoat.ast.ParameterReference
 import org.kobjects.sugarcoat.fn.Lambda
-import org.kobjects.sugarcoat.model.Classifier
 
 class CodeWriter {
     val sb = StringBuilder()

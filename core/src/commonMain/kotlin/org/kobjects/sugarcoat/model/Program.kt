@@ -10,7 +10,7 @@ import org.kobjects.sugarcoat.type.Type
 
 class Program(
     val printFn: (String) -> Unit = ::print
-) : Classifier(null, "", emptyList(), RootContext) {
+) : Namespace(null, "", emptyList(), RootContext) {
 
     val impls = mutableMapOf<Pair<Type, TraitDefinition>, ImplDefinition>()
 
@@ -18,7 +18,7 @@ class Program(
 
     fun findImpl(source: Type, target: Type): ImplDefinition {
         val resolvedSource = if (source is MetaType && source.type is ObjectDefinition) source.type else source
-        if (resolvedSource is Classifier) {
+        if (resolvedSource is Namespace) {
             for (def in resolvedSource.unnamed) {
                 println("Local candidate: $def")
                 if (def is ImplDefinition && def.trait == target) {

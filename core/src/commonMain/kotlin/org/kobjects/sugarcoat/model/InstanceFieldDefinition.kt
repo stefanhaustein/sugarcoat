@@ -8,7 +8,7 @@ data class InstanceFieldDefinition(
     var type: Type,
     val unresolvedDefaultExpression: Expression?
 ) {
-    fun resolveType(context: Classifier) {
+    fun resolveType(context: Namespace) {
         type = type.resolveType(context)
     }
 }

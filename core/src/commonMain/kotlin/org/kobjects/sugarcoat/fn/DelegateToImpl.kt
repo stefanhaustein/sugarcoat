@@ -2,17 +2,16 @@ package org.kobjects.sugarcoat.fn
 
 import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.ast.Expression
-import org.kobjects.sugarcoat.type.Type
-import org.kobjects.sugarcoat.model.Classifier
+import org.kobjects.sugarcoat.model.Namespace
 import org.kobjects.sugarcoat.model.ImplInstance
 import org.kobjects.sugarcoat.model.TraitDefinition
 
 class DelegateToImpl(
     override val parent: TraitDefinition,
-    fallback: Classifier?,
+    fallback: Namespace?,
     name: String,
     override var type: FunctionType,
-) : Classifier(parent, name, emptyList(), fallback), Callable {
+) : Namespace(parent, name, emptyList(), fallback), Callable {
     override fun serialize(writer: CodeWriter) {
         writer.append(name)
         writer.append("(<TBD>)")

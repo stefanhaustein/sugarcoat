@@ -8,16 +8,16 @@ import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.fn.Callable
-import org.kobjects.sugarcoat.model.Classifier
+import org.kobjects.sugarcoat.model.Namespace
 
 data class NativeFunction(
-    override val parent: Classifier,
+    override val parent: Namespace,
     override val static: Boolean,
     val returnType: Type,
     override val name: String,
     val args: List<ParameterDefinition>,
     val op: (NativeArgList) -> Any
-) : Classifier(parent, name), Callable {
+) : Namespace(parent, name), Callable {
 
 
     override fun call(

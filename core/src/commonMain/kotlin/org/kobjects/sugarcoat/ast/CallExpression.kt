@@ -3,8 +3,7 @@ package org.kobjects.sugarcoat.ast
 import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.Callable
-import org.kobjects.sugarcoat.fn.Lambda
-import org.kobjects.sugarcoat.model.Classifier
+import org.kobjects.sugarcoat.model.Namespace
 import org.kobjects.sugarcoat.parser.Position
 
 data class CallExpression(
@@ -31,7 +30,7 @@ data class CallExpression(
     override fun serialize(writer: CodeWriter) {
         writer.writeInvocation(
             receiver,
-            if (fn is Classifier) fn.name else fn.toString(),
+            if (fn is Namespace) fn.name else fn.toString(),
             parameter.mapIndexed { index, experession ->
                 fn.type.parameterTypes[index].name to experession
             }

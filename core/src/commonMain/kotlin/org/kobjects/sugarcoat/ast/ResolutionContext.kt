@@ -5,12 +5,12 @@ import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.fn.Callable
-import org.kobjects.sugarcoat.model.Classifier
+import org.kobjects.sugarcoat.model.Namespace
 import org.kobjects.sugarcoat.parser.Position
 import org.kobjects.sugarcoat.type.Type
 
 class ResolutionContext(
-    val namespace: Classifier,
+    val namespace: Namespace,
     val parent: ResolutionContext? = null,
 ) {
     private val locals: MutableMap<String, Variable> = parent?.locals ?: mutableMapOf()
