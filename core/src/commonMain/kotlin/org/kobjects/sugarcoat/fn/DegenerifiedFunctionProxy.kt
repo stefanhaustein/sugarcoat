@@ -5,10 +5,9 @@ import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.type.GenericType
 import org.kobjects.sugarcoat.type.GenericTypeResolver
-import org.kobjects.sugarcoat.type.Type
 
 
-class DelegateForResolvedGenerics(
+class DegenerifiedFunctionProxy(
     parent: Classifier,
     val wrapped: Classifier,
     override val type: FunctionType,
@@ -19,7 +18,7 @@ class DelegateForResolvedGenerics(
         get() = (wrapped as Callable).static
 
     companion object {
-        fun create(parent: Classifier, original: Classifier, genericTypeResolver: GenericTypeResolver): DelegateForResolvedGenerics {
+        fun create(parent: Classifier, original: Classifier, genericTypeResolver: GenericTypeResolver): DegenerifiedFunctionProxy {
             require(original is Callable) {
                 "Original must be callable for resolving generics."
             }
@@ -31,7 +30,7 @@ class DelegateForResolvedGenerics(
             }
             val resolvedFunctionType = original.type.resolveGenerics(genericTypeResolver)
 
-            return DelegateForResolvedGenerics(parent, original, resolvedFunctionType, remainingGenericTypes.toList() )
+            return DegenerifiedFunctionProxy(parent, original, resolvedFunctionType, remainingGenericTypes.toList() )
         }
 
     }

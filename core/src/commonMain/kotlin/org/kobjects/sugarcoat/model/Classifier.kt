@@ -31,15 +31,23 @@ abstract class Classifier(
 
     open fun selfType(): Type = throw UnsupportedOperationException()
 
+
     open fun resolveGenericParameters(resolvedTypes: List<Type>): Type {
         require(this is Type) {
             "$this is not a type"
         }
-        require(resolvedTypes.isEmpty()) {
-            "$this does not support any generic type parameters; Supplied: $resolvedTypes"
+        require(resolvedTypes.size == genericTypes.size) {
+            "${genericTypes.size} types expected to resolve $genericTypes in $this, but got $resolvedTypes"
         }
-        return this
+
+        if (resolvedTypes.isEmpty()) {
+            return this
+        }
+
+        val resolved = DegenerifiedClassifierProxy(this, resolvedTypes)
+        return resolved
     }
+
 
     open fun addChild(value: Classifier) {
         require(value.parent == this) {

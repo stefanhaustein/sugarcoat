@@ -5,7 +5,7 @@ import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.type.GenericType
 import org.kobjects.sugarcoat.type.GenericTypeResolver
 
-data class PairType(val firstType: Type, val secondType: Type) : Type {
+data class PairType(val firstType: Type, val secondType: Type) : NativeType("Pair") {
 
     override fun matchImpl(other: Type, genericTypeResolver: GenericTypeResolver?, lazyMessage: () -> String) {
         require(other is PairType, lazyMessage)
