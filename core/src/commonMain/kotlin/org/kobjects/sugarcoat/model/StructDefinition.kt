@@ -17,7 +17,7 @@ class StructDefinition(
     name: String,
     genericType: List<GenericType>,
     override val constructorName: String = "create"
-): Type, Namespace(parent, name, genericType, fallback) {
+): Classifier(parent, name, genericType, fallback) {
 
     val instanceFields = mutableMapOf<String, InstanceFieldDefinition>()
 

@@ -8,7 +8,7 @@ open class TraitDefinition(
     parent: Namespace,
     fallback: Namespace,
     name: String
-) : Type, Namespace(parent, name, emptyList(), fallback) {
+) : Classifier(parent, name, emptyList(), fallback) {
 
     override fun serialize(writer: CodeWriter) {
         writer.append("trait $name\n")

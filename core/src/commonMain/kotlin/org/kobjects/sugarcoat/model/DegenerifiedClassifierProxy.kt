@@ -9,7 +9,7 @@ import org.kobjects.sugarcoat.type.Type
 class DegenerifiedClassifierProxy(
     val original: Namespace,
     resolvedTypes: List<Type>
-) : Type, Namespace(original.parent, original.name + resolvedTypes, emptyList(), original.fallback
+) : Classifier(original.parent, original.name + resolvedTypes, emptyList(), original.fallback
 
 ) {
     init {
