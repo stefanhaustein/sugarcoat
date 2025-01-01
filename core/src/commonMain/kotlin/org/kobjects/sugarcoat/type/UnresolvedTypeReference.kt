@@ -1,5 +1,6 @@
 package org.kobjects.sugarcoat.type
 
+import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.model.Namespace
 import org.kobjects.sugarcoat.parser.Position
 
@@ -16,6 +17,9 @@ class UnresolvedTypeReference(
             return genericType
         }
         val classifier = context.resolveSymbol(name) { "$position" }
+        require (classifier is Classifier) {
+            "$position: $classifier is not a type."
+        }
 
         val parameters = genericParameters.map { it.resolveType(context) }
 

@@ -1,13 +1,14 @@
 package org.kobjects.sugarcoat.model
 
 import org.kobjects.sugarcoat.CodeWriter
+import org.kobjects.sugarcoat.fn.AbstractFunctionDefinition
 import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.fn.DegenerifiedFunctionProxy
 import org.kobjects.sugarcoat.type.GenericTypeResolver
 import org.kobjects.sugarcoat.type.Type
 
 class DegenerifiedClassifierProxy(
-    val original: Namespace,
+    val original: Classifier,
     resolvedTypes: List<Type>
 ) : Classifier(original.parent, original.name + resolvedTypes, emptyList(), original.fallback
 
@@ -23,7 +24,7 @@ class DegenerifiedClassifierProxy(
         }
 
         for (member in original.definitions.values) {
-            if (member is Callable) {
+            if (member is AbstractFunctionDefinition) {
                 val resolvedFunction = DegenerifiedFunctionProxy.create(this, member, genericTypeResolver)
                 println("Resolved function: $resolvedFunction")
                 addChild(resolvedFunction)

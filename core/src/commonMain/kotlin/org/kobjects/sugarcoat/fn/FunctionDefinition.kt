@@ -16,7 +16,7 @@ data class FunctionDefinition(
     override val static: Boolean,
     override val name: String,
     override var type: FunctionType,
-) : Callable, Namespace(parent, name, genericTypes, fallback) {
+) : AbstractFunctionDefinition(parent, name, genericTypes, fallback) {
 
     var body: Expression = UnresolvedFunctionBody(this)
 

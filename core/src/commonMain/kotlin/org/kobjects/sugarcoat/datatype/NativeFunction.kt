@@ -2,6 +2,7 @@ package org.kobjects.sugarcoat.datatype
 
 import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.ast.Expression
+import org.kobjects.sugarcoat.fn.AbstractFunctionDefinition
 
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.fn.FunctionType
@@ -17,7 +18,7 @@ data class NativeFunction(
     override val name: String,
     val args: List<ParameterDefinition>,
     val op: (NativeArgList) -> Any
-) : Namespace(parent, name), Callable {
+) : AbstractFunctionDefinition(parent, name) {
 
 
     override fun call(

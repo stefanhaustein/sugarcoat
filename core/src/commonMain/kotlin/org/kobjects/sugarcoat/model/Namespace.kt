@@ -16,12 +16,14 @@ import org.kobjects.sugarcoat.type.GenericType
 abstract class Namespace(
     open val parent: Namespace?,
     open val name: String,
-    open val genericTypes: List<GenericType> = emptyList(),
     open val fallback: Namespace? = null
 ) {
     val definitions = mutableMapOf<String, Namespace>()
     val unnamed = mutableListOf<Namespace>()
     val staticFields = mutableMapOf<String, StaticFieldDefinition>()
+    open val genericTypes: List<GenericType>
+        get() = emptyList()
+
     open val constructorName: String
         get() = ""
 
@@ -31,21 +33,6 @@ abstract class Namespace(
     open fun selfType(): Type = throw UnsupportedOperationException()
 
 
-    open fun resolveGenericParameters(resolvedTypes: List<Type>): Type {
-        require(this is Type) {
-            "$this is not a type"
-        }
-        require(resolvedTypes.size == genericTypes.size) {
-            "${genericTypes.size} types expected to resolve $genericTypes in $this, but got $resolvedTypes"
-        }
-
-        if (resolvedTypes.isEmpty()) {
-            return this
-        }
-
-        val resolved = DegenerifiedClassifierProxy(this, resolvedTypes)
-        return resolved
-    }
 
 
     open fun addChild(value: Namespace) {
@@ -178,8 +165,6 @@ abstract class Namespace(
         if (result != null) {
             return result
         }
-        val genericType = genericTypes.firstOrNull { it.name == name }
-
 
         val fb = fallback
         return fb?.resolveSymbolOrNull(name)
@@ -223,6 +208,7 @@ abstract class Namespace(
             classifier.collectImpls(impls)
         }
     }
+
 
     /*=
         buildString {

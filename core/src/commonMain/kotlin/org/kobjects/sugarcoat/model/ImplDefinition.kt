@@ -10,7 +10,7 @@ class ImplDefinition(
     fallback: Namespace,
     var trait: Type,
     var wrapped: Type
-) : Namespace(parent, "", emptyList(), fallback) {
+) : Namespace(parent, "", fallback) {
 //    override fun resolve() = trait.resolve()
 
     override fun resolveSignatures() {

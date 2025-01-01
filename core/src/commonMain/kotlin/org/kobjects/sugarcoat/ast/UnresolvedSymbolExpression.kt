@@ -5,6 +5,7 @@ import org.kobjects.sugarcoat.type.MetaType
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.Callable
+import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.model.Namespace
 import org.kobjects.sugarcoat.model.TraitDefinition
 import org.kobjects.sugarcoat.parser.Position
@@ -133,7 +134,7 @@ class UnresolvedSymbolExpression(
             "$position: Literal expression expected for generic type specification"
         }
         // Migrate to something like "ResolveAsType"
-        val classifier = resolvedReceiver.value as Namespace
+        val classifier = resolvedReceiver.value as Classifier
         val resolvedTypes = mutableListOf<Type>()
         for (child in children.map { it.value }) {
             require(child is UnresolvedSymbolExpression && !child.parens && child.children.isEmpty())

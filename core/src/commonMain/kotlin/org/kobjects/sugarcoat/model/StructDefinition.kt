@@ -5,6 +5,7 @@ import org.kobjects.sugarcoat.ast.Expression
 import org.kobjects.sugarcoat.ast.ResolutionContext
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.datatype.VoidType
+import org.kobjects.sugarcoat.fn.AbstractFunctionDefinition
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
@@ -63,7 +64,7 @@ class StructDefinition(
     override fun toString() = "struct $name"
 
 
-    class StructConstructor(override val parent: StructDefinition) : Callable, Namespace(parent, "create") {
+    class StructConstructor(override val parent: StructDefinition) : AbstractFunctionDefinition(parent, "create") {
         override val static: Boolean
             get() = true
 

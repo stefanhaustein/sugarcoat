@@ -11,7 +11,7 @@ class DelegateToImpl(
     fallback: Namespace?,
     name: String,
     override var type: FunctionType,
-) : Namespace(parent, name, emptyList(), fallback), Callable {
+) : Namespace(parent, name, fallback), Callable {
     override fun serialize(writer: CodeWriter) {
         writer.append(name)
         writer.append("(<TBD>)")

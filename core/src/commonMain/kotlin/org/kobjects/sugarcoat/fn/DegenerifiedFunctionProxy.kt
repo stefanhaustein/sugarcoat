@@ -2,6 +2,7 @@ package org.kobjects.sugarcoat.fn
 
 import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.ast.Expression
+import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.model.Namespace
 import org.kobjects.sugarcoat.type.GenericType
 import org.kobjects.sugarcoat.type.GenericTypeResolver
@@ -12,16 +13,13 @@ class DegenerifiedFunctionProxy(
     val wrapped: Namespace,
     override val type: FunctionType,
     genericTypes: List<GenericType>
-) : Namespace(parent, wrapped.name, genericTypes), Callable {
+) : AbstractFunctionDefinition(parent, wrapped.name, genericTypes), Callable {
 
     override val static: Boolean
         get() = (wrapped as Callable).static
 
     companion object {
-        fun create(parent: Namespace, original: Namespace, genericTypeResolver: GenericTypeResolver): DegenerifiedFunctionProxy {
-            require(original is Callable) {
-                "Original must be callable for resolving generics."
-            }
+        fun create(parent: Namespace, original: AbstractFunctionDefinition, genericTypeResolver: GenericTypeResolver): DegenerifiedFunctionProxy {
             val remainingGenericTypes = mutableListOf<GenericType>()
             for (type in original.genericTypes) {
                 if (!genericTypeResolver.map.containsKey(type)) {
