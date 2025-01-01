@@ -1,6 +1,7 @@
 package org.kobjects.sugarcoat.ast
 
 import org.kobjects.sugarcoat.CodeWriter
+import org.kobjects.sugarcoat.datatype.NativeType
 import org.kobjects.sugarcoat.type.MetaType
 import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
@@ -109,6 +110,8 @@ class UnresolvedSymbolExpression(
             is MetaType -> {
                 if (name == "[]") {
                     buildTypeReferenceWithResolveGenerics(context, resolvedReceiver, expectedType)
+                } else if (name == "()") {
+                    buildStaticCallOrTypeReference(context, receiverType.type, expectedType)
                 } else {
                     val resolvedMember = receiverType.type.resolveSymbol(name) { "$position" }
                     buildStaticCallOrTypeReference(context, resolvedMember, expectedType)
@@ -159,13 +162,6 @@ class UnresolvedSymbolExpression(
             is Type -> {
                 if (parens) {
                     when (resolvedMember) {
-                        is StructDefinition -> {
-                            val ctor = resolvedMember.resolveSymbol(resolvedMember.constructorName) { "$position" }
-                            require (ctor is Callable) {
-                                "$position: Constructor $ctor for $resolvedMember is not callable."
-                            }
-                            buildCallExpression(context, null, ctor, expectedType)
-                        }
                         is TraitDefinition -> {
                             require(children.size == 1) {
                                 "$position: Exactly one parameter expected."
@@ -174,7 +170,16 @@ class UnresolvedSymbolExpression(
                             val impl = context.namespace.program.findImpl(parameter.getType(), resolvedMember)
                             AsExpression(position, parameter, impl)
                         }
-                        else -> throw IllegalArgumentException("$position: Constructor-like calls on types are only supported for structs and traits.")
+                        else -> {
+                            require(resolvedMember.constructorName.isNotEmpty()) {
+                                throw IllegalArgumentException("$position: Constructor-like calls not supported on $resolvedMember.")
+                            }
+                            val ctor = resolvedMember.resolveSymbol(resolvedMember.constructorName) { "$position" }
+                            require (ctor is Callable) {
+                                "$position: Constructor $ctor for $resolvedMember is not callable."
+                            }
+                            buildCallExpression(context, null, ctor, expectedType)
+                        }
                     }
 
                 } else {
@@ -201,17 +206,6 @@ class UnresolvedSymbolExpression(
         return withImpliedTransformations(context, expectedType, resolvedMethod.type.returnType) { resolvedExpectedType ->
             buildCallExpressionImpl(context, resolvedReceiver, resolvedMethod, resolvedExpectedType)
         }
-/*
-        if (expectedType is FunctionType && expectedType.parameterTypes.isEmpty() && returnType !is FunctionType) {
-            val result = buildCallExpression(context, resolvedReceiver, resolvedMethod, expectedType.returnType)
-            return result.asLambda(expectedType)
-        }
-        if (expectedType is TraitDefinition && returnType != expectedType) {
-            val impl = context.namespace.program.findImpl(returnType, expectedType)
-            val result = buildCallExpressionImpl(context, resolvedReceiver, resolvedMethod, null)
-            return AsExpression(position, result, impl)
-        }
-        return buildCallExpressionImpl(context, resolvedReceiver, resolvedMethod, expectedType)*/
     }
 
     fun buildCallExpressionImpl(

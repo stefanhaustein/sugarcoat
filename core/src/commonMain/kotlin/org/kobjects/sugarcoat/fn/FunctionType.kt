@@ -23,7 +23,7 @@ data class FunctionType(
         return FunctionType(returnType, resolvedParameters)
     }
 
-    override fun resolveGenerics(state: GenericTypeResolver): Type {
+    override fun resolveGenerics(state: GenericTypeResolver): FunctionType {
 
         val resolvedReturnType = returnType.resolveGenerics(state)
 

@@ -9,14 +9,16 @@ import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.fn.Callable
+import org.kobjects.sugarcoat.fn.DelegateForResolvedGenerics
 import org.kobjects.sugarcoat.type.GenericType
+import org.kobjects.sugarcoat.type.GenericTypeResolver
 
 class StructDefinition(
     parent: Classifier,
     fallback: Classifier,
     name: String,
     genericType: List<GenericType>,
-    val constructorName: String = "create"
+    override val constructorName: String = "create"
 ): Type, Classifier(parent, name, genericType, fallback) {
 
     val instanceFields = mutableMapOf<String, InstanceFieldDefinition>()
@@ -47,6 +49,34 @@ class StructDefinition(
         }
 
         addChild(StructConstructor(this))
+    }
+
+    override fun resolveGenericParameters(resolvedTypes: List<Type>): Type {
+        require(resolvedTypes.size == genericTypes.size) {
+            "${genericTypes.size} types expected to resolve $genericTypes in $this, but got $resolvedTypes"
+        }
+
+        if (resolvedTypes.isEmpty()) {
+            return this
+        }
+
+        val resolved = StructDefinition(parent!!, fallback!!, name + resolvedTypes, emptyList(), constructorName)
+
+        val genericTypeResolver = GenericTypeResolver()
+
+        for (i in genericTypes.indices) {
+            genericTypeResolver.map[genericTypes[i]] = resolvedTypes[i]
+        }
+
+        for (classifier in definitions.values) {
+            if (classifier is Callable) {
+                val resolvedFunction = DelegateForResolvedGenerics.create(resolved, classifier, genericTypeResolver)
+                println("Resolved function: $resolvedFunction")
+                resolved.addChild(resolvedFunction)
+            }
+        }
+
+        return resolved
     }
 
     override fun serialize(writer: CodeWriter) {

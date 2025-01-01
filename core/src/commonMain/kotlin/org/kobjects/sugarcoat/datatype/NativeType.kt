@@ -10,6 +10,9 @@ abstract class NativeType(
 
 ) : Classifier(parent, name), Type {
 
+    override val constructorName: String
+        get() = if (definitions.contains("create")) "create" else ""
+
     override fun toString(): String = "native $name"
 
     override fun serialize(writer: CodeWriter) {

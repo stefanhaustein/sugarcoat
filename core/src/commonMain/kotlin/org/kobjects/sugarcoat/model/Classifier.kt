@@ -23,6 +23,8 @@ abstract class Classifier(
     val definitions = mutableMapOf<String, Classifier>()
     val unnamed = mutableListOf<Classifier>()
     val staticFields = mutableMapOf<String, StaticFieldDefinition>()
+    open val constructorName: String
+        get() = ""
 
     val program: Program
         get() = parent?.program ?: (this as Program)
@@ -30,17 +32,19 @@ abstract class Classifier(
     open fun selfType(): Type = throw UnsupportedOperationException()
 
     open fun resolveGenericParameters(resolvedTypes: List<Type>): Type {
-        require(resolvedTypes.isEmpty()) {
-            "$this does not support any generic type parameters; Supplied: $resolvedTypes"
-        }
         require(this is Type) {
             "$this is not a type"
+        }
+        require(resolvedTypes.isEmpty()) {
+            "$this does not support any generic type parameters; Supplied: $resolvedTypes"
         }
         return this
     }
 
     open fun addChild(value: Classifier) {
-        require(value.parent == this)
+        require(value.parent == this) {
+            "Parent is not 'this' when trying to add child '$value' to '$this'"
+        }
         if (value.name.isEmpty()) {
             unnamed.add(value)
         } else {
