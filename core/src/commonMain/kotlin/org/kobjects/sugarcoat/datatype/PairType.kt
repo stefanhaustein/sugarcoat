@@ -25,7 +25,7 @@ data class PairType(val firstType: Type, val secondType: Type) : NativeType("Pai
         return  PairType(firstResolved, secondResolved)
     }
 
-    override fun getGenericTypes(): Set<GenericType> {
+    fun getTypeParameters(): Set<GenericType> {
         val result = mutableSetOf<GenericType>()
         result.addAll(firstType.getGenericTypes())
         result.addAll(secondType.getGenericTypes())

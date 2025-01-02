@@ -21,7 +21,7 @@ abstract class Namespace(
     val definitions = mutableMapOf<String, Namespace>()
     val unnamed = mutableListOf<Namespace>()
     val staticFields = mutableMapOf<String, StaticFieldDefinition>()
-    open val genericTypes: List<GenericType>
+    open val typeParameters: List<Type>
         get() = emptyList()
 
     open val constructorName: String

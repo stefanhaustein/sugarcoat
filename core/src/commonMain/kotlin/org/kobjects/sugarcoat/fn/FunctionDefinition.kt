@@ -11,12 +11,12 @@ import org.kobjects.sugarcoat.type.GenericType
 data class FunctionDefinition(
     val position: Position,
     override val parent: Namespace,
-    override val genericTypes: List<GenericType>,
+    override val typeParameters: List<GenericType>,
     override val fallback: Namespace,
     override val static: Boolean,
     override val name: String,
     override var type: FunctionType,
-) : AbstractFunctionDefinition(parent, name, genericTypes, fallback) {
+) : AbstractFunctionDefinition(parent, name, typeParameters, fallback) {
 
     var body: Expression = UnresolvedFunctionBody(this)
 

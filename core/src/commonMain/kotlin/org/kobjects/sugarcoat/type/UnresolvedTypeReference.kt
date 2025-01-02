@@ -12,7 +12,7 @@ class UnresolvedTypeReference(
 ) : Type {
 
     override fun resolveType(context: Namespace): Type {
-        val genericType = context.genericTypes.firstOrNull() { it.name == name}
+        val genericType = context.typeParameters.firstOrNull() { it is GenericType && it.name == name}
         if (genericType != null) {
             return genericType
         }

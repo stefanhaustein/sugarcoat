@@ -56,5 +56,5 @@ data class MutableListType(val elementType: Type) : NativeType("MutableList", Ro
         return MutableListType(resolvedTypes[0])
     }
 
-    override fun getGenericTypes(): Set<GenericType> = elementType.getGenericTypes()
+    fun getTypeParameters(): Set<GenericType> = elementType.getGenericTypes()
 }
