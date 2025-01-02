@@ -158,7 +158,7 @@ class UnresolvedSymbolExpression(
                 }
                 buildCallExpression(context,null, resolvedMember, expectedType)
             }
-            is Type -> {
+            is Classifier -> {
                 if (parens) {
                     when (resolvedMember) {
                         is TraitDefinition -> {

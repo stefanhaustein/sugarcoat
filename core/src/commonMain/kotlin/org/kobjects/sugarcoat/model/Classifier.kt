@@ -7,10 +7,15 @@ import org.kobjects.sugarcoat.type.Type
 abstract class Classifier(
     parent: Namespace?,
     name: String,
-    override val typeParameters: List<GenericType> = emptyList(),
+    val typeParameters: List<Type> = emptyList(),
     fallback: Namespace? = null
 ) : Namespace(parent, name, fallback), Type {
 
+    open val original: Classifier
+        get() = this
+
+    open val constructorName:  String
+        get() = ""
 
 
     open fun resolveGenericParameters(resolvedTypes: List<Type>): Type {
@@ -31,6 +36,10 @@ abstract class Classifier(
         genericTypeResolver: GenericTypeResolver?,
         lazyMessage: () -> String
     ) {
+        require(other is Classifier && other.original == original, lazyMessage)
+        for (i in typeParameters.indices) {
+
+        }
 
     }
 }

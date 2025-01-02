@@ -12,9 +12,12 @@ class UnresolvedTypeReference(
 ) : Type {
 
     override fun resolveType(context: Namespace): Type {
-        val genericType = context.typeParameters.firstOrNull() { it is GenericType && it.name == name}
-        if (genericType != null) {
-            return genericType
+        if (context is Classifier) {
+            val genericType =
+                context.typeParameters.firstOrNull() { it is GenericType && it.name == name }
+            if (genericType != null) {
+                return genericType
+            }
         }
         val classifier = context.resolveSymbol(name) { "$position" }
         require (classifier is Classifier) {

@@ -6,7 +6,7 @@ import org.kobjects.sugarcoat.type.GenericType
 abstract class AbstractFunctionDefinition(
     parent: Namespace?,
     name: String,
-    override val typeParameters: List<GenericType> = emptyList(),
+    open val typeParameters: List<GenericType> = emptyList(),
     fallback: Namespace? = null
 ) : Namespace(parent, name, fallback), Callable {
 }

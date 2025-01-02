@@ -12,24 +12,17 @@ data class PairType(val firstType: Type, val secondType: Type) : NativeType("Pai
         firstType.match(other.firstType, genericTypeResolver, lazyMessage)
         secondType.match(other.secondType, genericTypeResolver, lazyMessage)
     }
-
+/*
     override fun resolveType(context: Namespace): Type {
         return PairType(firstType.resolveType(context), secondType.resolveType(context))
     }
-
+*/
     override fun resolveGenerics(state: GenericTypeResolver): Type {
 
         val firstResolved = firstType.resolveGenerics(state)
         val secondResolved = secondType.resolveGenerics(state)
 
         return  PairType(firstResolved, secondResolved)
-    }
-
-    fun getTypeParameters(): Set<GenericType> {
-        val result = mutableSetOf<GenericType>()
-        result.addAll(firstType.getGenericTypes())
-        result.addAll(secondType.getGenericTypes())
-        return result.toSet()
     }
 
 }

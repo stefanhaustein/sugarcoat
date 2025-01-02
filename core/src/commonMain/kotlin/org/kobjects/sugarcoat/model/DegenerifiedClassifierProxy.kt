@@ -3,23 +3,24 @@ package org.kobjects.sugarcoat.model
 import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.fn.AbstractFunctionDefinition
 import org.kobjects.sugarcoat.fn.DegenerifiedFunctionProxy
+import org.kobjects.sugarcoat.type.GenericType
 import org.kobjects.sugarcoat.type.GenericTypeResolver
 import org.kobjects.sugarcoat.type.Type
 
 class DegenerifiedClassifierProxy(
-    val original: Classifier,
-    val resolvedTypes: List<Type>
-) : Classifier(original.parent, original.name + resolvedTypes, emptyList(), original.fallback
+    override val original: Classifier,
+    typeParameters: List<Type>
+) : Classifier(original.parent, original.name + typeParameters, typeParameters, original.fallback
 
 ) {
     init {
-        require(resolvedTypes.size == original.typeParameters.size) {
-            "${original.typeParameters.size} types expected to resolve ${original.typeParameters} in $original, but got $resolvedTypes"
+        require(typeParameters.size == original.typeParameters.size) {
+            "${original.typeParameters.size} types expected to resolve ${original.typeParameters} in $original, but got $typeParameters"
         }
         val genericTypeResolver = GenericTypeResolver()
 
         for (i in original.typeParameters.indices) {
-            genericTypeResolver.map[original.typeParameters[i]] = resolvedTypes[i]
+            genericTypeResolver.map[original.typeParameters[i] as GenericType] = typeParameters[i]
         }
 
         for (member in original.definitions.values) {
