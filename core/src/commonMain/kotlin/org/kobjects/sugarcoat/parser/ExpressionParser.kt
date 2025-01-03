@@ -196,7 +196,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
             val optionalLambda = parseOptionalLambda(scanner, context)
             if (expr != null) {
                 if (optionalLambda != null) {
-                    builder.add(property, UnresolvedSymbolExpression(scanner.position(), "pair", expr, optionalLambda))
+                    builder.add(property, UnresolvedSymbolExpression(scanner.position(), "Pair", expr, optionalLambda))
                 } else {
                     builder.add(property, expr)
                 }

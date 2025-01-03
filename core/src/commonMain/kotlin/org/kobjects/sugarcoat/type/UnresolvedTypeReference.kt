@@ -26,7 +26,7 @@ class UnresolvedTypeReference(
 
         val parameters = genericParameters.map { it.resolveType(context) }
 
-        return classifier.resolveGenericParameters(parameters)
+        return classifier.typed(*parameters.toTypedArray())
     }
 
     override fun toString() = "Unresolved:$name"

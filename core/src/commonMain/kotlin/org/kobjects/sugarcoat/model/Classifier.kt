@@ -11,6 +11,8 @@ abstract class Classifier(
     fallback: Namespace? = null
 ) : Namespace(parent, name, fallback), Type {
 
+    val deGenerified = mutableMapOf<List<Type>, DeGenerifiedClassifierProxy>()
+
     open val original: Classifier
         get() = this
 
@@ -18,7 +20,7 @@ abstract class Classifier(
         get() = ""
 
 
-    open fun resolveGenericParameters(resolvedTypes: List<Type>): Type {
+    open fun typed(vararg resolvedTypes: Type): Type {
         require(resolvedTypes.size == typeParameters.size) {
             "${typeParameters.size} types expected to resolve $typeParameters in $this, but got $resolvedTypes"
         }
@@ -27,8 +29,23 @@ abstract class Classifier(
             return this
         }
 
-        val resolved = DegenerifiedClassifierProxy(this, resolvedTypes)
-        return resolved
+        val genericTypeResolver = GenericTypeResolver()
+
+        for (i in original.typeParameters.indices) {
+            genericTypeResolver.map[original.typeParameters[i] as GenericType] = typeParameters[i]
+        }
+
+        return resolveGenerics(genericTypeResolver)
+    }
+
+    override fun resolveGenerics(state: GenericTypeResolver): Type {
+        val resolvedTypeParameters = state.resolveAll(typeParameters)
+        if (resolvedTypeParameters == typeParameters) {
+            return this
+        }
+        return deGenerified.getOrPut(resolvedTypeParameters) {
+            DeGenerifiedClassifierProxy(this, state)
+        }
     }
 
     override fun matchImpl(
@@ -38,7 +55,7 @@ abstract class Classifier(
     ) {
         require(other is Classifier && other.original == original, lazyMessage)
         for (i in typeParameters.indices) {
-
+            typeParameters[i].match(other.typeParameters[i], genericTypeResolver, lazyMessage)
         }
 
     }

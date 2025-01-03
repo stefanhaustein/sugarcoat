@@ -49,7 +49,7 @@ data class MutableListType(val elementType: Type) : NativeType("MutableList", Ro
     }
 
 
-    override fun resolveGenericParameters(resolvedTypes: List<Type>): Type {
+    override fun typed(vararg resolvedTypes: Type): Type {
         require(resolvedTypes.size == 1) {
             "List requires 1 generic parameter. Provided: $resolvedTypes"
         }

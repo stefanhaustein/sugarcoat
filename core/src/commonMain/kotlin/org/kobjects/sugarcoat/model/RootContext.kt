@@ -40,6 +40,7 @@ object RootContext : Namespace(null, "") {
         addChild(VoidType)
         addChild(ListType(GenericType("E")))
         addChild(MutableListType(GenericType("E")))
+        addChild(PairType(GenericType("F"), GenericType("S")))
 
         addChild(ToStringTrait)
 
@@ -109,18 +110,6 @@ object RootContext : Namespace(null, "") {
 
                 else -> throw IllegalArgumentException("2 or 3 parameter expected for range, but got ${children.size}")
             }
-        }
-
-        val pairFirstGenericType = GenericType("F")
-        val pairSecondGenericType = GenericType("S")
-        addControl(
-            "pair",
-            PairType(pairFirstGenericType, pairSecondGenericType),
-            ParameterDefinition("first", pairFirstGenericType),
-            ParameterDefinition("second", pairSecondGenericType),
-        ) { children, parameterContext ->
-            require(children.size == 2) { "Two parameters expected for 'pair'." }
-            Pair(children[0]!!.eval(parameterContext), children[1]!!.eval(parameterContext))
         }
 
         addControl(

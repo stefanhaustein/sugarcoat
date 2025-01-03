@@ -7,7 +7,7 @@ import org.kobjects.sugarcoat.type.GenericType
 import org.kobjects.sugarcoat.type.GenericTypeResolver
 
 
-class DegenerifiedFunctionProxy(
+class DeGenerifiedFunctionProxy(
     parent: Namespace,
     val wrapped: Namespace,
     override val type: FunctionType,
@@ -18,7 +18,7 @@ class DegenerifiedFunctionProxy(
         get() = (wrapped as Callable).static
 
     companion object {
-        fun create(parent: Namespace, original: AbstractFunctionDefinition, genericTypeResolver: GenericTypeResolver): DegenerifiedFunctionProxy {
+        fun create(parent: Namespace, original: AbstractFunctionDefinition, genericTypeResolver: GenericTypeResolver): DeGenerifiedFunctionProxy {
             val remainingGenericTypes = mutableListOf<GenericType>()
             for (type in original.typeParameters) {
                 if (!genericTypeResolver.map.containsKey(type)) {
@@ -27,7 +27,7 @@ class DegenerifiedFunctionProxy(
             }
             val resolvedFunctionType = original.type.resolveGenerics(genericTypeResolver)
 
-            return DegenerifiedFunctionProxy(parent, original, resolvedFunctionType, remainingGenericTypes.toList() )
+            return DeGenerifiedFunctionProxy(parent, original, resolvedFunctionType, remainingGenericTypes.toList() )
         }
 
     }

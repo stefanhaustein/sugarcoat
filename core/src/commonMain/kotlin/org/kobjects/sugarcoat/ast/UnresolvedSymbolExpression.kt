@@ -142,7 +142,7 @@ class UnresolvedSymbolExpression(
             require(resolved is Type)
             resolvedTypes.add(resolved)
         }
-        val resolvedGenericType = classifier.resolveGenericParameters(resolvedTypes)
+        val resolvedGenericType = classifier.typed(*resolvedTypes.toTypedArray())
         return LiteralExpression(position, resolvedGenericType)
     }
 

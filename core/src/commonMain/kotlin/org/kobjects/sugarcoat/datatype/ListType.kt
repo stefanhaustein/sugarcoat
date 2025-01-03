@@ -1,7 +1,6 @@
 package org.kobjects.sugarcoat.datatype
 
 import org.kobjects.sugarcoat.fn.ParameterDefinition
-import org.kobjects.sugarcoat.model.ImplDefinition
 import org.kobjects.sugarcoat.model.ImplInstance
 import org.kobjects.sugarcoat.model.RootContext
 import org.kobjects.sugarcoat.type.GenericType
@@ -44,7 +43,7 @@ data class ListType(val elementType: Type) : NativeType("List", RootContext) {
     }
 
 
-    override fun resolveGenericParameters(resolvedTypes: List<Type>): Type {
+    override fun typed(vararg resolvedTypes:Type): Type {
         require(resolvedTypes.size == 1) {
             "List requires 1 generic parameter. Provided: $resolvedTypes"
         }
