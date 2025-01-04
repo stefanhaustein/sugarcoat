@@ -13,7 +13,7 @@ object IterableTrait  : TraitDefinition(RootContext, RootContext, "Iterable", li
 
     init {
         addChild(DelegateToImpl(
-            this, null, "iterator", FunctionType(IteratorTrait.typed(typeParameters[0]))))
+            this, null, "iterator", FunctionType(this, IteratorTrait.typed(typeParameters[0]))))
     }
 
 

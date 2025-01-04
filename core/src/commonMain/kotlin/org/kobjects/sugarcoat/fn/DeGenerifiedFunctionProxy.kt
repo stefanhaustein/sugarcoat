@@ -14,9 +14,6 @@ class DeGenerifiedFunctionProxy(
     genericTypes: List<GenericType>
 ) : AbstractFunctionDefinition(parent, wrapped.name, genericTypes), Callable {
 
-    override val static: Boolean
-        get() = (wrapped as Callable).static
-
     companion object {
         fun create(parent: Namespace, original: AbstractFunctionDefinition, genericTypeResolver: GenericTypeResolver): DeGenerifiedFunctionProxy {
             val remainingGenericTypes = mutableListOf<GenericType>()

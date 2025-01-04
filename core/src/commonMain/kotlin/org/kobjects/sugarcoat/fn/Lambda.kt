@@ -9,8 +9,6 @@ class Lambda(
     val body: Expression
 ) : Callable {
 
-    override val static: Boolean
-        get() = true
 
     override fun call(
         receiver: Any?,

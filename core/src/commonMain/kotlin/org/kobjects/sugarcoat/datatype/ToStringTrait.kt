@@ -8,7 +8,7 @@ import org.kobjects.sugarcoat.model.TraitDefinition
 object ToStringTrait : TraitDefinition(RootContext, RootContext, "ToString") {
 
     init {
-        addChild(DelegateToImpl(this, null, "toString", FunctionType(StringType)))
+        addChild(DelegateToImpl(this, null, "toString", FunctionType(this, StringType)))
     }
 
 }

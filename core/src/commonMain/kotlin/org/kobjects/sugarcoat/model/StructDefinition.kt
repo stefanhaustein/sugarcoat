@@ -9,7 +9,6 @@ import org.kobjects.sugarcoat.fn.AbstractFunctionDefinition
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
-import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.type.GenericType
 
 class StructDefinition(
@@ -65,8 +64,6 @@ class StructDefinition(
 
 
     class StructConstructor(override val parent: StructDefinition) : AbstractFunctionDefinition(parent, "create") {
-        override val static: Boolean
-            get() = true
 
         override fun toString() = "Constructor $name for $parent"
 
@@ -93,8 +90,9 @@ class StructDefinition(
         }
 
         override var type: FunctionType = FunctionType(
-            parent,
-            parent.instanceFields.values.map  { ParameterDefinition(it.name, it.type, false, it.unresolvedDefaultExpression) }
+            null,
+            parent.instanceFields.values.map  { ParameterDefinition(it.name, it.type, false, it.unresolvedDefaultExpression) },
+            parent
         )
 
         override fun resolveExpressions() {

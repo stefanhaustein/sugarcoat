@@ -11,7 +11,6 @@ import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.fn.Callable
-import org.kobjects.sugarcoat.type.GenericType
 
 abstract class Namespace(
     open val parent: Namespace?,
@@ -69,7 +68,7 @@ abstract class Namespace(
         require (this is Type) {
             "Methods can only be added to types."
         }
-        addChild(NativeFunction(this, false, returnType, name, args.toList(), op))
+        addChild(NativeFunction(this, this, returnType, name, args.toList(), op))
     }
 
     fun addNativeFunction(
@@ -78,7 +77,7 @@ abstract class Namespace(
         vararg args: ParameterDefinition,
         op: (NativeArgList) -> Any
     ) {
-        addChild(NativeFunction(this, true, returnType, name, args.toList(), op))
+        addChild(NativeFunction(this, null, returnType, name, args.toList(), op))
     }
 
     fun addImpl(trait: TraitDefinition): ImplDefinition {
@@ -91,8 +90,6 @@ abstract class Namespace(
     fun addControl(name: String, returnType: Type, vararg parameters: ParameterDefinition, action: (List<Expression?>, LocalRuntimeContext) -> Any) {
 
         addChild(object : Callable, Namespace(this, name) {
-            override val static: Boolean
-                get() = true
 
             override fun call(
                 receiver: Any?,
@@ -107,7 +104,7 @@ abstract class Namespace(
             }
 
             override val type: FunctionType
-                get() = FunctionType(returnType, parameters.toList())
+                get() = FunctionType(null, parameters.toList(), returnType)
 
             override fun toString() = "control instruction '$name'"
 

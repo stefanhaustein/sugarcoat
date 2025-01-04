@@ -61,7 +61,7 @@ object RootContext : Namespace(null, "") {
             "for",
             VoidType,
             ParameterDefinition("iterable", IterableTrait.typed(forGenericType)),
-            ParameterDefinition("body", FunctionType(VoidType, ParameterDefinition("iterator", forGenericType))),
+            ParameterDefinition("body", FunctionType(null, VoidType, ParameterDefinition("iterator", forGenericType))),
         ) { params, context ->
             evalFor(params, context)
         }
@@ -71,9 +71,9 @@ object RootContext : Namespace(null, "") {
             "if",
             ifGenericType,
             ParameterDefinition("condition", BoolType),
-            ParameterDefinition("then", FunctionType(ifGenericType)),
-            ParameterDefinition("elif", PairType.typed(FunctionType(BoolType), FunctionType(ifGenericType)), repeated = true),
-            ParameterDefinition("else", FunctionType(ifGenericType), false, LiteralExpression(
+            ParameterDefinition("then", FunctionType(null, ifGenericType)),
+            ParameterDefinition("elif", PairType.typed(FunctionType(null, BoolType), FunctionType(null, ifGenericType)), repeated = true),
+            ParameterDefinition("else", FunctionType(null, ifGenericType), false, LiteralExpression(
                 Position("Implied void else branch"), Unit)),
         ) { params, context ->
             evalIf(params, context)
@@ -115,8 +115,8 @@ object RootContext : Namespace(null, "") {
         addControl(
             "while",
             VoidType,
-            ParameterDefinition("condition", FunctionType(BoolType)),
-            ParameterDefinition("body", FunctionType(VoidType))
+            ParameterDefinition("condition", FunctionType(null, BoolType)),
+            ParameterDefinition("body", FunctionType(null, VoidType))
         ) { children, parameterContext ->
             require(children.size == 2) { "Two parameters expected for 'while'." }
             while (children[0]!!.evalBoolean(parameterContext)) children[1]!!.eval(

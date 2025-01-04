@@ -17,9 +17,6 @@ class DelegateToImpl(
         writer.append("(<TBD>)")
     }
 
-    override val static: Boolean
-        get() = false
-
     override fun call(
         receiver: Any?,
         children: List<Expression?>,

@@ -91,9 +91,13 @@ object SugarcoatParser {
             scanner.consume(")") { "Closing brace or comma (')' or ',') expected after parameter" }
         }
         val returnType = if (scanner.tryConsume("->")) parseType(scanner, parentContext) else VoidType
-        val functionType = FunctionType(returnType, parameters)
 
-        val fn: Namespace = if (!static && parentContext.namespace is TraitDefinition) {
+        val namespace = parentContext.namespace
+        val receiverType = if (static) null else if (namespace is ImplDefinition) namespace.trait else (namespace as Type)
+
+        val functionType = FunctionType(receiverType, parameters, returnType)
+
+        val fn: Namespace = if (!functionType.static && parentContext.namespace is TraitDefinition) {
             DelegateToImpl(
                 parentContext.namespace,
                 parentContext.namespace,
@@ -106,7 +110,6 @@ object SugarcoatParser {
                 parentContext.namespace,
                 generics,
                 parentContext.namespace,
-                static,
                 name,
                 functionType,
             )

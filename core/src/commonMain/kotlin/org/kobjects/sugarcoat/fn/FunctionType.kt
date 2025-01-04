@@ -7,24 +7,34 @@ import org.kobjects.sugarcoat.type.GenericTypeResolver
 import org.kobjects.sugarcoat.type.Type
 
 data class FunctionType(
-    val returnType: Type,
+    val receiverType: Type?,
     val parameterTypes: List<ParameterDefinition>,
+    val returnType: Type,
 ) : Type {
-    constructor(returnType: Type, vararg parameterTypes: ParameterDefinition) : this(returnType, parameterTypes.asList())
+    constructor(receiverType: Type?, returnType: Type, vararg parameterTypes: ParameterDefinition) : this(
+        receiverType,
+        parameterTypes.asList(),
+        returnType
+    )
+
+    val static: Boolean
+        get() = receiverType == null
 
     override fun resolveType(context: Namespace): FunctionType {
+        val resolvedReceiverType = receiverType?.resolveType(context)
         val resolvedReturnType = returnType.resolveType(context)
         val resolvedParameterTypes = List(parameterTypes.size) { parameterTypes[it].resolveType(context) }
-        return FunctionType(resolvedReturnType, resolvedParameterTypes)
+        return FunctionType(resolvedReceiverType, resolvedParameterTypes, resolvedReturnType)
     }
 
     fun resolveDefaultExpressions(resolutionContext: ResolutionContext): FunctionType {
         val resolvedParameters = List(parameterTypes.size) { parameterTypes[it].resolveDefaultExpression(resolutionContext) }
-        return FunctionType(returnType, resolvedParameters)
+        return FunctionType(receiverType, resolvedParameters, returnType)
     }
 
     override fun resolveGenerics(state: GenericTypeResolver): FunctionType {
 
+        val resolvedReceiverType = receiverType?.resolveGenerics(state)
         val resolvedReturnType = returnType.resolveGenerics(state)
 
         val builder = mutableListOf<ParameterDefinition>()
@@ -32,7 +42,7 @@ data class FunctionType(
             val resolvedType = parameter.type.resolveGenerics(state)
             builder.add(parameter.copy(type = resolvedType))
         }
-        return FunctionType(resolvedReturnType, builder.toList())
+        return FunctionType(resolvedReceiverType, builder.toList(), resolvedReturnType)
     }
 
     override fun matchImpl(other: Type, genericTypeResolver: GenericTypeResolver?, lazyMessage: () -> String) {

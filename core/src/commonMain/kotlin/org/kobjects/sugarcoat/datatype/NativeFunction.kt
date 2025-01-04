@@ -8,12 +8,11 @@ import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
 import org.kobjects.sugarcoat.fn.ParameterDefinition
-import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.model.Namespace
 
 data class NativeFunction(
     override val parent: Namespace,
-    override val static: Boolean,
+    val receiverType: Type?,
     val returnType: Type,
     override val name: String,
     val args: List<ParameterDefinition>,
@@ -26,6 +25,7 @@ data class NativeFunction(
         children: List<Expression?>,
         parameterScope: LocalRuntimeContext
     ): Any {
+        val static = receiverType == null
         require(static == (receiver == null)) {
             if (static) "Unexpected receiver for static method $this." else "Receiver expected for instance method $this."
         }
@@ -37,7 +37,7 @@ data class NativeFunction(
     }
 
     override val type: FunctionType
-        get() = FunctionType(returnType, args)
+        get() = FunctionType(receiverType, args, returnType)
 
     override fun serialize(writer: CodeWriter) {
         writer.append("native fn $name\n")

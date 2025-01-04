@@ -13,7 +13,6 @@ data class FunctionDefinition(
     override val parent: Namespace,
     override val typeParameters: List<GenericType>,
     override val fallback: Namespace,
-    override val static: Boolean,
     override val name: String,
     override var type: FunctionType,
 ) : AbstractFunctionDefinition(parent, name, typeParameters, fallback) {
@@ -25,8 +24,8 @@ data class FunctionDefinition(
         children: List<Expression?>,
         parameterScope: LocalRuntimeContext
     ): Any {
-        require(static == (receiver == null)) {
-            if (static) "Unexpected receiver for static method." else "Receiver expected for instance method."
+        require(type.static == (receiver == null)) {
+            if (type.static) "Unexpected receiver for static method." else "Receiver expected for instance method."
         }
 
         val localContext = LocalRuntimeContext(parameterScope.globalRuntimeContext, receiver)
@@ -52,7 +51,7 @@ data class FunctionDefinition(
 
     private fun createResolutionContext(): ResolutionContext {
         val resolutionContext = ResolutionContext(this)
-        if (!static) {
+        if (!type.static) {
             resolutionContext.addLocal("self", parent.selfType(), false)
         }
         for (parameter in type.parameterTypes) {

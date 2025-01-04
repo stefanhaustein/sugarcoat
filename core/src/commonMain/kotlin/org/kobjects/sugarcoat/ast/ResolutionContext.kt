@@ -60,10 +60,7 @@ class ResolutionContext(
 
     data class LocalGetter(val pos: Position, val variable: Variable) : Callable {
         override val type: FunctionType
-            get() = FunctionType(variable.type)
-
-        override val static: Boolean
-            get() = true
+            get() = FunctionType(null, variable.type)
 
         override fun call(
             receiver: Any?,
@@ -79,10 +76,8 @@ class ResolutionContext(
 
     data class LocalSetter(val pos: Position, val variable: Variable) : Callable {
         override val type: FunctionType
-            get() = FunctionType(VoidType, ParameterDefinition("value", variable.type))
+            get() = FunctionType(null, VoidType, ParameterDefinition("value", variable.type))
 
-        override val static: Boolean
-            get() = true
 
         override fun call(
             receiver: Any?,

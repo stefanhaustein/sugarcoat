@@ -67,8 +67,8 @@ class UnresolvedSymbolExpression(
             "$position: Resolved member is not callable: $resolvedMember"
         }
 
-        require(!resolvedMember.static) {
-            "$position: Receiver provided for static call"
+        require(resolvedMember.type.receiverType != null) {
+            "$position: Receiver provided for static call $resolvedMember"
         }
 
         return buildCallExpression(
@@ -92,7 +92,11 @@ class UnresolvedSymbolExpression(
             val resolvedMember = if (self == null) null else
                 (self.type.returnType as Namespace).resolveSymbolOrNull(name)
 
-            if (resolvedMember is Callable && !resolvedMember.static) {
+            if (name == "r") {
+                println("R")
+            }
+
+            if (resolvedMember is Callable && resolvedMember.type.receiverType != null) {
                 val selfExpression = CallExpression(position, null, self as Callable, emptyList())
                 return buildMethodCall(context,  selfExpression, resolvedMember, expectedType)
             }
@@ -153,7 +157,7 @@ class UnresolvedSymbolExpression(
     ): Expression =
         when(resolvedMember) {
             is Callable -> {
-                require(resolvedMember.static) {
+                require(resolvedMember.type.static) {
                     "$position: Can't make static call to instance method '$resolvedMember'"
                 }
                 buildCallExpression(context,null, resolvedMember, expectedType)

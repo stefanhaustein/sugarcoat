@@ -12,8 +12,8 @@ import org.kobjects.sugarcoat.type.Type
 object IteratorTrait : TraitDefinition(RootContext, RootContext, "Iterator", listOf(GenericType("E"))) {
 
     init {
-        addChild(DelegateToImpl(this, null, "next", FunctionType(typeParameters[0])))
-        addChild(DelegateToImpl(this, null, "hasNext", FunctionType(BoolType)))
+        addChild(DelegateToImpl(this, null, "next", FunctionType(this, typeParameters[0])))
+        addChild(DelegateToImpl(this, null, "hasNext", FunctionType(this, BoolType)))
     }
 
 
