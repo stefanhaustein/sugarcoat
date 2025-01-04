@@ -35,7 +35,7 @@ class ListExpression(position: Position, val elements: List<Expression>) : Expre
         expectedType: Type?
     ): Expression {
         val elementType: Type?
-        when (expectedType?.generify()) {
+        when (expectedType?.raw) {
             is ListType -> {
               elementType = (expectedType as Classifier).typeParameters[0]
             }

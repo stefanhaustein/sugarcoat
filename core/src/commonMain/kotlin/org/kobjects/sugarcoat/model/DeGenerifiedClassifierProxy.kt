@@ -4,19 +4,19 @@ import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.type.Type
 
 class DeGenerifiedClassifierProxy(
-    override val original: Classifier,
+    override val raw: Classifier,
     typeParameters: List<Type>,
 ) : Classifier(
-    original.parent,
-    original.name + typeParameters,
+    raw.parent,
+    raw.name + typeParameters,
     typeParameters,
-    original.fallback
+    raw.fallback
 ) {
 
 
 
     override val constructorName: String
-        get() = original.constructorName
+        get() = raw.constructorName
 
     override fun serialize(writer: CodeWriter) {
         writer.newline()

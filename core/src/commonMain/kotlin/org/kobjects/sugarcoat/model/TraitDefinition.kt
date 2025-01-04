@@ -9,10 +9,10 @@ open class TraitDefinition(
     fallback: Namespace,
     name: String,
     typeParameters: List<Type> = emptyList(),
-    original: TraitDefinition? = null,
+    raw: TraitDefinition? = null,
 ) : Classifier(parent, name, typeParameters, fallback) {
 
-    override val original: TraitDefinition = original ?: this
+    override val raw: TraitDefinition = raw ?: this
 
     override fun serialize(writer: CodeWriter) {
         writer.append("trait $name\n")

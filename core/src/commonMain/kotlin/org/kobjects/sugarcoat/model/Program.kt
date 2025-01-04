@@ -17,16 +17,16 @@ class Program(
 
     fun findImpl(source: Type, target: Type): ImplDefinition {
         val resolvedSource = if (source is MetaType && source.type is ObjectDefinition) source.type else source
-        val rawTarget = target.generify()
+        val rawTarget = target.raw
         if (resolvedSource is Namespace) {
             for (def in resolvedSource.unnamed) {
                 println("Local candidate: $def")
-                if (def is ImplDefinition && def.trait.generify() == rawTarget) {
+                if (def is ImplDefinition && def.trait.raw == rawTarget) {
                     return def
                 }
             }
         }
-        return impls[resolvedSource.generify() to target.generify()] ?: throw IllegalStateException("No impl found that maps $source to $target; available: ${impls.keys}")
+        return impls[resolvedSource.raw to target.raw] ?: throw IllegalStateException("No impl found that maps $source to $target; available: ${impls.keys}")
     }
 
 

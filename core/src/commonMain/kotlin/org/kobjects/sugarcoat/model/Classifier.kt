@@ -17,13 +17,11 @@ abstract class Classifier(
     // The cache reduces overhead and -- more importantly -- breaks infinite resolution recursions.
     val deGenerified = mutableMapOf<List<Type>, Classifier>()
 
-    open val original: Classifier
-        get() = this
-
     open val constructorName:  String
         get() = ""
 
-    override fun generify(): Classifier = original
+    override val raw: Classifier
+        get() = this
 
     open fun typed(vararg resolvedTypes: Type): Classifier {
         require(resolvedTypes.size == typeParameters.size) {
@@ -56,9 +54,9 @@ abstract class Classifier(
                     fallback!!,
                     name + resolvedTypeParameters,
                     resolvedTypeParameters,
-                    original
+                    raw
                 )
-                else -> DeGenerifiedClassifierProxy(original, resolvedTypeParameters)
+                else -> DeGenerifiedClassifierProxy(raw, resolvedTypeParameters)
             }
             deGenerified[resolvedTypeParameters] = proxy
             proxy.populateDeGenerified()
@@ -68,11 +66,11 @@ abstract class Classifier(
 
     private fun populateDeGenerified() {
         val genericTypeResolver = GenericTypeResolver()
-        for (i in original.typeParameters.indices) {
-            genericTypeResolver.map[original.typeParameters[i] as GenericType] = typeParameters[i]
+        for (i in raw.typeParameters.indices) {
+            genericTypeResolver.map[raw.typeParameters[i] as GenericType] = typeParameters[i]
         }
 
-        for (member in original.definitions.values) {
+        for (member in raw.definitions.values) {
             if (member is DelegateToImpl) {
                 val resolved = DelegateToImpl(this as TraitDefinition, member.fallback, member.name, member.type.resolveGenerics(genericTypeResolver))
                 addChild(resolved)
@@ -90,7 +88,7 @@ abstract class Classifier(
         genericTypeResolver: GenericTypeResolver?,
         lazyMessage: () -> String
     ) {
-        require(other is Classifier && other.original == original, lazyMessage)
+        require(other is Classifier && other.raw == raw, lazyMessage)
         for (i in typeParameters.indices) {
             typeParameters[i].match(other.typeParameters[i], genericTypeResolver, lazyMessage)
         }
