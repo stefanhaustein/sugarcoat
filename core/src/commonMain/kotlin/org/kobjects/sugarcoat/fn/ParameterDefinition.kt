@@ -21,5 +21,5 @@ data class ParameterDefinition(
         type
     ))
 
-    fun restType(): Type = if (repeated) ListType(type) else type
+    fun restType(): Type = if (repeated) ListType.typed(type) else type
 }

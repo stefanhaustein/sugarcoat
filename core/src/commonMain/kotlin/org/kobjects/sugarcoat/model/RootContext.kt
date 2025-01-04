@@ -38,9 +38,9 @@ object RootContext : Namespace(null, "") {
         addChild(I64Type)
         addChild(I64RangeType)
         addChild(VoidType)
-        addChild(ListType(GenericType("E")))
+        addChild(ListType)
         addChild(MutableListType(GenericType("E")))
-        addChild(PairType(GenericType("F"), GenericType("S")))
+        addChild(PairType)
 
         addChild(ToStringTrait)
 
@@ -60,7 +60,7 @@ object RootContext : Namespace(null, "") {
         addControl(
             "for",
             VoidType,
-            ParameterDefinition("iterable", IterableTrait(forGenericType)),
+            ParameterDefinition("iterable", IterableTrait.typed(forGenericType)),
             ParameterDefinition("body", FunctionType(VoidType, ParameterDefinition("iterator", forGenericType))),
         ) { params, context ->
             evalFor(params, context)
@@ -72,7 +72,7 @@ object RootContext : Namespace(null, "") {
             ifGenericType,
             ParameterDefinition("condition", BoolType),
             ParameterDefinition("then", FunctionType(ifGenericType)),
-            ParameterDefinition("elif", PairType(FunctionType(BoolType), FunctionType(ifGenericType)), repeated = true),
+            ParameterDefinition("elif", PairType.typed(FunctionType(BoolType), FunctionType(ifGenericType)), repeated = true),
             ParameterDefinition("else", FunctionType(ifGenericType), false, LiteralExpression(
                 Position("Implied void else branch"), Unit)),
         ) { params, context ->
@@ -89,7 +89,7 @@ object RootContext : Namespace(null, "") {
 
         addControl(
             "range",
-            ListType(I64Type),
+            ListType.typed(I64Type),
             ParameterDefinition("a", I64Type),
             ParameterDefinition("b", I64Type),
         ) { children, parameterContext ->

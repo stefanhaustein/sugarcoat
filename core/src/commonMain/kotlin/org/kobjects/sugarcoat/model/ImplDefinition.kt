@@ -3,6 +3,7 @@ package org.kobjects.sugarcoat.model
 import org.kobjects.sugarcoat.CodeWriter
 import org.kobjects.sugarcoat.fn.Callable
 import org.kobjects.sugarcoat.fn.DelegateToImpl
+import org.kobjects.sugarcoat.type.GenericType
 import org.kobjects.sugarcoat.type.Type
 
 class ImplDefinition(
@@ -45,8 +46,6 @@ class ImplDefinition(
             }
         }
 
-
-
         program.impls[wrapped to (trait as TraitDefinition)] = this
     }
 
@@ -57,5 +56,23 @@ class ImplDefinition(
     override fun serialize(writer: CodeWriter) {
         writer.append("impl $trait for $wrapped")
         serializeBody(writer)
+    }
+
+    fun mapType(wrappedActualType: Type): TraitDefinition {
+        val resolvedTrait = trait as TraitDefinition
+        if (wrappedActualType !is Classifier || wrapped !is Classifier) {
+            return resolvedTrait
+        }
+        val resolved = mutableListOf<Type>()
+        for (i in resolvedTrait.typeParameters.indices) {
+            val typeI = resolvedTrait.typeParameters[i]
+            if (typeI is GenericType) {
+                val i = (wrapped as Classifier).typeParameters.indexOf(typeI)
+                resolved.add(wrappedActualType.typeParameters[i])
+            } else {
+                resolved.add(typeI)
+            }
+        }
+        return resolvedTrait.typed(*resolved.toTypedArray())
     }
 }

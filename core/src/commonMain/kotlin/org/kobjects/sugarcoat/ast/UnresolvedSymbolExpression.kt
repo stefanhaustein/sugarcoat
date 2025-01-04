@@ -167,7 +167,8 @@ class UnresolvedSymbolExpression(
                             }
                             val parameter = children.first().value.resolve(context, null)
                             val impl = context.namespace.program.findImpl(parameter.getType(), resolvedMember)
-                            AsExpression(position, parameter, impl)
+                            val resolvedType = impl.mapType(parameter.getType())
+                            AsExpression(position, parameter, resolvedType, impl)
                         }
                         else -> {
                             require(resolvedMember.constructorName.isNotEmpty()) {
@@ -185,7 +186,8 @@ class UnresolvedSymbolExpression(
                     val result = LiteralExpression(position, resolvedMember)
                     if (expectedType is TraitDefinition && result.getType() != expectedType) {
                         val impl = context.namespace.program.findImpl(result.getType(), expectedType)
-                        AsExpression(position, result, impl)
+                        val resolvedType = impl.mapType(result.getType())
+                        AsExpression(position, result, resolvedType, impl)
                     } else {
                         result
                     }

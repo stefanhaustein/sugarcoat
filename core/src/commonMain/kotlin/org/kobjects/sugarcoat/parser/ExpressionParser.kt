@@ -103,7 +103,7 @@ object ExpressionParser : ConfigurableExpressionParser<Scanner<TokenType>, Parsi
                     tokenizer.consume("]") { "',' or ']' expected" }
                     UnresolvedSymbolExpression(
                         tokenizer.position(),
-                        LiteralExpression(tokenizer.position(), ListType(GenericType("E"))),
+                        LiteralExpression(tokenizer.position(), ListType.typed(GenericType("E"))),
                         "create",
                         true,
                         builder.build()

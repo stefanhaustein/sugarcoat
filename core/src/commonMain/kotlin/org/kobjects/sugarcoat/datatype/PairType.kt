@@ -7,14 +7,14 @@ import org.kobjects.sugarcoat.model.RootContext
 import org.kobjects.sugarcoat.type.GenericType
 import org.kobjects.sugarcoat.type.GenericTypeResolver
 
-data class PairType(val firstType: Type, val secondType: Type) : NativeType("Pair", RootContext) {
+object PairType : NativeType("Pair", RootContext, listOf(GenericType("F"), GenericType("S"))) {
 
     init {
-        addNativeFunction(this, "create", ParameterDefinition("first", firstType), ParameterDefinition("second", secondType)) {
+        addNativeFunction(this, "create", ParameterDefinition("first", typeParameters[0]), ParameterDefinition("second", typeParameters[1])) {
             Pair(it.list[0], it.list[1])
         }
     }
-
+/*
     override fun matchImpl(other: Type, genericTypeResolver: GenericTypeResolver?, lazyMessage: () -> String) {
         require(other is PairType, lazyMessage)
         firstType.match(other.firstType, genericTypeResolver, lazyMessage)
@@ -30,5 +30,5 @@ data class PairType(val firstType: Type, val secondType: Type) : NativeType("Pai
     }
 
 
-
+*/
 }

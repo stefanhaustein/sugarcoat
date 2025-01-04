@@ -6,11 +6,13 @@ import org.kobjects.sugarcoat.model.ImplDefinition
 import org.kobjects.sugarcoat.model.ImplInstance
 import org.kobjects.sugarcoat.model.TraitDefinition
 import org.kobjects.sugarcoat.parser.Position
+import org.kobjects.sugarcoat.type.Type
 
 class AsExpression(
     position: Position,
     val source: Expression,
-    val implDefinition: ImplDefinition,
+    val trait: TraitDefinition,
+    private val implDefinition: ImplDefinition,
 ) : ResolvedExpression(position) {
     override fun eval(context: LocalRuntimeContext): Any {
         // This should be resolved at resolution time.
@@ -19,11 +21,11 @@ class AsExpression(
     }
 
     override fun serialize(writer: CodeWriter) {
-        writer.append(implDefinition)
+        writer.append(trait)
         writer.append("(")
         source.serialize(writer)
         writer.append(")")
     }
 
-    override fun getType() = implDefinition.trait
+    override fun getType() = trait
 }

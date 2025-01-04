@@ -15,18 +15,18 @@ class Program(
     val impls = mutableMapOf<Pair<Type, TraitDefinition>, ImplDefinition>()
 
 
-
     fun findImpl(source: Type, target: Type): ImplDefinition {
         val resolvedSource = if (source is MetaType && source.type is ObjectDefinition) source.type else source
+        val rawTarget = target.generify()
         if (resolvedSource is Namespace) {
             for (def in resolvedSource.unnamed) {
                 println("Local candidate: $def")
-                if (def is ImplDefinition && def.trait == target) {
+                if (def is ImplDefinition && def.trait.generify() == rawTarget) {
                     return def
                 }
             }
         }
-        return impls[resolvedSource to target] ?: throw IllegalStateException("No impl found that maps $source to $target; available: ${impls.keys}")
+        return impls[resolvedSource.generify() to target.generify()] ?: throw IllegalStateException("No impl found that maps $source to $target; available: ${impls.keys}")
     }
 
 

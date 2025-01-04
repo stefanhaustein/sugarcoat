@@ -46,6 +46,7 @@ interface Type {
         require(other == this, lazyMessage)
     }
 
+    fun generify(): Type = this
 
     fun resolveGenerics(state: GenericTypeResolver): Type {
         /*require (other == null || other == this) {

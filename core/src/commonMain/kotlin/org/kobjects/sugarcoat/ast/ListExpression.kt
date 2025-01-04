@@ -6,6 +6,7 @@ import org.kobjects.sugarcoat.type.Type
 import org.kobjects.sugarcoat.datatype.ListType
 import org.kobjects.sugarcoat.fn.FunctionType
 import org.kobjects.sugarcoat.fn.LocalRuntimeContext
+import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.parser.Position
 import org.kobjects.sugarcoat.type.GenericType
 
@@ -34,12 +35,12 @@ class ListExpression(position: Position, val elements: List<Expression>) : Expre
         expectedType: Type?
     ): Expression {
         val elementType: Type?
-        when (expectedType) {
+        when (expectedType?.generify()) {
             is ListType -> {
-              elementType = expectedType.elementType
+              elementType = (expectedType as Classifier).typeParameters[0]
             }
             is FunctionType -> {
-              return resolve(context, expectedType.returnType).asLambda(expectedType)
+              return resolve(context, (expectedType as FunctionType).returnType).asLambda(expectedType)
             }
             null,
             is GenericType -> {
@@ -50,5 +51,5 @@ class ListExpression(position: Position, val elements: List<Expression>) : Expre
         return ListExpression(position, elements.map{ it.resolve(context, elementType) } )
     }
 
-    override fun getType() = ListType(elements.firstOrNull()?.getType() ?: AnyType)
+    override fun getType() = ListType.typed(elements.firstOrNull()?.getType() ?: AnyType)
 }

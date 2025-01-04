@@ -5,7 +5,7 @@ data class GenericTypeResolver(val errorPrefix: () -> String = {""}) {
 
     override fun toString() = "GenericTypeResolverState:$map"
 
-    fun resolveAll(types: List<Type>): List<Type> = types.map { resolveTopLevel(it) }
+    fun resolveAll(types: List<Type>): List<Type> = types.map { it.resolveGenerics(this) }
 
     fun resolveTopLevel(type: Type): Type = when(type) {
         is GenericType -> map[type] ?: type

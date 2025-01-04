@@ -7,8 +7,12 @@ import org.kobjects.sugarcoat.type.Type
 open class TraitDefinition(
     parent: Namespace,
     fallback: Namespace,
-    name: String
-) : Classifier(parent, name, emptyList(), fallback) {
+    name: String,
+    typeParameters: List<Type> = emptyList(),
+    original: TraitDefinition? = null,
+) : Classifier(parent, name, typeParameters, fallback) {
+
+    override val original: TraitDefinition = original ?: this
 
     override fun serialize(writer: CodeWriter) {
         writer.append("trait $name\n")
@@ -17,16 +21,12 @@ open class TraitDefinition(
 
     override fun toString() = "trait $name"
 
-    override fun matchImpl(
-        other: Type,
-        genericTypeResolver: GenericTypeResolver?,
-        lazyMessage: () -> String
-    ) {
-       require(other == this, lazyMessage)
-    }
-
     override fun equals(other: Any?): Boolean {
         return other is TraitDefinition && other.name == name && other.parent == parent
     }
+
+
+    override fun typed(vararg resolvedTypes: Type) =
+        super.typed(*resolvedTypes) as TraitDefinition
 
 }

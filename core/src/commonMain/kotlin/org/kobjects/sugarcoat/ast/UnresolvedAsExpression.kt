@@ -34,7 +34,7 @@ class UnresolvedAsExpression(
             "$position: Target must be Trait; got $type"
         }
         val implDefinition = context.namespace.program.findImpl(resolvedSource.getType(), type.type)
-
-        return AsExpression(position, resolvedSource, implDefinition)
+        val resolvedTrait = implDefinition.mapType(resolvedSource.getType())
+        return AsExpression(position, resolvedSource, resolvedTrait, implDefinition)
     }
 }

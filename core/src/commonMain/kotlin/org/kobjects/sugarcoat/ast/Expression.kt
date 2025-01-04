@@ -47,7 +47,8 @@ abstract class Expression(open val position: Position) {
         if (expectedType is TraitDefinition && actualType != expectedType) {
             val impl = context.namespace.program.findImpl(actualType, expectedType)
             val result = resolve(actualType)
-            return AsExpression(position, result, impl)
+            val type = impl.mapType(actualType)
+            return AsExpression(position, result, type, impl)
         }
         return resolve(expectedType)
     }

@@ -1,6 +1,7 @@
 package org.kobjects.sugarcoat.datatype
 
 import org.kobjects.sugarcoat.fn.ParameterDefinition
+import org.kobjects.sugarcoat.model.Classifier
 import org.kobjects.sugarcoat.model.ImplDefinition
 import org.kobjects.sugarcoat.model.ImplInstance
 import org.kobjects.sugarcoat.model.RootContext
@@ -27,12 +28,12 @@ data class MutableListType(val elementType: Type) : NativeType("MutableList", Ro
             (it.list[0] as List<Any>).toMutableList()
         }
 
-        val iteratorTrait = IteratorTrait(elementType)
-        val nativeIterator = NativeIterator(elementType)
+        val iteratorTrait = IteratorTrait.typed(elementType)
+        //val nativeIterator = NativeIterator(elementType)
         addNativeFunction(iteratorTrait, "iterator") {
-           ImplInstance(nativeIterator.impl, (it.list[0] as List<Any>).iterator())
+           ImplInstance(NativeIterator.impl, (it.list[0] as List<Any>).iterator())
         }
-        addImpl(IterableTrait(elementType))
+        addImpl(IterableTrait.typed(elementType))
     }
 
     override fun matchImpl(
@@ -44,12 +45,12 @@ data class MutableListType(val elementType: Type) : NativeType("MutableList", Ro
         elementType.match(other.elementType, genericTypeResolver, lazyMessage)
     }
 
-    override fun resolveGenerics(state: GenericTypeResolver): Type {
+    override fun resolveGenerics(state: GenericTypeResolver): Classifier {
         return MutableListType(elementType.resolveGenerics(state))
     }
 
 
-    override fun typed(vararg resolvedTypes: Type): Type {
+    override fun typed(vararg resolvedTypes: Type): Classifier {
         require(resolvedTypes.size == 1) {
             "List requires 1 generic parameter. Provided: $resolvedTypes"
         }

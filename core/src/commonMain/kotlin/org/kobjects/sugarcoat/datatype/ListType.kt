@@ -4,51 +4,29 @@ import org.kobjects.sugarcoat.fn.ParameterDefinition
 import org.kobjects.sugarcoat.model.ImplInstance
 import org.kobjects.sugarcoat.model.RootContext
 import org.kobjects.sugarcoat.type.GenericType
-import org.kobjects.sugarcoat.type.GenericTypeResolver
-import org.kobjects.sugarcoat.type.Type
 
-data class ListType(val elementType: Type) : NativeType("List", RootContext) {
+
+object ListType : NativeType("List", RootContext, listOf(GenericType("E"))) {
 
     init {
-        addNativeMethod(elementType, "[]", ParameterDefinition("index", I64Type)) {
+        addNativeMethod(typeParameters[0], "[]", ParameterDefinition("index", I64Type)) {
             (it.list[0] as List<Any>)[it.i64(1).toInt()]
         }
         addNativeMethod(I64Type, "size") {
             (it.list[0] as List<Any>).size.toLong()
         }
 
-        addNativeFunction(this, "create", ParameterDefinition("values", elementType, true)) {
+        addNativeFunction(this, "create", ParameterDefinition("values", typeParameters[0], true)) {
             it.list[0] as List<Any>
         }
 
-        val iteratorTrait = IteratorTrait(elementType)
-        val nativeIterator = NativeIterator(elementType)
-        addNativeFunction(iteratorTrait, "iterator") {
-           ImplInstance(nativeIterator.impl, (it.list[0] as List<Any>).iterator())
+        addNativeFunction(IteratorTrait.typed(typeParameters[0]), "iterator") {
+           ImplInstance(NativeIterator.impl, (it.list[0] as List<Any>).iterator())
         }
-        addImpl(IterableTrait(elementType))
-    }
 
-    override fun matchImpl(
-        other: Type,
-        genericTypeResolver: GenericTypeResolver?,
-        lazyMessage: () -> String
-    ) {
-        require(other is ListType, lazyMessage)
-        elementType.match(other.elementType, genericTypeResolver, lazyMessage)
-    }
-
-    override fun resolveGenerics(state: GenericTypeResolver): Type {
-        return ListType(elementType.resolveGenerics(state))
+        addImpl(IterableTrait.typed(typeParameters[0]))
     }
 
 
-    override fun typed(vararg resolvedTypes:Type): Type {
-        require(resolvedTypes.size == 1) {
-            "List requires 1 generic parameter. Provided: $resolvedTypes"
-        }
-        return ListType(resolvedTypes[0])
-    }
 
-    fun getTypeParameters(): Set<GenericType> = elementType.getGenericTypes()
 }

@@ -8,7 +8,7 @@ object StringType : NativeType("String", RootContext) {
     init {
         addNativeMethod(StringType, "+", ParameterDefinition("other", StringType)) { it.list[0].toString() + it.list[1] }
 
-        addNativeMethod(ListType(StringType), "split", ParameterDefinition("by", StringType)) { it.list[0].toString().split(Regex.fromLiteral(it.list[1].toString()))}
+        addNativeMethod(ListType.typed(StringType), "split", ParameterDefinition("by", StringType)) { it.list[0].toString().split(Regex.fromLiteral(it.list[1].toString()))}
 
         addNativeMethod(StringType, "toString") { it.list[0].toString() }
 
