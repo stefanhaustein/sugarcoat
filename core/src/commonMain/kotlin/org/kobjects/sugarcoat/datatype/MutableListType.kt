@@ -9,53 +9,31 @@ import org.kobjects.sugarcoat.type.GenericType
 import org.kobjects.sugarcoat.type.GenericTypeResolver
 import org.kobjects.sugarcoat.type.Type
 
-data class MutableListType(val elementType: Type) : NativeType("MutableList", RootContext) {
+object MutableListType : NativeType("MutableList", RootContext, listOf(GenericType("E"))) {
 
     init {
-        addNativeMethod(elementType, "[]", ParameterDefinition("index", I64Type)) {
+        addNativeMethod(typeParameters[0], "[]", ParameterDefinition("index", I64Type)) {
             (it.list[0] as List<Any>)[it.i64(1).toInt()]
         }
         addNativeMethod(I64Type, "size") {
             (it.list[0] as List<Any>).size.toLong()
         }
-        addNativeMethod(I64Type, "add", ParameterDefinition("value", elementType)) {
+        addNativeMethod(I64Type, "add", ParameterDefinition("value", typeParameters[0])) {
             (it.list[0] as MutableList<Any>).add(it.list[1])
         }
         addNativeMethod(VoidType, "removeAt", ParameterDefinition("index", I64Type)) {
             (it.list[0] as MutableList<Any>).removeAt((it.list[1] as Long).toInt())
         }
-        addNativeFunction(this, "create", ParameterDefinition("values", elementType, true)) {
+        addNativeFunction(this, "create", ParameterDefinition("values", typeParameters[0], true)) {
             (it.list[0] as List<Any>).toMutableList()
         }
 
-        val iteratorTrait = IteratorTrait.typed(elementType)
+        val iteratorTrait = IteratorTrait.typed(typeParameters[0])
         //val nativeIterator = NativeIterator(elementType)
         addNativeFunction(iteratorTrait, "iterator") {
            ImplInstance(NativeIterator.impl, (it.list[0] as List<Any>).iterator())
         }
-        addImpl(IterableTrait.typed(elementType))
+        addImpl(IterableTrait.typed(typeParameters[0]))
     }
 
-    override fun matchImpl(
-        other: Type,
-        genericTypeResolver: GenericTypeResolver?,
-        lazyMessage: () -> String
-    ) {
-        require(other is MutableListType, lazyMessage)
-        elementType.match(other.elementType, genericTypeResolver, lazyMessage)
-    }
-
-    override fun resolveGenerics(state: GenericTypeResolver): Classifier {
-        return MutableListType(elementType.resolveGenerics(state))
-    }
-
-
-    override fun typed(vararg resolvedTypes: Type): Classifier {
-        require(resolvedTypes.size == 1) {
-            "List requires 1 generic parameter. Provided: $resolvedTypes"
-        }
-        return MutableListType(resolvedTypes[0])
-    }
-
-    fun getTypeParameters(): Set<GenericType> = elementType.getGenericTypes()
 }

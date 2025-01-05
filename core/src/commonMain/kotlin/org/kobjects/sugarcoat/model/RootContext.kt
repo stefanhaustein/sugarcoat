@@ -39,7 +39,7 @@ object RootContext : Namespace(null, "") {
         addChild(I64RangeType)
         addChild(VoidType)
         addChild(ListType)
-        addChild(MutableListType(GenericType("E")))
+        addChild(MutableListType)
         addChild(PairType)
 
         addChild(ToStringTrait)
